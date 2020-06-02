@@ -898,9 +898,9 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        gtk.gdk.window_process_all_updates()
+        gtk.gdk.Window.process_all_updates()
         while gtk.events_pending():
-            gtk.main_iteration(False)
+            gtk.main_iteration_do(False)
 
         if do_import:
             eset = self.get_current_editorset()
@@ -1030,9 +1030,9 @@ of file.
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
         with compat.py3safe():
-            gtk.gdk.window_process_all_updates()
+            gtk.gdk.Window.process_all_updates()
             while gtk.events_pending():
-                gtk.main_iteration(False)
+                gtk.main_iteration_do(False)
 
         fn = tempfile.mktemp(".csv")
         try:
@@ -1142,9 +1142,9 @@ of file.
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
         with compat.py3safe():
-            gtk.gdk.window_process_all_updates()
+            gtk.gdk.Window.process_all_updates()
             while gtk.events_pending():
-                gtk.main_iteration(False)
+                gtk.main_iteration_do(False)
 
         fn = tempfile.mktemp(".csv")
         try:
@@ -1316,9 +1316,9 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        gtk.gdk.window_process_all_updates()
+        gtk.gdk.Window.process_all_updates()
         while gtk.events_pending():
-            gtk.main_iteration(False)
+            gtk.main_iteration_do(False)
 
         if do_import:
             eset = self.get_current_editorset()
@@ -1379,9 +1379,9 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        gtk.gdk.window_process_all_updates()
+        gtk.gdk.Window.process_all_updates()
         while gtk.events_pending():
-            gtk.main_iteration(False)
+            gtk.main_iteration_do(False)
 
         if do_import:
             eset = self.get_current_editorset()
