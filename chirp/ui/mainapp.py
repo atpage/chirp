@@ -1529,7 +1529,7 @@ of file.
             conf = config.get("memedit")
             conf.set_bool("hide_unused", action.get_active())
         else:
-            for editortype, editor in eset.editors.iteritems():
+            for editortype, editor in eset.editors.items():
                 if "memedit" in editortype:
                     editor.set_hide_unused(action.get_active())
 
