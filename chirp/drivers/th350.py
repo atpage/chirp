@@ -303,7 +303,7 @@ class Th350Radio(BaofengUVB5):
             self._mmap = do_download(self)
         except errors.RadioError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
         self.process_mmap()
 
@@ -312,7 +312,7 @@ class Th350Radio(BaofengUVB5):
             do_upload(self)
         except errors.RadioError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
     def process_mmap(self):

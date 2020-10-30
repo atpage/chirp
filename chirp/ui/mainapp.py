@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
 try:
     import serial
-except ImportError, e:
+except ImportError as e:
     common.log_exception()
     common.show_error("\nThe Pyserial module is not installed!")
 
@@ -374,7 +374,7 @@ of file.
                 if not radio:
                     return
                 LOG.debug("Manually selected %s" % radio)
-            except Exception, e:
+            except Exception as e:
                 common.log_exception()
                 common.show_error(os.path.basename(fname) + ": " + str(e))
                 return
@@ -384,7 +384,7 @@ of file.
             eset = editorset.EditorSet(radio, self,
                                        filename=fname,
                                        tempname=tempname)
-        except Exception, e:
+        except Exception as e:
             common.log_exception()
             common.show_error(
                 _("There was an error opening {fname}: {error}").format(
@@ -491,7 +491,7 @@ of file.
 
         try:
             eset.save(fname)
-        except Exception, e:
+        except Exception as e:
             d = inputdialog.ExceptionDialog(e)
             d.run()
             d.destroy()
@@ -584,7 +584,7 @@ of file.
             try:
                 shutil.copy(fn, stock_dir)
                 LOG.debug("Copying %s -> %s" % (fn, stock_dir))
-            except Exception, e:
+            except Exception as e:
                 LOG.error("Unable to copy %s to %s: %s" % (fn, stock_dir, e))
                 return False
         return True
@@ -594,7 +594,7 @@ of file.
         if not os.path.isdir(stock_dir):
             try:
                 os.mkdir(stock_dir)
-            except Exception, e:
+            except Exception as e:
                 LOG.error("Unable to create directory: %s" % stock_dir)
                 return
         if not self.copy_shipped_stock_configs(stock_dir):
@@ -740,7 +740,7 @@ of file.
                                 rtscts=rclass.HARDWARE_FLOW,
                                 timeout=0.25)
             ser.flushInput()
-        except serial.SerialException, e:
+        except serial.SerialException as e:
             d = inputdialog.ExceptionDialog(e)
             d.run()
             d.destroy()
@@ -786,7 +786,7 @@ of file.
                                 rtscts=radio.HARDWARE_FLOW,
                                 timeout=0.25)
             ser.flushInput()
-        except serial.SerialException, e:
+        except serial.SerialException as e:
             d = inputdialog.ExceptionDialog(e)
             d.run()
             d.destroy()
@@ -920,7 +920,7 @@ of file.
                 radio = dmrmarc.DMRMARCRadio(None)
                 radio.set_params(city, state, country)
                 self.do_open_live(radio, read_only=True)
-            except errors.RadioError, e:
+            except errors.RadioError as e:
                 common.show_error(e)
 
         self.window.set_cursor(None)
@@ -1055,11 +1055,11 @@ of file.
                                             ("query=%s\n" % query) +
                                             ("\n") +
                                             ("\n".join(radio.errors)))
-        except errors.InvalidDataError, e:
+        except errors.InvalidDataError as e:
             common.show_error(str(e))
             self.window.set_cursor(None)
             return
-        except Exception, e:
+        except Exception as e:
             common.log_exception()
 
         reporting.report_model_usage(radio, "import", True)
@@ -1161,11 +1161,11 @@ of file.
                                             ("query=%s\n" % query) +
                                             ("\n") +
                                             ("\n".join(radio.errors)))
-        except errors.InvalidDataError, e:
+        except errors.InvalidDataError as e:
             common.show_error(str(e))
             self.window.set_cursor(None)
             return
-        except Exception, e:
+        except Exception as e:
             common.log_exception()
 
         reporting.report_model_usage(radio, "import", True)
@@ -1249,7 +1249,7 @@ of file.
 
         try:
             radio = PRRadio(filename)
-        except Exception, e:
+        except Exception as e:
             common.show_error(str(e))
             return
 
@@ -1388,7 +1388,7 @@ of file.
                 radio = radioreference.RadioReferenceRadio(None)
                 radio.set_params(zipcode, username, passwd)
                 self.do_open_live(radio, read_only=True)
-            except errors.RadioError, e:
+            except errors.RadioError as e:
                 common.show_error(e)
 
         self.window.set_cursor(None)
@@ -1631,7 +1631,7 @@ of file.
             # See this for why:
             # http://stackoverflow.com/questions/2904274/globals-and-locals-in-python-exec
             exec(pyc, globals(), globals())
-        except Exception, e:
+        except Exception as e:
             common.log_exception()
             common.show_error("Unable to load module: %s" % e)
 

@@ -413,7 +413,7 @@ class FT817Radio(yaesu_clone.YaesuCloneModeRadio):
             self._mmap = self._clone_in()
         except errors.RadioError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
         self.process_mmap()
 
@@ -422,7 +422,7 @@ class FT817Radio(yaesu_clone.YaesuCloneModeRadio):
             self._clone_out()
         except errors.RadioError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
     def process_mmap(self):

@@ -177,7 +177,7 @@ class CloneSettingsDialog(gtk.Dialog):
                     raise Exception(
                         _("Unable to detect radio on {port}").format(
                             port=cs.port))
-            except Exception, e:
+            except Exception as e:
                 d = inputdialog.ExceptionDialog(e)
                 d.run()
                 d.destroy()
@@ -256,7 +256,7 @@ class CloneThread(threading.Thread):
                 self.__radio.sync_in()
 
             emsg = None
-        except Exception, e:
+        except Exception as e:
             common.log_exception()
             LOG.error("Clone failed: {error}".format(error=e))
             emsg = e

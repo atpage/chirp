@@ -300,7 +300,7 @@ class EditorSet(gtk.VBox):
             common.show_error("Memory editor must be selected before import")
         try:
             src_radio = directory.get_radio_by_image(filen)
-        except Exception, e:
+        except Exception as e:
             common.show_error(e)
             return
 
@@ -314,7 +314,7 @@ class EditorSet(gtk.VBox):
             try:
                 src_radio.status_fn = status
                 src_radio.do_fetch()
-            except Exception, e:
+            except Exception as e:
                 common.show_error(e)
                 ww.hide()
                 return
@@ -323,7 +323,7 @@ class EditorSet(gtk.VBox):
         try:
             if src_radio.get_features().has_sub_devices:
                 src_radio = self.choose_sub_device(src_radio)
-        except Exception, e:
+        except Exception as e:
             common.show_error(e)
             return
 
@@ -339,7 +339,7 @@ class EditorSet(gtk.VBox):
                                            src_radio,
                                            self.rthread)
             reporting.report_model_usage(src_radio, "importsrc", True)
-        except Exception, e:
+        except Exception as e:
             common.log_exception()
             common.show_error(_("There was an error during "
                                 "import: {error}").format(error=e))
@@ -352,7 +352,7 @@ class EditorSet(gtk.VBox):
                 dst_radio = generic_xml.XMLRadio(filen)
             else:
                 raise Exception(_("Unsupported file type"))
-        except Exception, e:
+        except Exception as e:
             common.log_exception()
             common.show_error(e)
             return
@@ -365,7 +365,7 @@ class EditorSet(gtk.VBox):
             count = self._do_import_locked(importdialog.ExportDialog,
                                            self.rthread.radio,
                                            dst_rthread)
-        except Exception, e:
+        except Exception as e:
             common.log_exception()
             common.show_error(_("There was an error during "
                                 "export: {error}").format(error=e),
@@ -380,7 +380,7 @@ class EditorSet(gtk.VBox):
 
         try:
             dst_radio.save(filename=filen)
-        except Exception, e:
+        except Exception as e:
             common.log_exception()
             common.show_error(_("There was an error during "
                                 "export: {error}").format(error=e),

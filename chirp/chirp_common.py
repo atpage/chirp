@@ -976,7 +976,7 @@ class RadioFeatures:
                     msg = ValidationError("Frequency requires %.2fkHz step" %
                                           required_step(mem.freq))
                     msgs.append(msg)
-            except errors.InvalidDataError, e:
+            except errors.InvalidDataError as e:
                 msgs.append(str(e))
 
         if self.valid_characters:

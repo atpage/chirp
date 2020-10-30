@@ -188,7 +188,7 @@ class KenwoodTKx102Radio(chirp_common.CloneModeRadio):
         except errors.RadioError:
             self.pipe.write("\x45")
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to download from radio: %s" % e)
         self.process_mmap()
 
@@ -201,7 +201,7 @@ class KenwoodTKx102Radio(chirp_common.CloneModeRadio):
         except errors.RadioError:
             self.pipe.write("\x45")
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to upload to radio: %s" % e)
 
     def get_raw_memory(self, number):

@@ -181,7 +181,7 @@ class IC9xRadio(icf.IcomLiveRadio):
                 LOG.debug("Done: %s" % mem)
             except errors.InvalidMemoryLocation:
                 pass
-            except errors.InvalidDataError, e:
+            except errors.InvalidDataError as e:
                 LOG.error("Error talking to radio: %s" % e)
                 break
 

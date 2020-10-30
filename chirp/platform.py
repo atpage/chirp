@@ -45,7 +45,7 @@ def win32_comports_bruteforce():
             ports.append((portname, "Unknown", "Serial"))
             win32file.CloseHandle(port)
             port = None
-        except Exception, e:
+        except Exception as e:
             pass
 
     return ports
@@ -374,7 +374,7 @@ class Win32Platform(Platform):
     def list_serial_ports(self):
         try:
             ports = list(comports())
-        except Exception, e:
+        except Exception as e:
             if comports != win32_comports_bruteforce:
                 LOG.error("Failed to detect win32 serial ports: %s" % e)
                 ports = win32_comports_bruteforce()
@@ -391,7 +391,7 @@ class Win32Platform(Platform):
 
         try:
             fname, _, _ = win32gui.GetOpenFileNameW(Filter=typestrs)
-        except Exception, e:
+        except Exception as e:
             LOG.error("Failed to get filename: %s" % e)
             return None
 
@@ -422,7 +422,7 @@ class Win32Platform(Platform):
                                                     CustomFilter=custom,
                                                     DefExt=def_ext,
                                                     Filter=typestrs)
-        except Exception, e:
+        except Exception as e:
             LOG.error("Failed to get filename: %s" % e)
             return None
 
@@ -434,7 +434,7 @@ class Win32Platform(Platform):
         try:
             pidl, _, _ = shell.SHBrowseForFolder()
             fname = shell.SHGetPathFromIDList(pidl)
-        except Exception, e:
+        except Exception as e:
             LOG.error("Failed to get directory: %s" % e)
             return None
 

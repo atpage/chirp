@@ -510,7 +510,7 @@ def _ident_radio(radio):
         try:
             data = _do_ident(radio, magic)
             return data
-        except errors.RadioError, e:
+        except errors.RadioError as e:
             LOG.error("uv5r._ident_radio: %s", e)
             error = e
             time.sleep(2)
@@ -810,7 +810,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio):
             self._mmap = _do_download(self)
         except errors.RadioError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
         self.process_mmap()
 
@@ -819,7 +819,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio):
             _do_upload(self)
         except errors.RadioError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
     def get_raw_memory(self, number):
@@ -1709,7 +1709,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio):
                     elif element.value.get_mutable():
                         LOG.debug("Setting %s = %s" % (setting, element.value))
                         setattr(obj, setting, element.value)
-                except Exception, e:
+                except Exception as e:
                     LOG.debug(element.get_name())
                     raise
 
@@ -1723,7 +1723,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio):
                     value = int(val.get_value() * 10)
                 LOG.debug("Setting fm_presets = %s" % (value))
                 self._memobj.fm_presets = value
-            except Exception, e:
+            except Exception as e:
                 LOG.debug(element.get_name())
                 raise
 

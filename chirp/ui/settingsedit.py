@@ -109,7 +109,7 @@ class SettingsEditor(common.Editor):
     def _save_setting(self, widget, value):
         try:
             self._do_save_setting(widget, value)
-        except settings.InvalidValueError, e:
+        except settings.InvalidValueError as e:
             common.show_error(_("Invalid setting value: %s") % e)
 
     def _build_ui_tab(self, group):

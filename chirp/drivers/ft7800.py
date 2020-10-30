@@ -321,7 +321,7 @@ class FTx800Radio(yaesu_clone.YaesuCloneModeRadio):
             self._mmap = _download(self)
         except errors.RadioError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
         LOG.info("Download finished in %i seconds" % (time.time() - start))
         self.check_checksums()
@@ -337,7 +337,7 @@ class FTx800Radio(yaesu_clone.YaesuCloneModeRadio):
             _upload(self)
         except errors.RadioError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
         LOG.info("Upload finished in %i seconds" % (time.time() - start))
 
@@ -766,7 +766,7 @@ class FT7800Radio(FTx800Radio):
                 oldval = getattr(_settings, setting)
                 LOG.debug("Setting %s(%s) <= %s" % (setting, oldval, newval))
                 setattr(_settings, setting, newval)
-            except Exception, e:
+            except Exception as e:
                 LOG.debug(element.get_name())
                 raise
 

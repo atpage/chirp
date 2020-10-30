@@ -328,7 +328,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
             self._mmap = do_download(self)
         except errors.RadioError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
         self.process_mmap()
 
@@ -337,7 +337,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
             do_upload(self)
         except errors.RadioError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
     def process_mmap(self):
@@ -770,7 +770,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
                     else:
                         LOG.debug("Setting %s = %s" % (setting, element.value))
                         setattr(obj, setting, element.value)
-                except Exception, e:
+                except Exception as e:
                     LOG.debug(element.get_name())
                     raise
 
@@ -786,7 +786,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
                 LOG.debug("Setting fm_presets[%1i] = %s" % (index, value))
                 setting = self._memobj.fm_presets
                 setting[index] = value
-            except Exception, e:
+            except Exception as e:
                 LOG.debug(element.get_name())
                 raise
 

@@ -29,7 +29,7 @@ def validate_doc(doc):
     try:
         ctx = libxml2.schemaNewParserCtxt(path)
         schema = ctx.schemaParse()
-    except libxml2.parserError, e:
+    except libxml2.parserError as e:
         LOG.error("Unable to load schema: %s" % e)
         LOG.error("Path: %s" % path)
         raise errors.RadioError("Unable to load schema")

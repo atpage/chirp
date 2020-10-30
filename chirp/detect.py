@@ -50,7 +50,7 @@ def _detect_icom_radio(ser):
         ser.baudrate = 9600
         md = icf.get_model_data(DetectorRadio(ser))
         return _icom_model_data_to_rclass(md)
-    except errors.RadioError, e:
+    except errors.RadioError as e:
         LOG.error("_detect_icom_radio: %s", e)
 
     # ICOM IC-91/92 Live-mode radios @ 4800/38400 baud
