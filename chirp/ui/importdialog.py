@@ -51,13 +51,13 @@ class WaitWindow(gtk.Window):
 
     def grind(self):
         while gtk.events_pending():
-            gtk.main_iteration(False)
+            gtk.main_iteration_do(False)
 
         self.prog.pulse()
 
     def set(self, fraction):
         while gtk.events_pending():
-            gtk.main_iteration(False)
+            gtk.main_iteration_do(False)
 
         self.prog.set_fraction(fraction)
 
@@ -301,8 +301,6 @@ class ImportDialog(gtk.Dialog):
         self.__view = gtk.TreeView(self.__store)
         self.__view.show()
 
-        tips = gtk.Tooltips()
-
         for k in self.caps.keys():
             t = self.types[k]
 
@@ -329,7 +327,7 @@ class ImportDialog(gtk.Dialog):
                 LOG.debug("Doing %s" % k)
                 lab = gtk.Label(self.caps[k])
                 column.set_widget(lab)
-                tips.set_tip(lab, self.tips[k])
+                lab.set_tooltip_text(self.tips[k])
                 lab.show()
             column.set_sort_column_id(k)
             self.__view.append_column(column)
@@ -410,7 +408,8 @@ class ImportDialog(gtk.Dialog):
         inv.show()
         hbox.pack_start(inv, 0, 0, 0)
 
-        frame = gtk.Frame(_("Select"))
+        frame = gtk.Frame()
+        frame.set_label("Select")
         frame.show()
         frame.add(hbox)
         hbox.show()
@@ -468,7 +467,8 @@ class ImportDialog(gtk.Dialog):
         revr.show()
         hbox.pack_start(revr, 0, 0, 0)
 
-        frame = gtk.Frame(_("Adjust New Location"))
+        frame = gtk.Frame()
+        frame.set_label("Adjust New Location")
         frame.show()
         frame.add(hbox)
         hbox.show()
