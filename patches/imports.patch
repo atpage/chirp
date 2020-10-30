@@ -1,0 +1,57 @@
+# HG changeset patch
+# User Alex Page <a.t.page@gmail.com>
+# Date 1591027546 14400
+#      Mon Jun 01 12:05:46 2020 -0400
+# Branch py3
+# Node ID 1c8561d30ebe95eefffcd8ab1be62d6f4cbf7d09
+# Parent  f79932bb4294a9b7e7d8b051715aa60fbb9239ed
+Fix various import errors on startup #7923
+
+diff --git a/chirp/drivers/baofeng_uv3r.py b/chirp/drivers/baofeng_uv3r.py
+--- a/chirp/drivers/baofeng_uv3r.py
++++ b/chirp/drivers/baofeng_uv3r.py
+@@ -19,7 +19,7 @@
+ import os
+ import logging
+ 
+-from wouxun_common import do_download, do_upload
++from chirp.drivers.wouxun_common import do_download, do_upload
+ from chirp import util, chirp_common, bitwise, errors, directory
+ from chirp.settings import RadioSetting, RadioSettingGroup, \
+                 RadioSettingValueBoolean, RadioSettingValueList, \
+diff --git a/chirp/drivers/ft2800.py b/chirp/drivers/ft2800.py
+--- a/chirp/drivers/ft2800.py
++++ b/chirp/drivers/ft2800.py
+@@ -18,7 +18,7 @@
+ import logging
+ 
+ from chirp import util, memmap, chirp_common, bitwise, directory, errors
+-from yaesu_clone import YaesuCloneModeRadio
++from chirp.drivers.yaesu_clone import YaesuCloneModeRadio
+ 
+ LOG = logging.getLogger(__name__)
+ 
+diff --git a/chirp/drivers/th_uv3r25.py b/chirp/drivers/th_uv3r25.py
+--- a/chirp/drivers/th_uv3r25.py
++++ b/chirp/drivers/th_uv3r25.py
+@@ -22,7 +22,7 @@
+     RadioSettingValueInteger, RadioSettingValueList, \
+     RadioSettingValueBoolean, RadioSettingValueString
+ 
+-from th_uv3r import TYTUV3RRadio, tyt_uv3r_prep, THUV3R_CHARSET
++from chirp.drivers.th_uv3r import TYTUV3RRadio, tyt_uv3r_prep, THUV3R_CHARSET
+ 
+ 
+ def tyt_uv3r_download(radio):
+diff --git a/chirp/drivers/wouxun.py b/chirp/drivers/wouxun.py
+--- a/chirp/drivers/wouxun.py
++++ b/chirp/drivers/wouxun.py
+@@ -23,7 +23,7 @@
+                 RadioSettingValueBoolean, RadioSettingValueList, \
+                 RadioSettingValueInteger, RadioSettingValueString, \
+                 RadioSettingValueFloat, RadioSettings
+-from wouxun_common import wipe_memory, do_download, do_upload
++from chirp.drivers.wouxun_common import wipe_memory, do_download, do_upload
+ from textwrap import dedent
+ 
+ LOG = logging.getLogger(__name__)

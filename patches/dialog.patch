@@ -1,0 +1,30 @@
+# HG changeset patch
+# User Alex Page <a.t.page@gmail.com>
+# Date 1591039373 14400
+#      Mon Jun 01 15:22:53 2020 -0400
+# Branch py3
+# Node ID ecda15e4be6df1906a981a1c62ef2ee91e5f1305
+# Parent  7c4c5bde73f6d6364de8e21abba37fa2ad5052d4
+Initialize Dialog before calling set_default_response() #7431
+
+This should fix the dialog box for querying RadioReference,
+RepeaterBook, etc.  These were crashing with "FieldDialog is not
+initialized".
+
+diff --git a/chirp/ui/inputdialog.py b/chirp/ui/inputdialog.py
+--- a/chirp/ui/inputdialog.py
++++ b/chirp/ui/inputdialog.py
+@@ -101,12 +101,10 @@
+         if "buttons" not in kwargs.keys():
+             kwargs["buttons"] = (gtk.STOCK_OK, gtk.RESPONSE_OK,
+                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+-
+         self.__fields = {}
++        gtk.Dialog.__init__(self, **kwargs)
+         self.set_default_response(gtk.RESPONSE_OK)
+ 
+-        gtk.Dialog.__init__(self, **kwargs)
+-
+     def response(self, _):
+         LOG.debug("Blocking response")
+         return

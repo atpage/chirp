@@ -1,0 +1,87 @@
+# HG changeset patch
+# User Alex Page <a.t.page@gmail.com>
+# Date 1591029599 14400
+#      Mon Jun 01 12:39:59 2020 -0400
+# Branch py3
+# Node ID a9922865fad99188e5f298006f374167211efad5
+# Parent  71b08c265f2136cd1b66fb2095aaaaf81302ab55
+Fix some list/dict related syntax errors in Python3 #7923
+
+diff --git a/chirp/drivers/ap510.py b/chirp/drivers/ap510.py
+--- a/chirp/drivers/ap510.py
++++ b/chirp/drivers/ap510.py
+@@ -242,7 +242,7 @@
+ 
+ class AP510Memory20141215(AP510Memory):
+     """Compatible with firmware version 20141215"""
+-    ATTR_MAP = dict(AP510Memory.ATTR_MAP.items() + {
++    ATTR_MAP = dict(list(AP510Memory.ATTR_MAP.items()) + list({
+         'tx_volume': '21',  # 1-6
+         'rx_volume': '22',  # 1-9
+         'tx_power': '23',  # 1: 1 watt,  0: 0.5 watt
+@@ -252,7 +252,7 @@
+         'path3': '27',  # like "WIDE1 1" else "0"
+         'multiple': '28',
+         'auto_on': '29',
+-    }.items())
++    }.items()))
+ 
+     def get_multiple(self):
+         return dict(zip(
+diff --git a/chirp/drivers/ft70.py b/chirp/drivers/ft70.py
+--- a/chirp/drivers/ft70.py
++++ b/chirp/drivers/ft70.py
+@@ -528,7 +528,7 @@
+     _GM_RING = ("OFF", "IN RING", "AlWAYS")
+     _GM_INTERVAL = ("LONG", "NORMAL", "OFF")
+ 
+-    _MYCALL_CHR_SET = list(string.uppercase) + list(string.digits) + ['-','/' ]
++    _MYCALL_CHR_SET = list(string.ascii_uppercase) + list(string.digits) + ['-','/' ]
+ 
+     @classmethod
+     def get_prompts(cls):
+diff --git a/chirp/drivers/ft90.py b/chirp/drivers/ft90.py
+--- a/chirp/drivers/ft90.py
++++ b/chirp/drivers/ft90.py
+@@ -52,7 +52,7 @@
+                          chirp_common.PowerLevel("Low", watts=5)]
+ 
+ FT90_DUPLEX = ["", "-", "+", "split"]
+-FT90_CWID_CHARS = list(string.digits) + list(string.uppercase) + list(" ")
++FT90_CWID_CHARS = list(string.digits) + list(string.ascii_uppercase) + list(" ")
+ FT90_DTMF_CHARS = list("0123456789ABCD*#")
+ FT90_SPECIAL = ["vfo_vhf", "home_vhf", "vfo_uhf", "home_uhf",
+                 "pms_1L", "pms_1U", "pms_2L", "pms_2U"]
+diff --git a/chirp/drivers/leixen.py b/chirp/drivers/leixen.py
+--- a/chirp/drivers/leixen.py
++++ b/chirp/drivers/leixen.py
+@@ -226,7 +226,7 @@
+                    ]
+ 
+ MODES = ["NFM", "FM"]
+-WTFTONES = map(float, range(56, 64))
++WTFTONES = list(map(float, range(56, 64)))
+ TONES = WTFTONES + chirp_common.TONES
+ DTCS_CODES = [17, 50, 645] + chirp_common.DTCS_CODES
+ DTCS_CODES.sort()
+diff --git a/chirp/drivers/ts850.py b/chirp/drivers/ts850.py
+--- a/chirp/drivers/ts850.py
++++ b/chirp/drivers/ts850.py
+@@ -26,7 +26,7 @@
+ TS850_SKIP = ["", "S"]
+ 
+ TS850_MODES = {
+-    "N/A":   " ",
++    "N/A":   " ",  # why is this here?  the line below removes it.
+     "N/A":   "0",
+     "LSB":   "1",
+     "USB":   "2",
+@@ -37,7 +37,7 @@
+     "CW-R":  "7",
+     "FSK-R": "9",
+ }
+-TS850_MODES_REV = {val: mode for mode, val in TS850_MODES.iteritems()}
++TS850_MODES_REV = {val: mode for mode, val in TS850_MODES.items()}
+ 
+ TS850_TONES = list(chirp_common.OLD_TONES)
+ TS850_TONES.remove(69.3)

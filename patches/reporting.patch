@@ -1,0 +1,22 @@
+# HG changeset patch
+# User Alex Page <a.t.page@gmail.com>
+# Date 1591045621 14400
+#      Mon Jun 01 17:07:01 2020 -0400
+# Branch py3
+# Node ID d4e064ee05113349c9cfd7006e4f8cf3d5afc52b
+# Parent  cc1e5830ab0881cf22577a3a1f6255e8aa1a144c
+Compare correctly in do_export() fixes #7935
+
+diff --git a/chirp/ui/mainapp.py b/chirp/ui/mainapp.py
+--- a/chirp/ui/mainapp.py
++++ b/chirp/ui/mainapp.py
+@@ -1426,7 +1426,8 @@
+             os.remove(filen)
+ 
+         count = eset.do_export(filen)
+-        reporting.report_model_usage(eset.rthread.radio, "export", count > 0)
++        success = count > 0 if count is not None else False
++        reporting.report_model_usage(eset.rthread.radio, "export", success)
+ 
+     def do_about(self):
+         d = gtk.AboutDialog()

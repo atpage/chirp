@@ -1,0 +1,21 @@
+# HG changeset patch
+# User Alex Page <a.t.page@gmail.com>
+# Date 1591627744 14400
+#      Mon Jun 08 10:49:04 2020 -0400
+# Branch py3
+# Node ID 8831ed2fd44de57b6177ce0d47ebd5530b8f3256
+# Parent  64ee0e070f2298571c9b2656396c653a59e01b67
+Use items() rather than iteritems() in mainapp
+
+diff --git a/chirp/ui/mainapp.py b/chirp/ui/mainapp.py
+--- a/chirp/ui/mainapp.py
++++ b/chirp/ui/mainapp.py
+@@ -1529,7 +1529,7 @@
+             conf = config.get("memedit")
+             conf.set_bool("hide_unused", action.get_active())
+         else:
+-            for editortype, editor in eset.editors.iteritems():
++            for editortype, editor in eset.editors.items():
+                 if "memedit" in editortype:
+                     editor.set_hide_unused(action.get_active())
+ 

@@ -16,3 +16,4 @@ archived_builds/
 locale/.files
 MANIFEST
 .pytest_cache
+\#*\#
