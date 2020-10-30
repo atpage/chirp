@@ -263,13 +263,13 @@ struct {
 
 MEM_SIZE = 0x8000  # 32,768 bytes
 BLOCK_SIZE = 256
-BLOCKS = MEM_SIZE / BLOCK_SIZE
+BLOCKS = MEM_SIZE // BLOCK_SIZE
 MEM_BLOCKS = range(0, BLOCKS)
 
 # define and empty block of data, as it will be used a lot in this code
 EMPTY_BLOCK = "\xFF" * 256
 
-RO_BLOCKS = range(0x10, 0x1F) + range(0x59, 0x5f)
+RO_BLOCKS = list(range(0x10, 0x1F)) + list(range(0x59, 0x5f))
 ACK_CMD = "\x06"
 
 POWER_LEVELS = [chirp_common.PowerLevel("Low", watts=1),
@@ -529,7 +529,7 @@ def do_download(radio):
 
     # reset UI data
     status.cur = 0
-    status.max = MEM_SIZE / 256
+    status.max = MEM_SIZE // 256
     status.msg = "Cloning from radio..."
     radio.status_fn(status)
 
@@ -580,7 +580,7 @@ def do_upload(radio):
 
     # update UI
     status.cur = 0
-    status.max = MEM_SIZE / 256
+    status.max = MEM_SIZE // 256
     status.msg = "Cloning to radio..."
     radio.status_fn(status)
 
@@ -843,7 +843,7 @@ class Kenwood_Serie_60G(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
         bdata += (256 - (len(bdata)) % 256) * "\xFF"
 
         # fill to match the whole area
-        bdata += (16 - len(bdata) / 256) * EMPTY_BLOCK
+        bdata += (16 - len(bdata) // 256) * EMPTY_BLOCK
 
         # updating the data in the memmap [x1000]
         self._fill(0x1000, bdata)
@@ -907,7 +907,7 @@ class Kenwood_Serie_60G(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
             do_upload(self)
         except errors.RadioError:
             raise
-        except Exception, e:
+        except Exception as e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
     def process_mmap(self):
@@ -958,7 +958,7 @@ class Kenwood_Serie_60G(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
         """Get the channel scan status from the 16 bytes array on the eeprom
         then from the bits on the byte, return '' or 'S' as needed"""
         result = "S"
-        byte = int(chan/8)
+        byte = int(chan//8)
         bit = chan % 8
         res = self._memobj.settings.add[byte] & (pow(2, bit))
         if res > 0:
@@ -968,7 +968,7 @@ class Kenwood_Serie_60G(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
 
     def _set_scan(self, chan, value):
         """Set the channel scan status from UI to the mem_map"""
-        byte = int(chan/8)
+        byte = int(chan//8)
         bit = chan % 8
 
         # get the actual value to see if I need to change anything
@@ -1086,7 +1086,7 @@ class Kenwood_Serie_60G(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
             return
 
         # frequency
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
 
         # this are a mistery yet, but so falr there is no impact
         # whit this default values for new channels
@@ -1096,14 +1096,14 @@ class Kenwood_Serie_60G(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
 
         # duplex
         if mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) / 10
+            _mem.txfreq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) / 10
+            _mem.txfreq = (mem.freq - mem.offset) // 10
         elif mem.duplex == "off":
             for byte in _mem.txfreq:
                 byte.set_raw("\xFF")
         else:
-            _mem.txfreq = mem.freq / 10
+            _mem.txfreq = mem.freq // 10
 
         # tone data
         ((txmode, txtone, txpol), (rxmode, rxtone, rxpol)) = \

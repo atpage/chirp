@@ -101,11 +101,9 @@ class FieldDialog(gtk.Dialog):
         if "buttons" not in kwargs.keys():
             kwargs["buttons"] = (gtk.STOCK_OK, gtk.RESPONSE_OK,
                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
-
         self.__fields = {}
-        self.set_default_response(gtk.RESPONSE_OK)
-
         gtk.Dialog.__init__(self, **kwargs)
+        self.set_default_response(gtk.RESPONSE_OK)
 
     def response(self, _):
         LOG.debug("Blocking response")

@@ -1137,7 +1137,7 @@ of file.
 
         query = "http://chirp.danplanet.com/query/rb/1.0/app_direct" \
                 "?loc=%s&band=%s&dist=%s" % (loc, band, dist)
-        print query
+        print( query )
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
@@ -1421,7 +1421,8 @@ of file.
             os.remove(filen)
 
         count = eset.do_export(filen)
-        reporting.report_model_usage(eset.rthread.radio, "export", count > 0)
+        success = count > 0 if count is not None else False
+        reporting.report_model_usage(eset.rthread.radio, "export", success)
 
     def do_about(self):
         d = gtk.AboutDialog()
@@ -1527,7 +1528,7 @@ of file.
             conf = config.get("memedit")
             conf.set_bool("hide_unused", action.get_active())
         else:
-            for editortype, editor in eset.editors.iteritems():
+            for editortype, editor in eset.editors.items():
                 if "memedit" in editortype:
                     editor.set_hide_unused(action.get_active())
 
