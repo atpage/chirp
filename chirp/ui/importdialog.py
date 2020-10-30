@@ -19,6 +19,7 @@ import pango
 import logging
 
 from chirp import errors, chirp_common, import_logic
+from chirp.drivers import generic_xml
 from chirp.ui import common
 
 LOG = logging.getLogger(__name__)
@@ -50,13 +51,13 @@ class WaitWindow(gtk.Window):
 
     def grind(self):
         while gtk.events_pending():
-            gtk.main_iteration_do(False)
+            gtk.main_iteration(False)
 
         self.prog.pulse()
 
     def set(self, fraction):
         while gtk.events_pending():
-            gtk.main_iteration_do(False)
+            gtk.main_iteration(False)
 
         self.prog.set_fraction(fraction)
 
@@ -237,7 +238,8 @@ class ImportDialog(gtk.Dialog):
             LOG.error("One or more of the radios doesn't support banks")
             return
 
-        if not len(dst_banks) != len(src_banks):
+        if not isinstance(self.dst_radio, generic_xml.XMLRadio) and \
+                len(dst_banks) != len(src_banks):
             LOG.warn("Source and destination radios have "
                      "a different number of banks")
         else:
@@ -263,7 +265,7 @@ class ImportDialog(gtk.Dialog):
                                               {"number":  new,
                                                "name":    name,
                                                "comment": comm})
-            except import_logic.ImportError as e:
+            except import_logic.ImportError, e:
                 LOG.error("Import error: %s", e)
                 error_messages[new] = str(e)
                 continue
@@ -277,9 +279,9 @@ class ImportDialog(gtk.Dialog):
             job.set_desc(_("Importing bank information"))
             dst_rthread._qsubmit(job, 0)
 
-        if list(error_messages.keys()):
+        if error_messages.keys():
             msg = _("Error importing memories:") + "\r\n"
-            for num, msgs in list(error_messages.items()):
+            for num, msgs in error_messages.items():
                 msg += "%s: %s" % (num, ",".join(msgs))
             common.show_error(msg)
 
@@ -299,7 +301,9 @@ class ImportDialog(gtk.Dialog):
         self.__view = gtk.TreeView(self.__store)
         self.__view.show()
 
-        for k in list(self.caps.keys()):
+        tips = gtk.Tooltips()
+
+        for k in self.caps.keys():
             t = self.types[k]
 
             if t == gobject.TYPE_BOOLEAN:
@@ -321,11 +325,11 @@ class ImportDialog(gtk.Dialog):
             if k == self.col_nloc:
                 column.set_cell_data_func(rend, self._render, k)
 
-            if k in list(self.tips.keys()):
+            if k in self.tips.keys():
                 LOG.debug("Doing %s" % k)
                 lab = gtk.Label(self.caps[k])
                 column.set_widget(lab)
-                lab.set_tooltip_text(self.tips[k])
+                tips.set_tip(lab, self.tips[k])
                 lab.show()
             column.set_sort_column_id(k)
             self.__view.append_column(column)
@@ -406,8 +410,7 @@ class ImportDialog(gtk.Dialog):
         inv.show()
         hbox.pack_start(inv, 0, 0, 0)
 
-        frame = gtk.Frame()
-        frame.set_label("Select")
+        frame = gtk.Frame(_("Select"))
         frame.show()
         frame.add(hbox)
         hbox.show()
@@ -465,8 +468,7 @@ class ImportDialog(gtk.Dialog):
         revr.show()
         hbox.pack_start(revr, 0, 0, 0)
 
-        frame = gtk.Frame()
-        frame.set_label("Adjust New Location")
+        frame = gtk.Frame(_("Adjust New Location"))
         frame.show()
         frame.add(hbox)
         hbox.show()
@@ -516,7 +518,7 @@ class ImportDialog(gtk.Dialog):
         except errors.InvalidMemoryLocation:
             LOG.error("Location %i empty or at limit of destination radio" %
                       number)
-        except errors.InvalidDataError as e:
+        except errors.InvalidDataError, e:
             LOG.error("Got error from radio, assuming %i beyond limits: %s" %
                       (number, e))
 
@@ -527,9 +529,9 @@ class ImportDialog(gtk.Dialog):
                 self.ww.set(float(i) / end)
             try:
                 mem = self.src_radio.get_memory(i)
-            except errors.InvalidMemoryLocation as e:
+            except errors.InvalidMemoryLocation, e:
                 continue
-            except Exception as e:
+            except Exception, e:
                 self.__store.append(row=(False,
                                          i,
                                          i,
@@ -649,4 +651,4 @@ if __name__ == "__main__":
     d = ImportDialog(radio)
     d.run()
 
-    print(d.get_import_list())
+    print d.get_import_list()

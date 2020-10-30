@@ -500,7 +500,10 @@ class VX8BankModel(chirp_common.BankModel):
 
 
 def _wipe_memory(mem):
-    mem.set_raw("\x00" * (mem.size() // 8))
+    mem.set_raw("\x00" * (mem.size() / 8))
+    mem.pr_frequency = 0x1d  # default PR frequency of 1600 Hz
+    mem.unknown8b = 1        # This bit must be 1, but its meaning is unknown
+    mem.rx_mode_auto = 1     # rx auto mode bit defaults to 1
 
 
 @directory.register
@@ -1436,7 +1439,7 @@ class VX8Radio(yaesu_clone.YaesuCloneModeRadio):
                 except AttributeError as e:
                     LOG.error("Setting %s is not in the memory map: %s" %
                               (element.get_name(), e))
-            except Exception as e:
+            except Exception, e:
                 LOG.debug(element.get_name())
                 raise
 

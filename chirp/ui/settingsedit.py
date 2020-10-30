@@ -96,7 +96,7 @@ class SettingsEditor(common.Editor):
         elif isinstance(value, settings.RadioSettingValueBoolean):
             value.set_value(widget.get_active())
         elif isinstance(value, settings.RadioSettingValueList):
-            value.set_value(widget.value)
+            value.set_value(widget.get_active_text())
         elif isinstance(value, settings.RadioSettingValueString):
             value.set_value(widget.get_text())
         else:
@@ -109,7 +109,7 @@ class SettingsEditor(common.Editor):
     def _save_setting(self, widget, value):
         try:
             self._do_save_setting(widget, value)
-        except settings.InvalidValueError as e:
+        except settings.InvalidValueError, e:
             common.show_error(_("Invalid setting value: %s") % e)
 
     def _build_ui_tab(self, group):
@@ -155,7 +155,7 @@ class SettingsEditor(common.Editor):
                          xoptions=gtk.FILL, yoptions=0,
                          xpadding=12, ypadding=3)
 
-            for i in list(element.keys()):
+            for i in element.keys():
                 value = element[i]
                 if isinstance(value, settings.RadioSettingValueInteger):
                     widget = gtk.SpinButton()
@@ -175,14 +175,15 @@ class SettingsEditor(common.Editor):
                     widget.set_active(value.get_value())
                     widget.connect("toggled", self._save_setting, value)
                 elif isinstance(value, settings.RadioSettingValueList):
-                    choice = miscwidgets.make_choice([], editable=False)
-                    model = choice.get_model()
+                    widget = miscwidgets.make_choice([], editable=False)
+                    model = widget.get_model()
                     model.clear()
                     for option in value.get_options():
-                        choice.append_text(option)
-                    choice.value = value.get_value()
-                    widget = choice.widget
-                    choice.connect("changed", self._save_setting, value)
+                        widget.append_text(option)
+                    current = value.get_value()
+                    index = value.get_options().index(current)
+                    widget.set_active(index)
+                    widget.connect("changed", self._save_setting, value)
                 elif isinstance(value, settings.RadioSettingValueString):
                     widget = gtk.Entry()
                     widget.set_width_chars(32)

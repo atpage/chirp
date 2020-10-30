@@ -5,4 +5,3 @@ include share/chirp.ico
 include share/*.1
 include stock_configs/*
 include COPYING
-include *requirements.txt

@@ -14,10 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from chirp import platform
-try:
-    from ConfigParser import ConfigParser
-except ImportError:
-    from configparser import ConfigParser
+from ConfigParser import ConfigParser
 import os
 
 
@@ -36,8 +33,9 @@ class ChirpConfig:
 
     def save(self):
         cfg = os.path.join(self.__basepath, self.__name)
-        with open(cfg, "w") as cfg_file:
-            self.__config.write(cfg_file)
+        cfg_file = file(cfg, "w")
+        self.__config.write(cfg_file)
+        cfg_file.close()
 
     def get(self, key, section, raw=False):
         if not self.__config.has_section(section):

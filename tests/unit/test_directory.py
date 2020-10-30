@@ -27,7 +27,7 @@ class TestDirectory(base.BaseTest):
 
             @classmethod
             def match_model(cls, file_data, image_file):
-                return file_data == b'thisisrawdata'
+                return file_data == 'thisisrawdata'
 
         self.test_class = FakeRadio
 
@@ -38,28 +38,28 @@ class TestDirectory(base.BaseTest):
 
     def test_detect_with_no_metadata(self):
         with tempfile.NamedTemporaryFile() as f:
-            f.write(b'thisisrawdata')
+            f.write('thisisrawdata')
             f.flush()
             self._test_detect_finds_our_class(f.name)
 
     def test_detect_with_metadata_base_class(self):
         with tempfile.NamedTemporaryFile() as f:
-            f.write(b'thisisrawdata')
-            f.write(self.test_class.MAGIC + b'-')
+            f.write('thisisrawdata')
+            f.write(self.test_class.MAGIC + '-')
             f.write(self.test_class._make_metadata())
             f.flush()
             self._test_detect_finds_our_class(f.name)
 
     def test_detect_with_metadata_alias_class(self):
         with tempfile.NamedTemporaryFile() as f:
-            f.write(b'thisisrawdata')
-            f.write(self.test_class.MAGIC + b'-')
+            f.write('thisisrawdata')
+            f.write(self.test_class.MAGIC + '-')
             FakeAlias = self.test_class.ALIASES[0]
             fake_metadata = base64.b64encode(json.dumps(
                 {'vendor': FakeAlias.VENDOR,
                  'model': FakeAlias.MODEL,
                  'variant': FakeAlias.VARIANT,
-                }).encode())
+                }))
             f.write(fake_metadata)
             f.flush()
             radio = self._test_detect_finds_our_class(f.name)

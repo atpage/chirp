@@ -104,7 +104,7 @@ def parse(data):
         if '//' in line:
             lines[index] = line[:line.index('//')]
 
-    class FakeFileInput(object):
+    class FakeFileInput:
         """Simulate line-by-line file reading from @data"""
         line = -1
 
@@ -121,9 +121,6 @@ def parse(data):
             return self
 
         def next(self):
-            return self.__next__()
-
-        def __next__(self):
             self.line += 1
             try:
                 # Note, FileInput objects keep the newlines

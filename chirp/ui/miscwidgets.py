@@ -13,7 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import abc
 import gtk
 import gobject
 import pango
@@ -21,11 +20,7 @@ import pango
 import os
 import logging
 
-import six
-
 from chirp import platform
-from chirp.ui import compat
-from chirp.ui import common
 
 LOG = logging.getLogger(__name__)
 
@@ -70,8 +65,6 @@ class KeyedListWidget(gtk.HBox):
     def _make_view(self):
         colnum = -1
 
-        self._renderers = []
-
         for typ, cap in self.columns:
             colnum += 1
             if colnum == 0:
@@ -88,8 +81,6 @@ class KeyedListWidget(gtk.HBox):
                 column = gtk.TreeViewColumn(cap, rend, active=colnum)
             else:
                 raise Exception("Unsupported type %s" % typ)
-
-            self._renderers.append(rend)
 
             column.set_sort_column_id(colnum)
             self.__view.append_column(column)
@@ -139,7 +130,7 @@ class KeyedListWidget(gtk.HBox):
         try:
             (store, iter) = self.__view.get_selection().get_selected()
             return store.get(iter, 0)[0]
-        except Exception as e:
+        except Exception, e:
             LOG.error("Unable to find selected: %s" % e)
             return None
 
@@ -194,7 +185,8 @@ class KeyedListWidget(gtk.HBox):
         gtk.HBox.connect(self, signame, *args)
 
     def set_editable(self, column, is_editable):
-        rend = self.get_renderer(column)
+        col = self.__view.get_column(column)
+        rend = col.get_cell_renderers()[0]
         rend.set_property("editable", True)
         rend.connect("edited", self._edited, column + 1)
 
@@ -205,7 +197,7 @@ class KeyedListWidget(gtk.HBox):
         col.set_sort_column_id(value)
 
     def get_renderer(self, colnum):
-        return self._renderers[colnum]
+        return self.__view.get_column(colnum).get_cell_renderers()[0]
 
 
 class ListWidget(gtk.HBox):
@@ -308,7 +300,7 @@ class ListWidget(gtk.HBox):
         try:
             (lst, iter) = self._view.get_selection().get_selected()
             lst.remove(iter)
-        except Exception as e:
+        except Exception, e:
             LOG.error("Unable to remove selected: %s" % e)
 
     def get_selected(self, take_default=False):
@@ -330,7 +322,7 @@ class ListWidget(gtk.HBox):
                 target = lst.get_iter(pos-1)
             elif delta < 0:
                 target = lst.get_iter(pos+1)
-        except Exception as e:
+        except Exception, e:
             return False
 
         if target:
@@ -596,7 +588,7 @@ class LatLonEntry(gtk.Entry):
             except:
                 try:
                     return self.parse_dms(string)
-                except Exception as e:
+                except Exception, e:
                     LOG.error("DMS: %s" % e)
 
         raise Exception("Invalid format")
@@ -623,138 +615,23 @@ class YesNoDialog(gtk.Dialog):
         self._label.set_text(text)
 
 
-@six.add_metaclass(abc.ABCMeta)
-class EditableChoiceBase(object):
-    def __init__(self, options, editable, default):
-        pass
-
-    @property
-    @abc.abstractmethod
-    def widget(self):
-        raise NotImplementedError()
-
-    @property
-    @abc.abstractmethod
-    def value(self):
-        pass
-
-    @value.setter
-    @abc.abstractmethod
-    def value(self):
-        pass
-
-    @abc.abstractmethod
-    def get_model(self):
-        pass
-
-    @abc.abstractmethod
-    def append_text(self, text):
-        """Add a choice option"""
-        pass
-
-    def set_active(self, text):
-        """Legacy compat"""
-        self.value = text
-
-    def get_active_text(self):
-        """Legacy compat"""
-        return self.value
-
-    def set_sensitive(self, sensitive):
-        self.widget.set_sensitive(sensitive)
-
-    def connect(self, signal, fn, data):
-        self.widget.connect(signal, lambda *a: fn(self, data))
-
-
-class EditableChoiceGTK3(EditableChoiceBase):
-    def __init__(self, options, editable, default):
-        self.store = gtk.ListStore(str)
-        for i, option in enumerate(options):
-            self.store.append([option])
-        if editable:
-            self.sel = gtk.ComboBox.new_with_model_and_entry(self.store)
-            self.sel.set_entry_text_column(0)
-        else:
-            self.sel = gtk.ComboBox.new_with_model(self.store)
-            renderer_text = gtk.CellRendererText()
-            self.sel.pack_start(renderer_text, True)
-            self.sel.add_attribute(renderer_text, "text", 0)
-        if default:
-            self.value = default
-
-    @property
-    def widget(self):
-        return self.sel
-
-    @property
-    def value(self):
-        modeliter = self.sel.get_active_iter()
-        if modeliter:
-            return self.store[modeliter][0]
-        else:
-            LOG.warning('No active iter')
-
-    @value.setter
-    def value(self, val):
-        modeliter = self.store.get_iter_first()
-        while modeliter is not None:
-            row = self.store[modeliter]
-            if row[0] == val:
-                self.sel.set_active_iter(modeliter)
-                break
-            modeliter = self.store.iter_next(modeliter)
-
-    def get_model(self):
-        return self.store
-
-    def append_text(self, text):
-        self.store.append([text])
-
-
-class EditableChoiceGTK2(EditableChoiceBase):
-    def __init__(self, options, editable, default):
-        if editable:
-            self.sel = gtk.combo_box_entry_new_text()
-        else:
-            self.sel = gtk.combo_box_new_text()
-
-        for opt in options:
-            self.sel.append_text(opt)
-
-        if default:
-            try:
-                idx = options.index(default)
-                self.sel.set_active(idx)
-            except Exception as e:
-                pass
-
-    @property
-    def widget(self):
-        return self.sel
-
-    @property
-    def value(self):
-        store = self.sel.get_model()
-        modeliter = self.sel.get_active_iter()
-        return store[modeliter][0]
-
-    @value.setter
-    def value(self, val):
-        common.combo_select(self.sel, val)
-
-    def get_model(self):
-        return self.sel.get_model()
-
-    def append_text(self, text):
-        self.sel.append_text(text)
-
-
 def make_choice(options, editable=True, default=None):
-    if hasattr(gtk.ComboBox, 'new_with_entry'):
-        return EditableChoiceGTK3(options, editable, default)
+    if editable:
+        sel = gtk.combo_box_entry_new_text()
     else:
-        return EditableChoiceGTK2(options, editable, default)
+        sel = gtk.combo_box_new_text()
+
+    for opt in options:
+        sel.append_text(opt)
+
+    if default:
+        try:
+            idx = options.index(default)
+            sel.set_active(idx)
+        except:
+            pass
+
+    return sel
 
 
 class FilenameBox(gtk.HBox):
@@ -860,9 +737,9 @@ def test():
 
     def print_val(entry):
         if entry.validate():
-            print("Valid: %s" % entry.value())
+            print "Valid: %s" % entry.value()
         else:
-            print("Invalid")
+            print "Invalid"
     lle.connect("activate", print_val)
 
     lle.set_text("45 13 12")
@@ -872,7 +749,7 @@ def test():
     except KeyboardInterrupt:
         pass
 
-    print(lst.get_values())
+    print lst.get_values()
 
 
 if __name__ == "__main__":

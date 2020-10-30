@@ -55,7 +55,7 @@ def _get_freq(bcd_array):
 
 def _set_freq(bcd_array, freq):
     bitwise.int_to_bcd(bcd_array, freq / 1000)
-    bcd_array[2].set_raw(bcd_array[2].get_bits(0xF0) + freq % 10000 // 500)
+    bcd_array[2].set_raw(bcd_array[2].get_bits(0xF0) + freq % 10000 / 500)
 
 
 @directory.register
@@ -84,6 +84,7 @@ class ICT8ARadio(icf.IcomCloneModeRadio):
         rf.valid_characters = chirp_common.CHARSET_UPPER_NUMERIC
         rf.has_dtcs = False
         rf.has_dtcs_polarity = False
+        rf.valid_tuning_steps = [5, 10, 12.5, 15, 20, 25, 30, 50, 100]
         rf.has_tuning_step = False
         rf.has_mode = False
         rf.has_bank = False

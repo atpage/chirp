@@ -242,7 +242,7 @@ class AP510Memory(object):
 
 class AP510Memory20141215(AP510Memory):
     """Compatible with firmware version 20141215"""
-    ATTR_MAP = dict(list(AP510Memory.ATTR_MAP.items()) + list({
+    ATTR_MAP = dict(AP510Memory.ATTR_MAP.items() + {
         'tx_volume': '21',  # 1-6
         'rx_volume': '22',  # 1-9
         'tx_power': '23',  # 1: 1 watt,  0: 0.5 watt
@@ -252,7 +252,7 @@ class AP510Memory20141215(AP510Memory):
         'path3': '27',  # like "WIDE1 1" else "0"
         'multiple': '28',
         'auto_on': '29',
-    }.items()))
+    }.items())
 
     def get_multiple(self):
         return dict(zip(
@@ -380,7 +380,7 @@ class AP510Radio(chirp_common.CloneModeRadio):
             data = download(self)
         except errors.RadioError:
             raise
-        except Exception as e:
+        except Exception, e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
         # _mmap isn't a Chirp MemoryMap, but since AP510Memory implements
@@ -398,7 +398,7 @@ class AP510Radio(chirp_common.CloneModeRadio):
             upload(self)
         except errors.RadioError:
             raise
-        except Exception as e:
+        except Exception, e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
     def load_mmap(self, filename):

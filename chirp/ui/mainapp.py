@@ -17,6 +17,7 @@
 from datetime import datetime
 import os
 import tempfile
+import urllib
 import webbrowser
 from glob import glob
 import shutil
@@ -27,9 +28,8 @@ import gobject
 import sys
 
 from chirp.ui import inputdialog, common
-from chirp.ui import compat
 from chirp import platform, directory, util
-from chirp.drivers import generic_csv, repeaterbook
+from chirp.drivers import generic_xml, generic_csv, repeaterbook
 from chirp.drivers import ic9x, kenwood_live, idrp, vx7, vx5, vx6
 from chirp.drivers import icf, ic9x_icf
 from chirp import CHIRP_VERSION, chirp_common, detect, errors
@@ -45,7 +45,7 @@ if __name__ == "__main__":
 
 try:
     import serial
-except ImportError as e:
+except ImportError, e:
     common.log_exception()
     common.show_error("\nThe Pyserial module is not installed!")
 
@@ -374,7 +374,7 @@ of file.
                 if not radio:
                     return
                 LOG.debug("Manually selected %s" % radio)
-            except Exception as e:
+            except Exception, e:
                 common.log_exception()
                 common.show_error(os.path.basename(fname) + ": " + str(e))
                 return
@@ -384,7 +384,7 @@ of file.
             eset = editorset.EditorSet(radio, self,
                                        filename=fname,
                                        tempname=tempname)
-        except Exception as e:
+        except Exception, e:
             common.log_exception()
             common.show_error(
                 _("There was an error opening {fname}: {error}").format(
@@ -491,7 +491,7 @@ of file.
 
         try:
             eset.save(fname)
-        except Exception as e:
+        except Exception, e:
             d = inputdialog.ExceptionDialog(e)
             d.run()
             d.destroy()
@@ -502,7 +502,7 @@ of file.
         if not emsg:
             self.do_open_live(radio, tempname="(" + _("Untitled") + ")")
         else:
-            d = inputdialog.ExceptionDialog(emsg, parent=self)
+            d = inputdialog.ExceptionDialog(emsg)
             d.run()
             d.destroy()
 
@@ -537,15 +537,25 @@ of file.
                 self.menu_ag.remove_action(old_action)
 
             file_basename = os.path.basename(fname).replace("_", "__")
-            action = gtk.Action(
-                action_name, "_%i. %s" % (i + 1, file_basename),
-                _("Open recent file {name}").format(name=fname), "")
+            widget_name = action_name
+            widget_label = "_%i. %s" % (i + 1, file_basename)
+            widget_tip = _("Open recent file") + (" {name}").format(name=fname)
+            action = gtk.Action(action_name, widget_label, widget_tip, "")
+
             action.connect("activate", lambda a, f: self.do_open(f), fname)
             mid = self.menu_uim.new_merge_id()
             self.menu_uim.add_ui(mid, path,
                                  action_name, action_name,
                                  gtk.UI_MANAGER_MENUITEM, False)
             self.menu_ag.add_action(action)
+
+            widget_uim_path = path + "/" + widget_name
+            try:
+                widget_item = self.menu_uim.get_widget(widget_uim_path)
+                widget_item.set_tooltip_text(widget_tip)
+            except:
+                pass
+
             i += 1
 
     def record_recent_file(self, filename):
@@ -574,7 +584,7 @@ of file.
             try:
                 shutil.copy(fn, stock_dir)
                 LOG.debug("Copying %s -> %s" % (fn, stock_dir))
-            except Exception as e:
+            except Exception, e:
                 LOG.error("Unable to copy %s to %s: %s" % (fn, stock_dir, e))
                 return False
         return True
@@ -584,7 +594,7 @@ of file.
         if not os.path.isdir(stock_dir):
             try:
                 os.mkdir(stock_dir)
-            except Exception as e:
+            except Exception, e:
                 LOG.error("Unable to create directory: %s" % stock_dir)
                 return
         if not self.copy_shipped_stock_configs(stock_dir):
@@ -725,14 +735,13 @@ of file.
                   (rclass.VENDOR, rclass.MODEL, settings.port))
 
         try:
-            ser = compat.CompatSerial.get(rclass.NEEDS_COMPAT_SERIAL,
-                                          port=settings.port,
-                                          baudrate=rclass.BAUD_RATE,
-                                          rtscts=rclass.HARDWARE_FLOW,
-                                          timeout=0.25)
+            ser = serial.Serial(port=settings.port,
+                                baudrate=rclass.BAUD_RATE,
+                                rtscts=rclass.HARDWARE_FLOW,
+                                timeout=0.25)
             ser.flushInput()
-        except serial.SerialException as e:
-            d = inputdialog.ExceptionDialog(e, parent=self)
+        except serial.SerialException, e:
+            d = inputdialog.ExceptionDialog(e)
             d.run()
             d.destroy()
             return
@@ -772,13 +781,12 @@ of file.
             return
 
         try:
-            ser = compat.CompatSerial.get(radio.NEEDS_COMPAT_SERIAL,
-                                          port=settings.port,
-                                          baudrate=radio.BAUD_RATE,
-                                          rtscts=radio.HARDWARE_FLOW,
-                                          timeout=0.25)
+            ser = serial.Serial(port=settings.port,
+                                baudrate=radio.BAUD_RATE,
+                                rtscts=radio.HARDWARE_FLOW,
+                                timeout=0.25)
             ser.flushInput()
-        except serial.SerialException as e:
+        except serial.SerialException, e:
             d = inputdialog.ExceptionDialog(e)
             d.run()
             d.destroy()
@@ -898,9 +906,9 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        gtk.gdk.Window.process_all_updates()
+        gtk.gdk.window_process_all_updates()
         while gtk.events_pending():
-            gtk.main_iteration_do(False)
+            gtk.main_iteration(False)
 
         if do_import:
             eset = self.get_current_editorset()
@@ -912,7 +920,7 @@ of file.
                 radio = dmrmarc.DMRMARCRadio(None)
                 radio.set_params(city, state, country)
                 self.do_open_live(radio, read_only=True)
-            except errors.RadioError as e:
+            except errors.RadioError, e:
                 common.show_error(e)
 
         self.window.set_cursor(None)
@@ -965,31 +973,28 @@ of file.
         band = miscwidgets.make_choice(sorted(RB_BANDS.keys(), key=key_bands),
                                        False, default_band)
 
-        def _changed(box, state, county):
-            state = fips.FIPS_STATES[state.get_active_text()]
+        def _changed(box, county):
+            state = fips.FIPS_STATES[box.get_active_text()]
             county.get_model().clear()
             for fips_county in sorted(fips.FIPS_COUNTIES[state].keys()):
                 county.append_text(fips_county)
-            county.value = list(sorted(fips.FIPS_COUNTIES[state].keys()))[0]
+            county.set_active(0)
 
-        state.widget.connect("changed", _changed, state, county)
+        state.connect("changed", _changed, county)
 
         d = inputdialog.FieldDialog(title=_("RepeaterBook Query"), parent=self)
-        d.add_field("State", state.widget)
-        d.add_field("County", county.widget)
-        d.add_field("Band", band.widget)
+        d.add_field("State", state)
+        d.add_field("County", county)
+        d.add_field("Band", band)
 
         r = d.run()
-        chose_state = state.get_active_text()
-        chose_county = county.get_active_text()
-        chose_band = band.get_active_text()
         d.destroy()
         if r != gtk.RESPONSE_OK:
             return False
 
-        code = fips.FIPS_STATES[chose_state]
-        county_id = fips.FIPS_COUNTIES[code][chose_county]
-        freq = RB_BANDS[chose_band]
+        code = fips.FIPS_STATES[state.get_active_text()]
+        county_id = fips.FIPS_COUNTIES[code][county.get_active_text()]
+        freq = RB_BANDS[band.get_active_text()]
         CONF.set("state", str(code), "repeaterbook")
         CONF.set("county", str(county_id), "repeaterbook")
         CONF.set("band", str(freq), "repeaterbook")
@@ -1026,37 +1031,35 @@ of file.
         query = query % (code,
                          band and band or "%%",
                          county and county or "%%")
+        print query
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        with compat.py3safe():
-            gtk.gdk.Window.process_all_updates()
-            while gtk.events_pending():
-                gtk.main_iteration_do(False)
+        gtk.gdk.window_process_all_updates()
+        while gtk.events_pending():
+            gtk.main_iteration(False)
 
         fn = tempfile.mktemp(".csv")
-        try:
-            chirp_common.urlretrieve(query, fn)
-        except Exception as e:
-            LOG.error('Failed to fetch %s: %s' % (query, e))
-        if not os.path.exists(fn):
+        filename, headers = urllib.urlretrieve(query, fn)
+        if not os.path.exists(filename):
+            LOG.error("Failed, headers were: %s", headers)
             common.show_error(_("RepeaterBook query failed"))
             self.window.set_cursor(None)
             return
 
         try:
             # Validate CSV
-            radio = repeaterbook.RBRadio(fn)
+            radio = repeaterbook.RBRadio(filename)
             if radio.errors:
                 reporting.report_misc_error("repeaterbook",
                                             ("query=%s\n" % query) +
                                             ("\n") +
                                             ("\n".join(radio.errors)))
-        except errors.InvalidDataError as e:
+        except errors.InvalidDataError, e:
             common.show_error(str(e))
             self.window.set_cursor(None)
             return
-        except Exception as e:
+        except Exception, e:
             common.log_exception()
 
         reporting.report_model_usage(radio, "import", True)
@@ -1064,7 +1067,7 @@ of file.
         self.window.set_cursor(None)
         if do_import:
             eset = self.get_current_editorset()
-            count = eset.do_import(fn)
+            count = eset.do_import(filename)
         else:
             self.do_open_live(radio, read_only=True)
 
@@ -1089,10 +1092,7 @@ of file.
         d = inputdialog.FieldDialog(title=_("RepeaterBook Query"),
                                     parent=self)
         for k in sorted(fields.keys()):
-            widget = fields[k][0]
-            if isinstance(widget, miscwidgets.EditableChoiceBase):
-                widget = widget.widget
-            d.add_field(k[1:], widget)
+            d.add_field(k[1:], fields[k][0])
             if isinstance(fields[k][0], gtk.Entry):
                 fields[k][0].set_text(
                     CONF.get(k[1:].lower(), "repeaterbook") or "")
@@ -1137,38 +1137,35 @@ of file.
 
         query = "http://chirp.danplanet.com/query/rb/1.0/app_direct" \
                 "?loc=%s&band=%s&dist=%s" % (loc, band, dist)
-        print( query )
+        print query
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        with compat.py3safe():
-            gtk.gdk.Window.process_all_updates()
-            while gtk.events_pending():
-                gtk.main_iteration_do(False)
+        gtk.gdk.window_process_all_updates()
+        while gtk.events_pending():
+            gtk.main_iteration(False)
 
         fn = tempfile.mktemp(".csv")
-        try:
-            chirp_common.urlretrieve(query, fn)
-        except Exception as e:
-            LOG.error('Failed to fetch %s: %s' % (query, e))
-        if not os.path.exists(fn):
+        filename, headers = urllib.urlretrieve(query, fn)
+        if not os.path.exists(filename):
+            LOG.error("Failed, headers were: %s", headers)
             common.show_error(_("RepeaterBook query failed"))
             self.window.set_cursor(None)
             return
 
         try:
             # Validate CSV
-            radio = repeaterbook.RBRadio(fn)
+            radio = repeaterbook.RBRadio(filename)
             if radio.errors:
                 reporting.report_misc_error("repeaterbook",
                                             ("query=%s\n" % query) +
                                             ("\n") +
                                             ("\n".join(radio.errors)))
-        except errors.InvalidDataError as e:
+        except errors.InvalidDataError, e:
             common.show_error(str(e))
             self.window.set_cursor(None)
             return
-        except Exception as e:
+        except Exception, e:
             common.log_exception()
 
         reporting.report_model_usage(radio, "import", True)
@@ -1176,7 +1173,7 @@ of file.
         self.window.set_cursor(None)
         if do_import:
             eset = self.get_current_editorset()
-            count = eset.do_import(fn)
+            count = eset.do_import(filename)
         else:
             self.do_open_live(radio, read_only=True)
 
@@ -1239,11 +1236,9 @@ of file.
             return
 
         fn = tempfile.mktemp(".csv")
-        try:
-            chirp_common.urlretrieve(url, fn)
-        except Exception as e:
-            LOG.error('Failed to fetch %s: %s' % (url, e))
-        if not os.path.exists(fn):
+        filename, headers = urllib.urlretrieve(url, fn)
+        if not os.path.exists(filename):
+            LOG.error("Failed, headers were: %s", str(headers))
             common.show_error(_("Query failed"))
             return
 
@@ -1253,14 +1248,14 @@ of file.
             MODEL = ""
 
         try:
-            radio = PRRadio(fn)
-        except Exception as e:
+            radio = PRRadio(filename)
+        except Exception, e:
             common.show_error(str(e))
             return
 
         if do_import:
             eset = self.get_current_editorset()
-            count = eset.do_import(fn)
+            count = eset.do_import(filename)
         else:
             self.do_open_live(radio, read_only=True)
 
@@ -1316,9 +1311,9 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        gtk.gdk.Window.process_all_updates()
+        gtk.gdk.window_process_all_updates()
         while gtk.events_pending():
-            gtk.main_iteration_do(False)
+            gtk.main_iteration(False)
 
         if do_import:
             eset = self.get_current_editorset()
@@ -1379,9 +1374,9 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        gtk.gdk.Window.process_all_updates()
+        gtk.gdk.window_process_all_updates()
         while gtk.events_pending():
-            gtk.main_iteration_do(False)
+            gtk.main_iteration(False)
 
         if do_import:
             eset = self.get_current_editorset()
@@ -1393,7 +1388,7 @@ of file.
                 radio = radioreference.RadioReferenceRadio(None)
                 radio.set_params(zipcode, username, passwd)
                 self.do_open_live(radio, read_only=True)
-            except errors.RadioError as e:
+            except errors.RadioError, e:
                 common.show_error(e)
 
         self.window.set_cursor(None)
@@ -1426,8 +1421,7 @@ of file.
             os.remove(filen)
 
         count = eset.do_export(filen)
-        success = count > 0 if count is not None else False
-        reporting.report_model_usage(eset.rthread.radio, "export", success)
+        reporting.report_model_usage(eset.rthread.radio, "export", count > 0)
 
     def do_about(self):
         d = gtk.AboutDialog()
@@ -1439,14 +1433,18 @@ of file.
             sys.version.split()[0])
 
         # Set url hook to handle user activating a URL link in the about dialog
-        with compat.py3safe():
-            gtk.about_dialog_set_url_hook(
-                lambda dlg, url: webbrowser.open(url))
+        gtk.about_dialog_set_url_hook(lambda dlg, url: webbrowser.open(url))
 
         d.set_name("CHIRP")
         d.set_version(CHIRP_VERSION)
         d.set_copyright("Copyright 2019 CHIRP Software LLC")
         d.set_website("http://chirp.danplanet.com")
+        d.set_authors(("Dan Smith KK7DS <dsmith@danplanet.com>",
+                       _("With significant contributions from:"),
+                       "Tom KD7LXL",
+                       "Marco IZ3GME",
+                       "Jim KC9HI"
+                       ))
         d.set_translator_credits("Polish: Grzegorz SQ2RBY" +
                                  os.linesep +
                                  "Italian: Fabio IZ2QDH" +
@@ -1529,7 +1527,7 @@ of file.
             conf = config.get("memedit")
             conf.set_bool("hide_unused", action.get_active())
         else:
-            for editortype, editor in eset.editors.items():
+            for editortype, editor in eset.editors.iteritems():
                 if "memedit" in editortype:
                     editor.set_hide_unused(action.get_active())
 
@@ -1632,7 +1630,7 @@ of file.
             # See this for why:
             # http://stackoverflow.com/questions/2904274/globals-and-locals-in-python-exec
             exec(pyc, globals(), globals())
-        except Exception as e:
+        except Exception, e:
             common.log_exception()
             common.show_error("Unable to load module: %s" % e)
 
@@ -1946,18 +1944,14 @@ of file.
         box = gtk.HBox(False, 2)
 
         self.sb_general = gtk.Statusbar()
+        self.sb_general.set_has_resize_grip(False)
         self.sb_general.show()
         box.pack_start(self.sb_general, 1, 1, 1)
 
         self.sb_radio = gtk.Statusbar()
+        self.sb_radio.set_has_resize_grip(True)
         self.sb_radio.show()
         box.pack_start(self.sb_radio, 1, 1, 1)
-
-        with compat.py3safe(quiet=True):
-            # Gtk2 had resize grips on the status bars, so remove them
-            # if we can
-            self.sb_general.set_has_resize_grip(False)
-            self.sb_radio.set_has_resize_grip(True)
 
         box.show()
         return box
@@ -2045,15 +2039,8 @@ of file.
         except ImportError:
             pass
 
-        # for gtk-mac-integration 2.1.3 in brew
-        try:
-            from gi.repository import GtkosxApplication
-            macapp = GtkosxApplication.Application()
-        except ImportError:
-            pass
-
         if macapp is None:
-            LOG.error("No MacOS support")
+            LOG.error("No MacOS support: %s" % e)
             return
 
         this_platform = platform.get_platform()
@@ -2084,16 +2071,11 @@ of file.
     def __init__(self, *args, **kwargs):
         gtk.Window.__init__(self, *args, **kwargs)
 
-        def expose(window, event=None):
+        def expose(window, event):
             allocation = window.get_allocation()
             CONF.set_int("window_w", allocation.width, "state")
             CONF.set_int("window_h", allocation.height, "state")
-
-        with compat.py3safe(quiet=True):
-            # GTK3 does not have 'expose_event' and I am not sure which
-            # is a suitable replacement. We only need this to save window
-            # size in the config, so don't warn about it.
-            self.connect("expose_event", expose)
+        self.connect("expose_event", expose)
 
         def state_change(window, event):
             CONF.set_bool(

@@ -13,15 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from builtins import bytes
-from future import standard_library
-
 import base64
 import json
 import logging
 import math
 import sys
-
 from chirp import errors, memmap, CHIRP_VERSION
 
 LOG = logging.getLogger(__name__)
@@ -198,7 +194,7 @@ class PowerLevel:
     def __gt__(self, val):
         return int(self) > int(val)
 
-    def __bool__(self):
+    def __nonzero__(self):
         return int(self) != 0
 
     def __repr__(self):
@@ -319,14 +315,14 @@ class Memory:
     def dupe(self):
         """Return a deep copy of @self"""
         mem = self.__class__()
-        for k, v in list(self.__dict__.items()):
+        for k, v in self.__dict__.items():
             mem.__dict__[k] = v
 
         return mem
 
     def clone(self, source):
         """Absorb all of the properties of @source"""
-        for k, v in list(source.__dict__.items()):
+        for k, v in source.__dict__.items():
             self.__dict__[k] = v
 
     CSV_FORMAT = ["Location", "Name", "Frequency",
@@ -748,7 +744,7 @@ class RadioFeatures:
         if name.startswith("_"):
             self.__dict__[name] = val
             return
-        elif name not in list(self._valid_map.keys()):
+        elif name not in self._valid_map.keys():
             raise ValueError("No such attribute `%s'" % name)
 
         if type(self._valid_map[name]) == tuple:
@@ -878,7 +874,7 @@ class RadioFeatures:
 
     def is_a_feature(self, name):
         """Returns True if @name is a valid feature flag name"""
-        return name in list(self._valid_map.keys())
+        return name in self._valid_map.keys()
 
     def __getitem__(self, name):
         return self.__dict__[name]
@@ -980,7 +976,7 @@ class RadioFeatures:
                     msg = ValidationError("Frequency requires %.2fkHz step" %
                                           required_step(mem.freq))
                     msgs.append(msg)
-            except errors.InvalidDataError as e:
+            except errors.InvalidDataError, e:
                 msgs.append(str(e))
 
         if self.valid_characters:
@@ -1020,7 +1016,6 @@ class Radio(Alias):
     BAUD_RATE = 9600
     HARDWARE_FLOW = False
     ALIASES = []
-    NEEDS_COMPAT_SERIAL = True
 
     def status_fn(self, status):
         """Deliver @status to the UI"""
@@ -1120,7 +1115,7 @@ class Radio(Alias):
 class FileBackedRadio(Radio):
     """A file-backed radio stores its data in a file"""
     FILE_EXTENSION = "img"
-    MAGIC = b'\x00\xffchirp\xeeimg\x00\x01'
+    MAGIC = '\x00\xffchirp\xeeimg\x00\x01'
 
     def __init__(self, *args, **kwargs):
         Radio.__init__(self, *args, **kwargs)
@@ -1151,7 +1146,7 @@ class FileBackedRadio(Radio):
         raw_metadata = raw_data[idx + len(cls.MAGIC):]
         metadata = {}
         try:
-            metadata = json.loads(base64.b64decode(raw_metadata).decode())
+            metadata = json.loads(base64.b64decode(raw_metadata))
         except ValueError as e:
             LOG.error('Failed to parse decoded metadata blob: %s' % e)
         except TypeError as e:
@@ -1170,11 +1165,11 @@ class FileBackedRadio(Radio):
              'model': cls.MODEL,
              'variant': cls.VARIANT,
              'chirp_version': CHIRP_VERSION,
-             }).encode())
+             }))
 
     def load_mmap(self, filename):
         """Load the radio's memory map from @filename"""
-        mapfile = open(filename, "rb")
+        mapfile = file(filename, "rb")
         data = mapfile.read()
         if self.MAGIC in data:
             data, self._metadata = self._strip_metadata(data)
@@ -1182,10 +1177,7 @@ class FileBackedRadio(Radio):
                     is_version_newer(self._metadata.get('chirp_version'))):
                 LOG.warning('Image is from version %s but we are %s' % (
                     self._metadata.get('chirp_version'), CHIRP_VERSION))
-        if self.NEEDS_COMPAT_SERIAL:
-            self._mmap = memmap.MemoryMap(data)
-        else:
-            self._mmap = memmap.MemoryMapBytes(bytes(data))
+        self._mmap = memmap.MemoryMap(data)
         mapfile.close()
         self.process_mmap()
 
@@ -1195,8 +1187,8 @@ class FileBackedRadio(Radio):
         If IOError raise a File Access Error Exception
         """
         try:
-            mapfile = open(filename, "wb")
-            mapfile.write(self._mmap.get_byte_compatible().get_packed())
+            mapfile = file(filename, "wb")
+            mapfile.write(self._mmap.get_packed())
             if filename.lower().endswith(".img"):
                 mapfile.write(self.MAGIC)
                 mapfile.write(self._make_metadata())
@@ -1324,7 +1316,7 @@ class Status:
     def __str__(self):
         try:
             pct = (self.cur / float(self.max)) * 100
-            nticks = int(pct) // 10
+            nticks = int(pct) / 10
             ticks = "=" * nticks
         except ValueError:
             pct = 0.0
@@ -1463,17 +1455,17 @@ def to_kHz(val):
 
 def from_GHz(val):
     """Convert @val in Hz to GHz"""
-    return val // 100000000
+    return val / 100000000
 
 
 def from_MHz(val):
     """Convert @val in Hz to MHz"""
-    return val // 100000
+    return val / 100000
 
 
 def from_kHz(val):
     """Convert @val in Hz to kHz"""
-    return val // 100
+    return val / 100
 
 
 def split_tone_decode(mem, txtone, rxtone):
@@ -1572,7 +1564,7 @@ def sanitize_string(astring, validcharset=CHARSET_ASCII, replacechar='*'):
     myfilter = ''.join(
         [
             [replacechar, chr(x)][chr(x) in validcharset]
-            for x in range(256)
+            for x in xrange(256)
         ])
     return astring.translate(myfilter)
 
@@ -1613,19 +1605,3 @@ def http_user_agent():
         CHIRP_VERSION,
         ver.major, ver.minor, ver.micro,
         sys.platform)
-
-
-def urlretrieve(url, fn):
-    """Grab an URL and save it in a specified file"""
-
-    standard_library.install_aliases()
-    import urllib.request
-    import urllib.error
-
-    headers = {
-        'User-Agent': http_user_agent(),
-    }
-    req = urllib.request.Request(url, headers=headers)
-    resp = urllib.request.urlopen(req)
-    with open(fn, 'wb') as f:
-        f.write(resp.read())

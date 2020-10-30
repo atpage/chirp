@@ -5,16 +5,14 @@
 import re
 import sys
 import codecs
-import collections
-
-import six
+import exceptions
 
 
-class keyword(str):
+class keyword(unicode):
     pass
 
 
-class code(str):
+class code(unicode):
     pass
 
 
@@ -32,10 +30,10 @@ class _not(_and):
     pass
 
 
-class Name(str):
+class Name(unicode):
     def __init__(self, *args):
         self.line = 0
-        self.file = ""
+        self.file = u""
 
 
 class Symbol(list):
@@ -49,29 +47,28 @@ class Symbol(list):
         return self.what
 
     def __unicode__(self):
-        return 'Symbol(' + repr(self.__name__) + ', ' + repr(self.what) + ')'
+        return u'Symbol(' + repr(self.__name__) + ', ' + repr(self.what) + u')'
 
     def __repr__(self):
-        return str(self)
+        return unicode(self)
 
-word_regex = re.compile(r"\w+")
-rest_regex = re.compile(r".*")
+word_regex = re.compile(ur"\w+")
+rest_regex = re.compile(ur".*")
 
 print_trace = False
 
 
 def u(text):
-    return six.text_type(text)
     if isinstance(text, exceptions.BaseException):
         text = text.args[0]
-    if type(text) is str:
+    if type(text) is unicode:
         return text
     if isinstance(text, str):
         if sys.stdin.encoding:
             return codecs.decode(text, sys.stdin.encoding)
         else:
             return codecs.decode(text, "utf-8")
-    return str(text)
+    return unicode(text)
 
 
 def skip(skipper, text, skipWS, skipComments):
@@ -129,8 +126,8 @@ class parser(object):
                 if print_trace:
                     try:
                         if _pattern.__name__ != "comment":
-                            sys.stderr.write("match: " +
-                                             _pattern.__name__ + "\n")
+                            sys.stderr.write(u"match: " +
+                                             _pattern.__name__ + u"\n")
                     except:
                         pass
 
@@ -169,14 +166,14 @@ class parser(object):
             except:
                 pass
 
-        if isinstance(pattern, collections.Callable):
+        if callable(pattern):
             if __debug__:
                 if print_trace:
                     try:
                         if pattern.__name__ != "comment":
-                            sys.stderr.write("testing with " +
-                                             pattern.__name__ + ": " +
-                                             textline[:40] + "\n")
+                            sys.stderr.write(u"testing with " +
+                                             pattern.__name__ + u": " +
+                                             textline[:40] + u"\n")
                     except:
                         pass
 
@@ -184,14 +181,14 @@ class parser(object):
                 name = Name(pattern.__name__)
 
             pattern = pattern()
-            if isinstance(pattern, collections.Callable):
+            if callable(pattern):
                 pattern = (pattern,)
 
         text = skip(self.skipper, textline, skipWS, skipComments)
 
         pattern_type = type(pattern)
 
-        if pattern_type is str or pattern_type is str:
+        if pattern_type is str or pattern_type is unicode:
             if text[:len(pattern)] == pattern:
                 text = skip(self.skipper, text[len(pattern):],
                             skipWS, skipComments)
@@ -290,13 +287,13 @@ class parser(object):
                 syntaxError()
 
         else:
-            raise SyntaxError("illegal type in grammar: " + u(pattern_type))
+            raise SyntaxError(u"illegal type in grammar: " + u(pattern_type))
 
     def lineNo(self):
         if not(self.lines):
-            return ""
+            return u""
         if self.restlen == -1:
-            return ""
+            return u""
         parsed = self.textlen - self.restlen
 
         left, right = 0, len(self.lines)
@@ -308,21 +305,21 @@ class parser(object):
                     if self.lines[mid + 1][0] >= parsed:
                         try:
                             return u(self.lines[mid + 1][1]) + \
-                                   ":" + u(self.lines[mid + 1][2])
+                                   u":" + u(self.lines[mid + 1][2])
                         except:
-                            return ""
+                            return u""
                     else:
                         left = mid + 1
                 except:
                     try:
                         return u(self.lines[mid + 1][1]) + \
-                               ":" + u(self.lines[mid + 1][2])
+                               u":" + u(self.lines[mid + 1][2])
                     except:
-                        return ""
+                        return u""
             else:
                 right = mid - 1
             if left > right:
-                return ""
+                return u""
 
 
 # plain module APIs
@@ -353,10 +350,10 @@ def parse(language, lineSource, skipWS=True, skipComments=None,
           packrat=False, lineCount=True):
     lines, lineNo = [], 0
 
-    while isinstance(language, collections.Callable):
+    while callable(language):
         language = language()
 
-    orig, ld = "", 0
+    orig, ld = u"", 0
     for line in lineSource:
         if lineSource.isfirstline():
             ld = 1
@@ -380,10 +377,10 @@ def parse(language, lineSource, skipWS=True, skipComments=None,
         if text:
             raise SyntaxError()
 
-    except SyntaxError as msg:
+    except SyntaxError, msg:
         parsed = textlen - p.restlen
         textlen = 0
-        nn, lineNo, file = 0, 0, ""
+        nn, lineNo, file = 0, 0, u""
         for n, ld, l in lines:
             if n >= parsed:
                 break
@@ -395,7 +392,7 @@ def parse(language, lineSource, skipWS=True, skipComments=None,
         lineNo += 1
         nn -= 1
         lineCont = orig.splitlines()[nn]
-        raise SyntaxError("syntax error in " + u(file) + ":" +
-                          u(lineNo) + ": " + lineCont)
+        raise SyntaxError(u"syntax error in " + u(file) + u":" +
+                          u(lineNo) + u": " + lineCont)
 
     return result

@@ -18,7 +18,6 @@ import gobject
 import logging
 
 from chirp.ui import common, miscwidgets
-from chirp.ui import compat
 
 LOG = logging.getLogger(__name__)
 
@@ -51,10 +50,9 @@ class CallsignEditor(gtk.HBox):
         self.listw.set_editable(1, True)
         self.listw.connect("item-set", self._cs_changed)
 
-        with compat.py3safe():
-            rend = self.listw.get_renderer(1)
-            rend.set_property("family", "Monospace")
-            rend.set_property("width-chars", width)
+        rend = self.listw.get_renderer(1)
+        rend.set_property("family", "Monospace")
+        rend.set_property("width-chars", width)
 
         sw = gtk.ScrolledWindow()
         sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
@@ -128,7 +126,7 @@ class DStarEditor(common.Editor):
 
         fixed = self.rthread.radio.get_features().has_implicit_calls
 
-        frame = compat.Frame(_("Your callsign"))
+        frame = gtk.Frame(_("Your callsign"))
         self.editor_ucall = CallsignEditor(first_fixed=fixed)
         self.editor_ucall.set_size_request(-1, 200)
         self.editor_ucall.show()
@@ -136,7 +134,7 @@ class DStarEditor(common.Editor):
         frame.show()
         box.pack_start(frame, 1, 1, 0)
 
-        frame = compat.Frame(_("Repeater callsign"))
+        frame = gtk.Frame(_("Repeater callsign"))
         self.editor_rcall = CallsignEditor(first_fixed=fixed)
         self.editor_rcall.set_size_request(-1, 200)
         self.editor_rcall.show()
@@ -144,7 +142,7 @@ class DStarEditor(common.Editor):
         frame.show()
         box.pack_start(frame, 1, 1, 0)
 
-        frame = compat.Frame(_("My callsign"))
+        frame = gtk.Frame(_("My callsign"))
         self.editor_mcall = CallsignEditor()
         self.editor_mcall.set_size_request(-1, 200)
         self.editor_mcall.show()

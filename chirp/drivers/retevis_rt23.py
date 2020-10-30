@@ -846,7 +846,7 @@ class RT23Radio(chirp_common.CloneModeRadio):
                     elif element.value.get_mutable():
                         LOG.debug("Setting %s = %s" % (setting, element.value))
                         setattr(obj, setting, element.value)
-                except Exception as e:
+                except Exception, e:
                     LOG.debug(element.get_name())
                     raise
 

@@ -16,7 +16,6 @@
 
 import threading
 
-import base64
 import gtk
 import pango
 from gobject import TYPE_INT, \
@@ -30,10 +29,7 @@ import pickle
 import os
 import logging
 
-import six
-
 from chirp.ui import common, shiftdialog, miscwidgets, config, memdetail
-from chirp.ui import compat
 from chirp.ui import bandplans
 from chirp import chirp_common, errors, directory, import_logic
 
@@ -182,7 +178,7 @@ class MemoryEditor(common.Editor):
 
         try:
             new = chirp_common.parse_freq(new)
-        except ValueError as e:
+        except ValueError, e:
             LOG.error("chirp_common.parse_freq error: %s", e)
             new = None
 
@@ -342,7 +338,7 @@ class MemoryEditor(common.Editor):
         iter = self.store.get_iter(path)
         if not self.store.get(iter, self.col("_filled"))[0] and \
                 self.store.get(iter, self.col(_("Frequency")))[0] == 0:
-            LOG.error(_("Editing new item, taking defaults"))
+            LOG.error("Editing new item, taking defaults")
             self.insert_new(iter)
 
         colnum = self.col(cap)
@@ -364,7 +360,7 @@ class MemoryEditor(common.Editor):
             new = funcs[cap](rend, path, new, colnum)
 
         if new is None:
-            LOG.error(_("Bad value for {col}: {val}").format(col=cap, val=new))
+            LOG.error("Bad value for {col}: {val}".format(col=cap, val=new))
             return
 
         if self.store.get_column_type(colnum) == TYPE_INT:
@@ -427,14 +423,12 @@ class MemoryEditor(common.Editor):
             if extd:
                 val = extd
 
-        return str(val)
+        return val
 
     def render(self, _, rend, model, iter, colnum):
-        val, hide, filled = model.get(iter, colnum, self.col("_hide_cols"),
-                                      self.col('_filled'))
+        val, hide = model.get(iter, colnum, self.col("_hide_cols"))
         val = self._render(colnum, val, iter, hide or [])
         rend.set_property("text", "%s" % val)
-        rend.set_sensitive(filled)
 
     def insert_new(self, iter, loc=None):
         line = []
@@ -917,41 +911,18 @@ class MemoryEditor(common.Editor):
 
         return uim.get_widget("/Menu")
 
-    def double_click_empty_memory(self, treeiter, path, col):
-        loc = self.store.get(treeiter, self.col(_('Loc')))
-        # Make this filled=True, thus sensitive=True
-        self.store.set(treeiter, self.col(_('_filled')), True)
-        # Set the cursor and stat editing
-        self.view.set_cursor(path, col, True)
-
     def click_cb(self, view, event):
         self.emit("usermsg", "")
-
-        pathinfo = view.get_path_at_pos(int(event.x), int(event.y))
-        if pathinfo is None:
-            return
-        path, col, x, y = pathinfo
-        treeiter = self.store.get_iter(path)
-
-        if hasattr(gtk.gdk.EventType, '_2BUTTON_PRESS'):
-            double_click = event.type == gtk.gdk.EventType._2BUTTON_PRESS
-        else:
-            double_click = False
-
-        if event.button == 1 and double_click:
-            filled, = self.store.get(treeiter, self.col(_('_filled')))
-            if not filled:
-                self.double_click_empty_memory(treeiter, path, col)
-            return True
-        elif event.button == 3:
-            view.set_cursor(path, col)
-            menu = self.make_context_menu()
-            try:
+        if event.button == 3:
+            pathinfo = view.get_path_at_pos(int(event.x), int(event.y))
+            if pathinfo is not None:
+                path, col, x, y = pathinfo
+                view.grab_focus()
+                sel = view.get_selection()
+                if (not sel.path_is_selected(path)):
+                    view.set_cursor(path, col)
+                menu = self.make_context_menu()
                 menu.popup(None, None, None, event.button, event.time)
-            except TypeError:
-                # GTK3
-                menu.popup(None, None, None, None, event.button,
-                           event.time)
             return True
 
     def get_column_visible(self, col):
@@ -968,6 +939,7 @@ class MemoryEditor(common.Editor):
 
     def cell_editing_stopped(self, *args):
         self._in_editing = False
+        print 'Would activate %s' % str(self._edit_path)
         self.view.grab_focus()
         self.view.set_cursor(*self._edit_path)
 
@@ -1000,7 +972,7 @@ class MemoryEditor(common.Editor):
                 for i in col_order:
                     if i not in default_col_order:
                         raise Exception()
-        except Exception as e:
+        except Exception, e:
             LOG.error("column order setting: %s", e)
             col_order = default_col_order
 
@@ -1009,14 +981,12 @@ class MemoryEditor(common.Editor):
         unsupported_cols = self.get_unsupported_columns()
         visible_cols = self.get_columns_visible()
 
-        self._renderers = {}
         cols = {}
         i = 0
         for _cap, _type, _rend in self.cols:
             if not _rend:
                 continue
             rend = _rend()
-            self._renderers[_cap] = rend
             rend.connect('editing-started', self.cell_editing_started)
             rend.connect('editing-canceled', self.cell_editing_stopped)
             rend.connect('edited', self.cell_editing_stopped)
@@ -1032,18 +1002,18 @@ class MemoryEditor(common.Editor):
                 else:
                     choices = gtk.ListStore(TYPE_STRING, TYPE_STRING)
                     for choice in self.choices[_cap]:
-                        choices.append([str(choice), self._render(i, choice)])
+                        choices.append([choice, self._render(i, choice)])
                 rend.set_property("model", choices)
                 rend.set_property("text-column", 1)
                 rend.set_property("editable", True)
                 rend.set_property("has-entry", False)
                 rend.connect("edited", self.edited, _cap)
-                col = gtk.TreeViewColumn(_cap, rend, text=i)
+                col = gtk.TreeViewColumn(_cap, rend, text=i, sensitive=filled)
                 col.set_cell_data_func(rend, self.render, i)
             else:
                 rend.set_property("editable", _cap not in non_editable)
                 rend.connect("edited", self.edited, _cap)
-                col = gtk.TreeViewColumn(_cap, rend, text=i)
+                col = gtk.TreeViewColumn(_cap, rend, text=i, sensitive=filled)
                 col.set_cell_data_func(rend, self.render, i)
 
             col.set_reorderable(True)
@@ -1078,15 +1048,6 @@ class MemoryEditor(common.Editor):
             raise Exception(
                 _("Internal Error: Column {name} not found").format(
                     name=caption))
-
-    def rend(self, caption):
-        try:
-            return self._renderers[caption]
-        except KeyError:
-            print(self._renderers)
-            raise Exception(
-                _('Internal Error: Renderer for column %s not found') % (
-                    caption))
 
     def prefill(self):
         self.store.clear()
@@ -1136,9 +1097,7 @@ class MemoryEditor(common.Editor):
                        self.col(_("Duplex")), memory.duplex,
                        self.col(_("Offset")), memory.offset,
                        self.col(_("Mode")), memory.mode,
-                       self.col(_("Power")), (memory.power and
-                                              str(memory.power) or
-                                              ""),
+                       self.col(_("Power")), memory.power or "",
                        self.col(_("Tune Step")), memory.tuning_step,
                        self.col(_("Skip")), memory.skip,
                        self.col(_("Comment")), memory.comment)
@@ -1233,8 +1192,7 @@ class MemoryEditor(common.Editor):
             self._config.get_int(hikey) or 999
 
         self.lo_limit_adj = gtk.Adjustment(lostart, min, max-1, 1, 10)
-        lo = compat.SpinButton(self.lo_limit_adj)
-        lo.set_value(lostart)
+        lo = gtk.SpinButton(self.lo_limit_adj)
         lo.connect("value-changed", self._store_limit, "lo")
         lo.show()
         hbox.pack_start(lo, 0, 0, 0)
@@ -1244,8 +1202,7 @@ class MemoryEditor(common.Editor):
         hbox.pack_start(lab, 0, 0, 0)
 
         self.hi_limit_adj = gtk.Adjustment(histart, min+1, max, 1, 10)
-        hi = compat.SpinButton(self.hi_limit_adj)
-        hi.set_value(histart)
+        hi = gtk.SpinButton(self.hi_limit_adj)
         hi.connect("value-changed", self._store_limit, "hi")
         hi.show()
         hbox.pack_start(hi, 0, 0, 0)
@@ -1473,16 +1430,9 @@ class MemoryEditor(common.Editor):
 
                 self._set_memory(iter, mem)
 
-        result = base64.b64encode(pickle.dumps((self._features,
-                                                selection))).decode()
-        if hasattr(gtk.Clipboard, 'get'):
-            # GTK3
-            clipboard = gtk.Clipboard.get(gtk.gdk.SELECTION_CLIPBOARD)
-            clipboard.set_text(result, len(result))
-        else:
-            # GTK2
-            clipboard = gtk.Clipboard(selection="CLIPBOARD")
-            clipboard.set_text(result)
+        result = pickle.dumps((self._features, selection))
+        clipboard = gtk.Clipboard(selection="CLIPBOARD")
+        clipboard.set_text(result)
         clipboard.store()
 
         return cut  # Only changed if we did a cut
@@ -1501,7 +1451,7 @@ class MemoryEditor(common.Editor):
         always = False
 
         try:
-            src_features, mem_list = pickle.loads(base64.b64decode(text))
+            src_features, mem_list = pickle.loads(text)
         except Exception:
             LOG.error("Paste failed to unpickle")
             return
@@ -1576,15 +1526,8 @@ class MemoryEditor(common.Editor):
             self.rthread.submit(job)
 
     def paste_selection(self):
-        if hasattr(gtk.Clipboard, 'get'):
-            # GTK3
-            clipboard = gtk.Clipboard.get(gtk.gdk.SELECTION_CLIPBOARD)
-            text = clipboard.wait_for_text()
-            self._paste_selection(clipboard, text, None)
-        else:
-            # GTK2
-            clipboard = gtk.Clipboard(selection="CLIPBOARD")
-            clipboard.request_text(self._paste_selection)
+        clipboard = gtk.Clipboard(selection="CLIPBOARD")
+        clipboard.request_text(self._paste_selection)
 
     def select_all(self):
         self.view.get_selection().select_all()
@@ -1699,11 +1642,13 @@ class DstarMemoryEditor(MemoryEditor):
             for i in _dv_columns:
                 if i not in self.choices:
                     continue
-                rend = self.rend(i)
+                column = self.view.get_column(self.col(i))
+                rend = column.get_cell_renderers()[0]
                 rend.set_property("has-entry", True)
 
         for i in _dv_columns:
-            rend = self.rend(i)
+            col = self.view.get_column(self.col(i))
+            rend = col.get_cell_renderers()[0]
             rend.set_property("family", "Monospace")
 
     def set_urcall_list(self, urcalls):

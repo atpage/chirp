@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from builtins import bytes
-
 import struct
 import time
 import os
@@ -154,9 +152,7 @@ struct {
 #seekto 0x0F10;
 struct {
   u8 freq[8];
-  u8 unknown1;
-  u8 offset[4];
-  u8 unknown2;
+  u8 offset[6];
   ul16 rxtone;
   ul16 txtone;
   u8 unused1:7,
@@ -178,9 +174,7 @@ struct {
 #seekto 0x0F30;
 struct {
   u8 freq[8];
-  u8 unknown1;
-  u8 offset[4];
-  u8 unknown2;
+  u8 offset[6];
   ul16 rxtone;
   ul16 txtone;
   u8 unused1:7,
@@ -280,18 +274,17 @@ struct {
 
 # 0x1EC0 - 0x2000
 
-vhf_220_radio = bytes(b"\x02")
+vhf_220_radio = "\x02"
 
-BASETYPE_UV5R = [b"BFS", b"BFB", b"N5R-2", b"N5R2", b"N5RV", b"BTS", b"D5R2",
-                 b"B5R2"]
-BASETYPE_F11 = [b"USA"]
-BASETYPE_UV82 = [b"US2S2", b"B82S", b"BF82", b"N82-2", b"N822"]
-BASETYPE_BJ55 = [b"BJ55"]  # needed for for the Baojie UV-55 in bjuv55.py
-BASETYPE_UV6 = [b"BF1", b"UV6"]
-BASETYPE_KT980HP = [b"BFP3V3 B"]
-BASETYPE_F8HP = [b"BFP3V3 F", b"N5R-3", b"N5R3", b"F5R3", b"BFT"]
-BASETYPE_UV82HP = [b"N82-3", b"N823", b"N5R2"]
-BASETYPE_UV82X3 = [b"HN5RV01"]
+BASETYPE_UV5R = ["BFS", "BFB", "N5R-2", "N5R2", "N5RV", "BTS", "D5R2", "B5R2"]
+BASETYPE_F11 = ["USA"]
+BASETYPE_UV82 = ["US2S2", "B82S", "BF82", "N82-2", "N822"]
+BASETYPE_BJ55 = ["BJ55"]  # needed for for the Baojie UV-55 in bjuv55.py
+BASETYPE_UV6 = ["BF1", "UV6"]
+BASETYPE_KT980HP = ["BFP3V3 B"]
+BASETYPE_F8HP = ["BFP3V3 F", "N5R-3", "N5R3", "F5R3", "BFT", "N5RV"]
+BASETYPE_UV82HP = ["N82-3", "N823", "N5R2"]
+BASETYPE_UV82X3 = ["HN5RV01"]
 BASETYPE_LIST = BASETYPE_UV5R + BASETYPE_F11 + BASETYPE_UV82 + \
     BASETYPE_BJ55 + BASETYPE_UV6 + BASETYPE_KT980HP + \
     BASETYPE_F8HP + BASETYPE_UV82HP + BASETYPE_UV82X3
@@ -369,13 +362,13 @@ def _do_status(radio, block):
     status.max = radio.get_memsize()
     radio.status_fn(status)
 
-UV5R_MODEL_ORIG = bytes(b"\x50\xBB\xFF\x01\x25\x98\x4D")
-UV5R_MODEL_291 = bytes(b"\x50\xBB\xFF\x20\x12\x07\x25")
-UV5R_MODEL_F11 = bytes(b"\x50\xBB\xFF\x13\xA1\x11\xDD")
-UV5R_MODEL_UV82 = bytes(b"\x50\xBB\xFF\x20\x13\x01\x05")
-UV5R_MODEL_UV6 = bytes(b"\x50\xBB\xFF\x20\x12\x08\x23")
-UV5R_MODEL_UV6_ORIG = bytes(b"\x50\xBB\xFF\x12\x03\x98\x4D")
-UV5R_MODEL_A58 = bytes(b"\x50\xBB\xFF\x20\x14\x04\x13")
+UV5R_MODEL_ORIG = "\x50\xBB\xFF\x01\x25\x98\x4D"
+UV5R_MODEL_291 = "\x50\xBB\xFF\x20\x12\x07\x25"
+UV5R_MODEL_F11 = "\x50\xBB\xFF\x13\xA1\x11\xDD"
+UV5R_MODEL_UV82 = "\x50\xBB\xFF\x20\x13\x01\x05"
+UV5R_MODEL_UV6 = "\x50\xBB\xFF\x20\x12\x08\x23"
+UV5R_MODEL_UV6_ORIG = "\x50\xBB\xFF\x12\x03\x98\x4D"
+UV5R_MODEL_A58 = "\x50\xBB\xFF\x20\x14\x04\x13"
 
 
 def _upper_band_from_data(data):
@@ -392,10 +385,9 @@ def _firmware_version_from_data(data, version_start, version_stop):
 
 
 def _firmware_version_from_image(radio):
-    version = _firmware_version_from_data(
-        radio.get_mmap().get_byte_compatible(),
-        radio._fw_ver_file_start,
-        radio._fw_ver_file_stop)
+    version = _firmware_version_from_data(radio.get_mmap(),
+                                          radio._fw_ver_file_start,
+                                          radio._fw_ver_file_stop)
     LOG.debug("_firmware_version_from_image: " + util.hexprint(version))
     return version
 
@@ -406,16 +398,16 @@ def _do_ident(radio, magic, secondack=True):
 
     LOG.info("Sending Magic: %s" % util.hexprint(magic))
     for byte in magic:
-        serial.write(bytes([byte]))
+        serial.write(byte)
         time.sleep(0.01)
     ack = serial.read(1)
 
-    if ack != b"\x06":
+    if ack != "\x06":
         if ack:
             LOG.debug(repr(ack))
         raise errors.RadioError("Radio did not respond")
 
-    serial.write(bytes(b"\x02"))
+    serial.write("\x02")
 
     # Until recently, the "ident" returned by the radios supported by this
     # driver have always been 8 bytes long. The image sturcture is the 8 byte
@@ -429,12 +421,12 @@ def _do_ident(radio, magic, secondack=True):
     # image data aligned with the existing settings structures.
 
     # Ok, get the response
-    response = bytes(b"")
+    response = ""
     for i in range(1, 13):
         byte = serial.read(1)
         response += byte
         # stop reading once the last byte ("\xdd") is encountered
-        if byte == b"\xDD":
+        if byte == "\xdd":
             break
 
     # check if response is OK
@@ -443,8 +435,7 @@ def _do_ident(radio, magic, secondack=True):
         LOG.info("Valid response, got this:")
         LOG.debug(util.hexprint(response))
         if len(response) == 12:
-            ident = (bytes([response[0], response[3], response[5]]) +
-                     response[7:])
+            ident = response[0] + response[3] + response[5] + response[7:]
         else:
             ident = response
     else:
@@ -455,9 +446,9 @@ def _do_ident(radio, magic, secondack=True):
         raise errors.RadioError("Unexpected response from radio.")
 
     if secondack:
-        serial.write(b"\x06")
+        serial.write("\x06")
         ack = serial.read(1)
-        if ack != b"\x06":
+        if ack != "\x06":
             raise errors.RadioError("Radio refused clone")
 
     return ident
@@ -469,7 +460,7 @@ def _read_block(radio, start, size, first_command=False):
 
     if first_command is False:
         ack = radio.pipe.read(1)
-        if ack != b"\x06":
+        if ack != "\x06":
             raise errors.RadioError(
                 "Radio refused to send second block 0x%04x" % start)
 
@@ -490,7 +481,7 @@ def _read_block(radio, start, size, first_command=False):
         LOG.error("Chunk length was 0x%04i" % len(chunk))
         raise errors.RadioError("Radio sent incomplete block 0x%04x" % start)
 
-    radio.pipe.write(b"\x06")
+    radio.pipe.write("\x06")
     time.sleep(0.05)
 
     return chunk
@@ -509,7 +500,7 @@ def _get_radio_firmware_version(radio):
 
 
 IDENT_BLACKLIST = {
-    b"\x50\x0D\x0C\x20\x16\x03\x28": "Radio identifies as BTECH UV-5X3",
+    "\x50\x0D\x0C\x20\x16\x03\x28": "Radio identifies as BTECH UV-5X3",
 }
 
 
@@ -519,12 +510,12 @@ def _ident_radio(radio):
         try:
             data = _do_ident(radio, magic)
             return data
-        except errors.RadioError as e:
+        except errors.RadioError, e:
             LOG.error("uv5r._ident_radio: %s", e)
             error = e
             time.sleep(2)
 
-    for magic, reason in list(IDENT_BLACKLIST.items()):
+    for magic, reason in IDENT_BLACKLIST.items():
         try:
             _do_ident(radio, magic, secondack=False)
         except errors.RadioError as e:
@@ -550,7 +541,7 @@ def _do_download(radio):
     radio_version = _get_radio_firmware_version(radio)
     LOG.info("Radio Version is %s" % repr(radio_version))
 
-    if b"HN5RV" in radio_version:
+    if "HN5RV" in radio_version:
         # A radio with HN5RV firmware has been detected. It could be a
         # UV-5R style radio with HIGH/LOW power levels or it could be a
         # BF-F8HP style radio with HIGH/MID/LOW power levels.
@@ -558,7 +549,7 @@ def _do_download(radio):
         # then append that model type to the end of the image so it can
         # be properly detected when loaded.
         append_model = True
-    elif b"\xFF" * 7 in radio_version:
+    elif "\xFF" * 7 in radio_version:
         # A radio UV-5R style radio that reports no firmware version has
         # been detected.
         # We are going to count on the user to make the right choice and
@@ -581,16 +572,17 @@ def _do_download(radio):
         _do_status(radio, i)
     _do_status(radio, radio.get_memsize())
     LOG.debug("done.")
-    LOG.debug("downloading aux block...")
-    # Auxiliary block starts at 0x1ECO (?)
-    for i in range(0x1EC0, 0x2000, 0x40):
-        data += _read_block(radio, i, 0x40, False)
+    if radio._aux_block:
+        LOG.debug("downloading aux block...")
+        # Auxiliary block starts at 0x1ECO (?)
+        for i in range(0x1EC0, 0x2000, 0x40):
+            data += _read_block(radio, i, 0x40, False)
 
     if append_model:
-        data += radio.MODEL.ljust(8).encode()
+        data += radio.MODEL.ljust(8)
 
     LOG.debug("done.")
-    return memmap.MemoryMapBytes(data)
+    return memmap.MemoryMap(data)
 
 
 def _send_block(radio, addr, data):
@@ -599,7 +591,7 @@ def _send_block(radio, addr, data):
     time.sleep(0.05)
 
     ack = radio.pipe.read(1)
-    if ack != b"\x06":
+    if ack != "\x06":
         raise errors.RadioError("Radio refused to accept block 0x%04x" % addr)
 
 
@@ -636,7 +628,7 @@ def _do_upload(radio):
 
     if image_version == radio_version:
         image_matched_radio = True
-        if image_version.startswith(b"HN5RV"):
+        if image_version.startswith("HN5RV"):
             ranges_main = _ranges_main_default
             ranges_aux = _ranges_aux_default + _ranges_aux_extra
         elif image_version == 0xFF * 7:
@@ -655,15 +647,17 @@ def _do_upload(radio):
                "of the radio (%s).")
         raise errors.RadioError(msg % (image_version, radio_version))
 
+    if not radio._aux_block:
+        image_matched_radio = True
+
     # Main block
-    mmap = radio.get_mmap().get_byte_compatible()
     for start_addr, end_addr in ranges_main:
         for i in range(start_addr, end_addr, 0x10):
-            _send_block(radio, i - 0x08, mmap[i:i + 0x10])
+            _send_block(radio, i - 0x08, radio.get_mmap()[i:i + 0x10])
             _do_status(radio, i)
         _do_status(radio, radio.get_memsize())
 
-    if len(mmap.get_packed()) == 0x1808:
+    if len(radio.get_mmap().get_packed()) == 0x1808:
         LOG.info("Old image, not writing aux block")
         return  # Old image, no aux block
 
@@ -671,7 +665,7 @@ def _do_upload(radio):
     for start_addr, end_addr in ranges_aux:
         for i in range(start_addr, end_addr, 0x10):
             addr = 0x1808 + (i - 0x1EC0)
-            _send_block(radio, i, mmap[addr:addr + 0x10])
+            _send_block(radio, i, radio.get_mmap()[addr:addr + 0x10])
 
     if not image_matched_radio:
         msg = ("Upload finished, but the 'Other Settings' "
@@ -707,14 +701,12 @@ def model_match(cls, data):
         return False
 
 
-class BaofengUV5R(chirp_common.CloneModeRadio,
-                  chirp_common.ExperimentalRadio):
+class BaofengUV5R(chirp_common.CloneModeRadio):
 
     """Baofeng UV-5R"""
     VENDOR = "Baofeng"
     MODEL = "UV-5R"
     BAUD_RATE = 9600
-    NEEDS_COMPAT_SERIAL = False
 
     _memsize = 0x1808
     _basetype = BASETYPE_UV5R
@@ -724,6 +716,8 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
     _vhf_range = (136000000, 174000000)
     _220_range = (220000000, 260000000)
     _uhf_range = (400000000, 520000000)
+    _aux_block = True
+    _tri_power = False
     _mem_params = (0x1828  # poweron_msg offset
                    )
     # offset of fw version in image file
@@ -816,7 +810,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
             self._mmap = _do_download(self)
         except errors.RadioError:
             raise
-        except Exception as e:
+        except Exception, e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
         self.process_mmap()
 
@@ -825,7 +819,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
             _do_upload(self)
         except errors.RadioError:
             raise
-        except Exception as e:
+        except Exception, e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
     def get_raw_memory(self, number):
@@ -924,7 +918,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
         if not _mem.scan:
             mem.skip = "S"
 
-        if self.MODEL in ("KT-980HP", "BF-F8HP", "UV-82HP"):
+        if self._tri_power:
             levels = UV5R_POWER_LEVELS3
         else:
             levels = UV5R_POWER_LEVELS
@@ -1045,7 +1039,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
         _mem.wide = mem.mode == "FM"
 
         if mem.power:
-            if self.MODEL in ("KT-980HP", "BF-F8HP", "UV-82HP"):
+            if self._tri_power:
                 levels = [str(l) for l in UV5R_POWER_LEVELS3]
                 _mem.lowpower = levels.index(str(mem.power))
             else:
@@ -1066,8 +1060,8 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
         version_tag = _firmware_version_from_image(self)
         LOG.debug("@_is_orig, version_tag: %s", util.hexprint(version_tag))
         try:
-            if b'BFB' in version_tag:
-                idx = version_tag.index(b"BFB") + 3
+            if 'BFB' in version_tag:
+                idx = version_tag.index("BFB") + 3
                 version = int(version_tag[idx:idx + 3])
                 return version < 291
             return False
@@ -1078,8 +1072,8 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
 
     def _my_version(self):
         version_tag = _firmware_version_from_image(self)
-        if b'BFB' in version_tag:
-            idx = version_tag.index(b"BFB") + 3
+        if 'BFB' in version_tag:
+            idx = version_tag.index("BFB") + 3
             return int(version_tag[idx:idx + 3])
 
         raise Exception("Unrecognized firmware version string")
@@ -1175,10 +1169,11 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
                               RadioSettingValueBoolean(_settings.voice))
             advanced.append(rs)
         else:
-            rs = RadioSetting("voice", "Voice",
-                              RadioSettingValueList(
-                                  VOICE_LIST, VOICE_LIST[_settings.voice]))
-            advanced.append(rs)
+            if self.MODEL != "TI-F8+":
+                rs = RadioSetting("voice", "Voice",
+                                  RadioSettingValueList(
+                                      VOICE_LIST, VOICE_LIST[_settings.voice]))
+                advanced.append(rs)
 
         rs = RadioSetting("screv", "Scan Resume",
                           RadioSettingValueList(
@@ -1304,30 +1299,30 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
             # Old image, without aux block
             return group
 
-        other = RadioSettingGroup("other", "Other Settings")
-        group.append(other)
-
-        def _filter(name):
-            filtered = ""
-            for char in str(name):
-                if char in chirp_common.CHARSET_ASCII:
-                    filtered += char
-                else:
-                    filtered += " "
-            return filtered
-
-        _msg = self._memobj.firmware_msg
-        val = RadioSettingValueString(0, 7, _filter(_msg.line1))
-        val.set_mutable(False)
-        rs = RadioSetting("firmware_msg.line1", "Firmware Message 1", val)
-        other.append(rs)
-
-        val = RadioSettingValueString(0, 7, _filter(_msg.line2))
-        val.set_mutable(False)
-        rs = RadioSetting("firmware_msg.line2", "Firmware Message 2", val)
-        other.append(rs)
-
         if self.MODEL != "UV-6":
+            other = RadioSettingGroup("other", "Other Settings")
+            group.append(other)
+
+            def _filter(name):
+                filtered = ""
+                for char in str(name):
+                    if char in chirp_common.CHARSET_ASCII:
+                        filtered += char
+                    else:
+                        filtered += " "
+                return filtered
+
+            _msg = self._memobj.firmware_msg
+            val = RadioSettingValueString(0, 7, _filter(_msg.line1))
+            val.set_mutable(False)
+            rs = RadioSetting("firmware_msg.line1", "Firmware Message 1", val)
+            other.append(rs)
+
+            val = RadioSettingValueString(0, 7, _filter(_msg.line2))
+            val.set_mutable(False)
+            rs = RadioSetting("firmware_msg.line2", "Firmware Message 2", val)
+            other.append(rs)
+
             _msg = self._memobj.sixpoweron_msg
             rs = RadioSetting("sixpoweron_msg.line1", "6+Power-On Message 1",
                               RadioSettingValueString(
@@ -1463,29 +1458,29 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
                 real_offset = 0
                 for byte in bytes:
                     real_offset = (real_offset * 10) + byte
-                return chirp_common.format_freq(real_offset * 10000)
+                return chirp_common.format_freq(real_offset * 1000)
 
             def apply_offset(setting, obj):
-                value = chirp_common.parse_freq(str(setting.value)) / 10000
-                for i in range(3, -1, -1):
+                value = chirp_common.parse_freq(str(setting.value)) / 1000
+                for i in range(5, -1, -1):
                     obj.offset[i] = value % 10
                     value /= 10
 
             val1a = RadioSettingValueString(
                 0, 10, convert_bytes_to_offset(_vfoa.offset))
             rs = RadioSetting("vfoa.offset",
-                              "VFO A Offset (0.00-69.95)", val1a)
+                              "VFO A Offset (0.0-999.999)", val1a)
             rs.set_apply_callback(apply_offset, _vfoa)
             workmode.append(rs)
 
             val1b = RadioSettingValueString(
                 0, 10, convert_bytes_to_offset(_vfob.offset))
             rs = RadioSetting("vfob.offset",
-                              "VFO B Offset (0.00-69.95)", val1b)
+                              "VFO B Offset (0.0-999.999)", val1b)
             rs.set_apply_callback(apply_offset, _vfob)
             workmode.append(rs)
 
-            if self.MODEL in ("KT-980HP", "BF-F8HP", "UV-82HP"):
+            if self._tri_power:
                 rs = RadioSetting("vfoa.txpower3", "VFO A Power",
                                   RadioSettingValueList(
                                       TXPOWER3_LIST,
@@ -1653,7 +1648,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
                           RadioSettingValueInteger(0, 50, _settings.pttlt))
         dtmf.append(rs)
 
-        if not self._is_orig():
+        if not self._is_orig() and self._aux_block:
             service = RadioSettingGroup("service", "Service Settings")
             group.append(service)
 
@@ -1714,7 +1709,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
                     elif element.value.get_mutable():
                         LOG.debug("Setting %s = %s" % (setting, element.value))
                         setattr(obj, setting, element.value)
-                except Exception as e:
+                except Exception, e:
                     LOG.debug(element.get_name())
                     raise
 
@@ -1728,7 +1723,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio,
                     value = int(val.get_value() * 10)
                 LOG.debug("Setting fm_presets = %s" % (value))
                 self._memobj.fm_presets = value
-            except Exception as e:
+            except Exception, e:
                 LOG.debug(element.get_name())
                 raise
 
@@ -1773,15 +1768,10 @@ class A5RAlias(chirp_common.Alias):
     MODEL = "A-5R"
 
 
-class TenwayUV5RPro(chirp_common.Alias):
-    VENDOR = 'Tenway'
-    MODEL = 'UV-5R Pro'
-
-
 @directory.register
 class BaofengUV5RGeneric(BaofengUV5R):
     ALIASES = [UV5XAlias, RT5RAlias, RT5RVAlias, RT5Alias, RH5RAlias,
-               ROUV5REXAlias, A5RAlias, TenwayUV5RPro]
+               ROUV5REXAlias, A5RAlias]
 
 
 @directory.register
@@ -1834,6 +1824,7 @@ class BaofengUV6Radio(BaofengUV5R):
     _idents = [UV5R_MODEL_UV6,
                UV5R_MODEL_UV6_ORIG
                ]
+    _aux_block = False
 
     def get_features(self):
         rf = BaofengUV5R.get_features(self)
@@ -1865,6 +1856,7 @@ class IntekKT980Radio(BaofengUV5R):
     _idents = [UV5R_MODEL_291]
     _vhf_range = (130000000, 180000000)
     _uhf_range = (400000000, 521000000)
+    _tri_power = True
 
     def get_features(self):
         rf = BaofengUV5R.get_features(self)
@@ -1881,17 +1873,34 @@ class ROGA5SAlias(chirp_common.Alias):
     MODEL = "GA-5S"
 
 
+class UV5XPAlias(chirp_common.Alias):
+    VENDOR = "Baofeng"
+    MODEL = "UV-5XP"
+
+
+class TSTIF8Alias(chirp_common.Alias):
+    VENDOR = "TechSide"
+    MODEL = "TI-F8+"
+
+
+class TenwayUV5RPro(chirp_common.Alias):
+    VENDOR = 'Tenway'
+    MODEL = 'UV-5R Pro'
+
+
 @directory.register
 class BaofengBFF8HPRadio(BaofengUV5R):
     VENDOR = "Baofeng"
     MODEL = "BF-F8HP"
-    ALIASES = [RT5_TPAlias, ROGA5SAlias]
+    ALIASES = [RT5_TPAlias, ROGA5SAlias, UV5XPAlias, TSTIF8Alias,
+               TenwayUV5RPro]
     _basetype = BASETYPE_F8HP
     _idents = [UV5R_MODEL_291,
                UV5R_MODEL_A58
                ]
     _vhf_range = (130000000, 180000000)
     _uhf_range = (400000000, 521000000)
+    _tri_power = True
 
     def get_features(self):
         rf = BaofengUV5R.get_features(self)
@@ -1903,14 +1912,21 @@ class BaofengBFF8HPRadio(BaofengUV5R):
         return False
 
 
+class TenwayUV82Pro(chirp_common.Alias):
+    VENDOR = 'Tenway'
+    MODEL = 'UV-82 Pro'
+
+
 @directory.register
 class BaofengUV82HPRadio(BaofengUV5R):
     VENDOR = "Baofeng"
     MODEL = "UV-82HP"
+    ALIASES = [TenwayUV82Pro]
     _basetype = BASETYPE_UV82HP
     _idents = [UV5R_MODEL_UV82]
     _vhf_range = (136000000, 175000000)
     _uhf_range = (400000000, 521000000)
+    _tri_power = True
 
     def get_features(self):
         rf = BaofengUV5R.get_features(self)
@@ -1922,10 +1938,16 @@ class BaofengUV82HPRadio(BaofengUV5R):
         return False
 
 
+class TDUV5RRadio(chirp_common.Alias):
+    VENDOR = "TIDRADIO"
+    MODEL = "TD-UV5R TriPower"
+
+
 @directory.register
 class RadioddityUV5RX3Radio(BaofengUV5R):
     VENDOR = "Radioddity"
     MODEL = "UV-5RX3"
+    ALIASES = [TDUV5RRadio]
 
     def get_features(self):
         rf = BaofengUV5R.get_features(self)

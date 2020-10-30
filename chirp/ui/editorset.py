@@ -19,7 +19,7 @@ import gobject
 import logging
 
 from chirp import chirp_common, directory
-from chirp.drivers import generic_csv
+from chirp.drivers import generic_csv, generic_xml
 from chirp.ui import memedit, dstaredit, bankedit, common, importdialog
 from chirp.ui import inputdialog, reporting, settingsedit, radiobrowser, config
 
@@ -168,6 +168,7 @@ class EditorSet(gtk.VBox):
         self.modified = (tempname is not None)
         if tempname:
             self.filename = tempname
+        self.tooltip_filename = None
         self.update_tab()
 
     def make_label(self):
@@ -199,6 +200,9 @@ class EditorSet(gtk.VBox):
             text = fn
 
         self.text_label.set_text(self.radio.get_name() + ": " + text)
+        if self.filename != self.tooltip_filename:
+            self.text_label.set_tooltip_text(self.filename)
+            self.tooltip_filename = self.filename
 
     def save(self, fname=None):
         if not fname:
@@ -229,7 +233,7 @@ class EditorSet(gtk.VBox):
         if not isinstance(self.radio, chirp_common.LiveRadio):
             self.modified = True
             self.update_tab()
-        for editor in list(self.editors.values()):
+        for editor in self.editors.values():
             if editor != target_editor:
                 editor.other_editor_changed(target_editor)
 
@@ -296,7 +300,7 @@ class EditorSet(gtk.VBox):
             common.show_error("Memory editor must be selected before import")
         try:
             src_radio = directory.get_radio_by_image(filen)
-        except Exception as e:
+        except Exception, e:
             common.show_error(e)
             return
 
@@ -310,7 +314,7 @@ class EditorSet(gtk.VBox):
             try:
                 src_radio.status_fn = status
                 src_radio.do_fetch()
-            except Exception as e:
+            except Exception, e:
                 common.show_error(e)
                 ww.hide()
                 return
@@ -319,7 +323,7 @@ class EditorSet(gtk.VBox):
         try:
             if src_radio.get_features().has_sub_devices:
                 src_radio = self.choose_sub_device(src_radio)
-        except Exception as e:
+        except Exception, e:
             common.show_error(e)
             return
 
@@ -335,7 +339,7 @@ class EditorSet(gtk.VBox):
                                            src_radio,
                                            self.rthread)
             reporting.report_model_usage(src_radio, "importsrc", True)
-        except Exception as e:
+        except Exception, e:
             common.log_exception()
             common.show_error(_("There was an error during "
                                 "import: {error}").format(error=e))
@@ -344,9 +348,11 @@ class EditorSet(gtk.VBox):
         try:
             if filen.lower().endswith(".csv"):
                 dst_radio = generic_csv.CSVRadio(filen)
+            elif filen.lower().endswith(".chirp"):
+                dst_radio = generic_xml.XMLRadio(filen)
             else:
                 raise Exception(_("Unsupported file type"))
-        except Exception as e:
+        except Exception, e:
             common.log_exception()
             common.show_error(e)
             return
@@ -359,7 +365,7 @@ class EditorSet(gtk.VBox):
             count = self._do_import_locked(importdialog.ExportDialog,
                                            self.rthread.radio,
                                            dst_rthread)
-        except Exception as e:
+        except Exception, e:
             common.log_exception()
             common.show_error(_("There was an error during "
                                 "export: {error}").format(error=e),
@@ -374,7 +380,7 @@ class EditorSet(gtk.VBox):
 
         try:
             dst_radio.save(filename=filen)
-        except Exception as e:
+        except Exception, e:
             common.log_exception()
             common.show_error(_("There was an error during "
                                 "export: {error}").format(error=e),
@@ -395,7 +401,7 @@ class EditorSet(gtk.VBox):
 
     def tab_selected(self, notebook, foo, pagenum):
         widget = notebook.get_nth_page(pagenum)
-        for k, v in list(self.editors.items()):
+        for k, v in self.editors.items():
             if v and v.root == widget:
                 v.focus()
                 self.emit("editor-selected", k)
@@ -403,19 +409,19 @@ class EditorSet(gtk.VBox):
                 v.unfocus()
 
     def set_read_only(self, read_only=True):
-        for editor in list(self.editors.values()):
+        for editor in self.editors.values():
             editor and editor.set_read_only(read_only)
 
     def get_read_only(self):
         return self.editors["memedit0"].get_read_only()
 
     def prepare_close(self):
-        for editor in list(self.editors.values()):
+        for editor in self.editors.values():
             editor and editor.prepare_close()
 
     def get_current_editor(self):
         tabs = self.tabs
-        for lab, e in list(self.editors.items()):
+        for lab, e in self.editors.items():
             if e and tabs.page_num(e.root) == tabs.get_current_page():
                 return e
         raise Exception("No editor selected?")

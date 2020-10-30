@@ -1,20 +1,13 @@
 import glob
-import logging
 import os
-import re
 import shutil
 import sys
 import tempfile
 import unittest
 
-import six
-
 from chirp import directory
 
-from tests import run_tests
-
-
-LOG = logging.getLogger('testadapter')
+import run_tests
 
 
 class TestAdapterMeta(type):
@@ -26,27 +19,18 @@ class TestAdapter(unittest.TestCase):
     RADIO_CLASS = None
     SOURCE_IMAGE = None
     RADIO_INST = None
-    testwrapper = None
 
     def shortDescription(self):
         test = self.id().split('.')[-1].replace('test_', '').replace('_', ' ')
         return 'Testing %s %s' % (self.RADIO_CLASS.get_name(), test)
 
-    @classmethod
-    def setUpClass(cls):
-        if not cls.testwrapper:
-            # Initialize the radio once per class invocation to save
-            # bitwise parse time
-            # Do this for things like Generic_CSV, that demand it
-            _base, ext = os.path.splitext(cls.SOURCE_IMAGE)
-            cls.testimage = tempfile.mktemp(ext)
-            shutil.copy(cls.SOURCE_IMAGE, cls.testimage)
-            cls.testwrapper = run_tests.TestWrapper(cls.RADIO_CLASS,
-                                                    cls.testimage)
+    def setUp(self):
+        self._out = run_tests.TestOutputANSI()
+        self.testimage = tempfile.mktemp('.img')
+        shutil.copy(self.SOURCE_IMAGE, self.testimage)
 
-    @classmethod
-    def tearDownClass(cls):
-        os.remove(cls.testimage)
+    def tearDown(self):
+        os.remove(self.testimage)
 
     def _runtest(self, test):
         tw = run_tests.TestWrapper(self.RADIO_CLASS,
@@ -89,7 +73,7 @@ class TestAdapter(unittest.TestCase):
 
 def _get_sub_devices(rclass, testimage):
     try:
-        tw = run_tests.TestWrapper(rclass, None)
+        tw = run_tests.TestWrapper(rclass, '/etc/localtime')
     except Exception as e:
         tw = run_tests.TestWrapper(rclass, testimage)
 
@@ -100,36 +84,19 @@ def _get_sub_devices(rclass, testimage):
         return [rclass]
 
 
-class RadioSkipper(unittest.TestCase):
-    def test_is_supported_by_environment(self):
-        raise unittest.SkipTest('Running in py3 and driver is not supported')
+def load_tests(loader, tests, pattern):
+    suite = unittest.TestSuite()
 
+    images = glob.glob("tests/images/*.img")
+    tests = [os.path.splitext(os.path.basename(img))[0] for img in images]
 
-def load_tests(loader, tests, pattern, suite=None):
-    if not suite:
-        suite = unittest.TestSuite()
-
-    base = os.path.dirname(os.path.abspath(__file__))
-    base = os.path.join(base, 'images')
-    images = glob.glob(os.path.join(base, "*"))
-    tests = {img: os.path.splitext(os.path.basename(img))[0] for img in images}
-
-    if pattern == 'test*.py':
-        # This default is meaningless for us
-        pattern = None
-
-    for image, test in tests.items():
-        try:
-            rclass = directory.get_radio(test)
-        except Exception:
-            if six.PY3 and 'CHIRP_DEBUG' in os.environ:
-                LOG.error('Failed to load %s' % test)
-                continue
-            raise
+    for test in tests:
+        image = os.path.join('tests', 'images', '%s.img' % test)
+        rclass = directory.get_radio(test)
         for device in _get_sub_devices(rclass, image):
             class_name = 'TestCase_%s' % (
-                ''.join(filter(lambda c: c.isalnum(),
-                               device.get_name())))
+                filter(lambda c: c.isalnum(),
+                       device.get_name()))
             if isinstance(device, type):
                 dst = None
             else:
@@ -139,13 +106,6 @@ def load_tests(loader, tests, pattern, suite=None):
                 class_name, (TestAdapter,), dict(RADIO_CLASS=device,
                                                  SOURCE_IMAGE=image,
                                                  RADIO_INST=dst))
-            tests = loader.loadTestsFromTestCase(tc)
-
-            if pattern:
-                tests = [t for t in tests
-                         if re.search(pattern, '%s.%s' % (class_name,
-                                                          t._testMethodName))]
-
-            suite.addTests(tests)
+        suite.addTests(loader.loadTestsFromTestCase(tc))
 
     return suite

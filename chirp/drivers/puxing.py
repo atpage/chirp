@@ -47,7 +47,7 @@ def puxing_prep(radio):
     for _i in range(0, 10):
         try:
             return _puxing_prep(radio)
-        except Exception as e:
+        except Exception, e:
             time.sleep(1)
 
     raise e
@@ -60,7 +60,7 @@ def puxing_download(radio):
         return do_download(radio, 0x0000, 0x0C60, 0x0008)
     except errors.RadioError:
         raise
-    except Exception as e:
+    except Exception, e:
         raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
 
@@ -71,7 +71,7 @@ def puxing_upload(radio):
         return do_upload(radio, 0x0000, 0x0C40, 0x0008)
     except errors.RadioError:
         raise
-    except Exception as e:
+    except Exception, e:
         raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
 POWER_LEVELS = [chirp_common.PowerLevel("High", watts=5.00),
@@ -165,8 +165,8 @@ class Puxing777Radio(chirp_common.CloneModeRadio):
         rf.valid_power_levels = POWER_LEVELS
         rf.valid_characters = ''.join(set(PUXING_CHARSET))
         rf.valid_name_length = 6
-        rf.valid_tuning_steps = [2.5, 5.0, 10.0, 15.0, 20.0, 25.0, 30.0,
-                                 50.0, 100.0]
+        rf.valid_tuning_steps = [2.5, 5.0, 6.25, 10.0, 12.5, 15.0, 20.0,
+                                 25.0, 30.0, 50.0, 100.0]
         rf.has_ctone = False
         rf.has_tuning_step = False
         rf.has_bank = False
@@ -372,7 +372,7 @@ def puxing_2r_download(radio):
         return do_download(radio, 0x0000, 0x0FE0, 0x0010)
     except errors.RadioError:
         raise
-    except Exception as e:
+    except Exception, e:
         raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
 
@@ -383,7 +383,7 @@ def puxing_2r_upload(radio):
         return do_upload(radio, 0x0000, 0x0FE0, 0x0010)
     except errors.RadioError:
         raise
-    except Exception as e:
+    except Exception, e:
         raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
 PUXING_2R_MEM_FORMAT = """

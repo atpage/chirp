@@ -1,34 +1,30 @@
-from __future__ import print_function
-
 import sys
-import glob
+
 import os
 
 from chirp import CHIRP_VERSION
+from chirp.drivers import *
 import chirp
-from chirp import directory
-
-directory.safe_import_drivers()
 
 
 def staticify_chirp_module():
     import chirp
 
-    with open("chirp/__init__.py", "w") as init:
-        print("CHIRP_VERSION = \"%s\"" % CHIRP_VERSION, file=init)
-        print("__all__ = %s\n" % str(chirp.__all__), file=init)
+    with file("chirp/__init__.py", "w") as init:
+        print >>init, "CHIRP_VERSION = \"%s\"" % CHIRP_VERSION
+        print >>init, "__all__ = %s\n" % str(chirp.__all__)
 
-    print("Set chirp/__init__.py::__all__ = %s" % str(chirp.__all__))
+    print "Set chirp/__init__.py::__all__ = %s" % str(chirp.__all__)
 
 
 def staticify_drivers_module():
     import chirp.drivers
 
     with file("chirp/drivers/__init__.py", "w") as init:
-        print("__all__ = %s\n" % str(chirp.drivers.__all__), file=init)
+        print >>init, "__all__ = %s\n" % str(chirp.drivers.__all__)
 
-    print("Set chirp/drivers/__init__.py::__all__ = %s" % str(
-        chirp.drivers.__all__))
+    print "Set chirp/drivers/__init__.py::__all__ = %s" % str(
+        chirp.drivers.__all__)
 
 
 def win32_build():
@@ -121,16 +117,15 @@ def default_build():
     for f in _locale_files:
         locale_files.append(("share/chirp/%s" % os.path.dirname(f), [f]))
 
-    print("LOC: %s" % str(locale_files))
+    print "LOC: %s" % str(locale_files)
 
     xsd_files = glob("chirp*.xsd")
 
     setup(
         name="chirp",
-        packages=["chirp", "chirp.drivers", "chirp.ui", "tests", "tests.unit",
-                  "chirp.wxui"],
+        packages=["chirp", "chirp.drivers", "chirp.ui"],
         version=CHIRP_VERSION,
-        scripts=["chirpw", "rpttool", "chirpwx.py"],
+        scripts=["chirpw", "rpttool"],
         data_files=[('share/applications', desktop_files),
                     ('share/chirp/images', image_files),
                     ('share/chirp', xsd_files),
@@ -151,7 +146,7 @@ def nuke_manifest(*files):
 
     f = file("MANIFEST.in", "w")
     for fn in files:
-        print(fn, file=f)
+        print >>f, fn
     f.close()
 
 

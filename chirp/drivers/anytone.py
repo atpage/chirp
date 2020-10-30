@@ -177,7 +177,7 @@ def _echo_write(radio, data):
     try:
         radio.pipe.write(data)
         radio.pipe.read(len(data))
-    except Exception as e:
+    except Exception, e:
         LOG.error("Error writing to radio: %s" % e)
         raise errors.RadioError("Unable to write to radio")
 
@@ -185,7 +185,7 @@ def _echo_write(radio, data):
 def _read(radio, length):
     try:
         data = radio.pipe.read(length)
-    except Exception as e:
+    except Exception, e:
         LOG.error("Error reading from radio: %s" % e)
         raise errors.RadioError("Unable to read from radio")
 
@@ -353,6 +353,7 @@ class AnyTone5888UVRadio(chirp_common.CloneModeRadio,
         rf.has_settings = True
         rf.has_bank = False
         rf.has_cross = True
+        rf.valid_tuning_steps = [2.5, 5, 6.25, 10, 12.5, 15, 20, 25, 30, 50]
         rf.has_tuning_step = False
         rf.has_rx_dtcs = True
         rf.valid_skips = ["", "S", "P"]
@@ -410,6 +411,12 @@ class AnyTone5888UVRadio(chirp_common.CloneModeRadio,
             return mem
 
         mem.freq = int(_mem.freq) * 100
+
+        # compensate for 6.25 and 12.5 kHz tuning steps, add 500 Hz if needed
+        lastdigit = int(_mem.freq) % 10
+        if (lastdigit == 2 or lastdigit == 7):
+            mem.freq += 50
+
         mem.offset = int(_mem.offset) * 100
         mem.name = str(_mem.name).rstrip()
         mem.duplex = DUPLEXES[_mem.duplex]

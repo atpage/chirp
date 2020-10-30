@@ -16,7 +16,7 @@
 import gtk
 import logging
 
-from chirp.ui.miscwidgets import make_choice
+from miscwidgets import make_choice
 from chirp.ui import reporting
 
 LOG = logging.getLogger(__name__)
@@ -101,9 +101,11 @@ class FieldDialog(gtk.Dialog):
         if "buttons" not in kwargs.keys():
             kwargs["buttons"] = (gtk.STOCK_OK, gtk.RESPONSE_OK,
                                  gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL)
+
         self.__fields = {}
-        gtk.Dialog.__init__(self, **kwargs)
         self.set_default_response(gtk.RESPONSE_OK)
+
+        gtk.Dialog.__init__(self, **kwargs)
 
     def response(self, _):
         LOG.debug("Blocking response")

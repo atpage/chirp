@@ -136,6 +136,7 @@ class TYTTHUVF8_V2(chirp_common.CloneModeRadio):
         rf.memory_bounds = (1, 128)
         rf.has_bank = False
         rf.has_ctone = True
+        rf.valid_tuning_steps = [5, 6.25, 10, 12.5]
         rf.has_tuning_step = False
         rf.has_cross = True
         rf.has_rx_dtcs = True
@@ -167,7 +168,7 @@ class TYTTHUVF8_V2(chirp_common.CloneModeRadio):
                 filedata[0x840:0x848] == cls._FILEID)
 
     def process_mmap(self):
-        print( MEM_FORMAT )
+        print MEM_FORMAT
         self._memobj = bitwise.parse(MEM_FORMAT, self._mmap)
 
     def get_raw_memory(self, number):

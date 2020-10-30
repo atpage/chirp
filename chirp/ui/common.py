@@ -114,9 +114,9 @@ class RadioJob:
                                         str(self.kwargs)))
             DBG(self.desc)
             result = func(*self.args, **self.kwargs)
-        except errors.InvalidMemoryLocation as e:
+        except errors.InvalidMemoryLocation, e:
             result = e
-        except Exception as e:
+        except Exception, e:
             LOG.error("Exception running RadioJob: %s" % e)
             log_exception()
             LOG.error("Job Args:   %s" % str(self.args))
@@ -134,7 +134,7 @@ class RadioJob:
 
         try:
             func = getattr(self.target, self.func)
-        except AttributeError as e:
+        except AttributeError, e:
             LOG.error("No such radio function `%s' in %s" %
                       (self.func, self.target))
             return

@@ -136,7 +136,7 @@ class ShiftDialog(gtk.Dialog):
 
         try:
             count = func(newhole, *args)
-        except errors.InvalidMemoryLocation as e:
+        except errors.InvalidMemoryLocation, e:
             self.status(str(e), 0)
             self.finished()
             return

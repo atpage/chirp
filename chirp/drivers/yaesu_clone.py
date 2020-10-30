@@ -13,13 +13,11 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from builtins import bytes
 import time
 import os
 import logging
 from textwrap import dedent
 
-from chirp import bitwise
 from chirp import chirp_common, util, memmap, errors
 
 LOG = logging.getLogger(__name__)
@@ -28,13 +26,13 @@ CMD_ACK = 0x06
 
 
 def _safe_read(pipe, count):
-    buf = bytes(b"")
+    buf = ""
     first = True
     for _i in range(0, 60):
         buf += pipe.read(count - len(buf))
         # LOG.debug("safe_read: %i/%i\n" % (len(buf), count))
         if buf:
-            if first and buf[0] == CMD_ACK:
+            if first and buf[0] == chr(CMD_ACK):
                 # LOG.debug("Chewed an ack")
                 buf = buf[1:]  # Chew an echo'd ack if using a 2-pin cable
             first = False
@@ -47,7 +45,7 @@ def _safe_read(pipe, count):
 def _chunk_read(pipe, count, status_fn):
     timer = time.time()
     block = 32
-    data = bytes(b"")
+    data = ""
     while len(data) < count:
         # Don't read past the end of our block if we're not on a 32-byte
         # boundary
@@ -56,7 +54,7 @@ def _chunk_read(pipe, count, status_fn):
         if chunk:
             timer = time.time()
             data += chunk
-            if data[0] == CMD_ACK:
+            if data[0] == chr(CMD_ACK):
                 data = data[1:]  # Chew an echo'd ack if using a 2-pin cable
         # LOG.debug("Chewed an ack")
         if time.time() - timer > 2:
@@ -81,7 +79,7 @@ def __clone_in(radio):
 
     start = time.time()
 
-    data = bytes(b"")
+    data = ""
     blocks = 0
     for block in radio._block_lengths:
         blocks += 1
@@ -89,7 +87,7 @@ def __clone_in(radio):
             chunk = _chunk_read(pipe, block, radio.status_fn)
         else:
             chunk = _safe_read(pipe, block)
-            pipe.write(bytes([CMD_ACK]))
+            pipe.write(chr(CMD_ACK))
         if not chunk:
             raise errors.RadioError("No response from radio")
         if radio.status_fn:
@@ -102,13 +100,13 @@ def __clone_in(radio):
 
     LOG.debug("Clone completed in %i seconds" % (time.time() - start))
 
-    return memmap.MemoryMapBytes(data)
+    return memmap.MemoryMap(data)
 
 
 def _clone_in(radio):
     try:
         return __clone_in(radio)
-    except Exception as e:
+    except Exception, e:
         raise errors.RadioError("Failed to communicate with the radio: %s" % e)
 
 
@@ -145,19 +143,18 @@ def __clone_out(radio):
 
     blocks = 0
     pos = 0
-    mmap = radio.get_mmap().get_byte_compatible()
     for block in radio._block_lengths:
         blocks += 1
         if blocks != len(radio._block_lengths):
             LOG.debug("Sending %i-%i" % (pos, pos+block))
-            pipe.write(mmap[pos:pos+block])
+            pipe.write(radio.get_mmap()[pos:pos+block])
             buf = pipe.read(1)
-            if buf and buf[0] != CMD_ACK:
+            if buf and buf[0] != chr(CMD_ACK):
                 buf = pipe.read(block)
-            if not buf or buf[-1] != CMD_ACK:
+            if not buf or buf[-1] != chr(CMD_ACK):
                 raise Exception("Radio did not ack block %i" % blocks)
         else:
-            _chunk_write(pipe, mmap[pos:],
+            _chunk_write(pipe, radio.get_mmap()[pos:],
                          radio.status_fn, radio._block_size)
         pos += block
 
@@ -169,7 +166,7 @@ def __clone_out(radio):
 def _clone_out(radio):
     try:
         return __clone_out(radio)
-    except Exception as e:
+    except Exception, e:
         raise errors.RadioError("Failed to communicate with the radio: %s" % e)
 
 
@@ -183,40 +180,19 @@ class YaesuChecksum:
         else:
             self._address = stop + 1
 
-    @staticmethod
-    def _asbytes(mmap):
-        if hasattr(mmap, 'get_byte_compatible'):
-            return mmap.get_byte_compatible()
-        elif isinstance(mmap, bytes):
-            # NOTE: this won't work for update(), but nothing should be calling
-            # this with a literal expecting that to work
-            return memmap.MemoryMapBytes(bytes(mmap))
-        elif isinstance(mmap, str):
-            # NOTE: this won't work for update(), but nothing should be calling
-            # this with a literal expecting that to work
-            return memmap.MemoryMap(
-                bitwise.string_straight_encode(mmap)).get_byte_compatible()
-        else:
-            raise TypeError('Unable to convert %s to bytes' % (
-                type(mmap).__name__))
-
     def get_existing(self, mmap):
         """Return the existing checksum in mmap"""
-        return self._asbytes(mmap)[self._address][0]
+        return ord(mmap[self._address])
 
     def get_calculated(self, mmap):
         """Return the calculated value of the checksum"""
-        mmap = self._asbytes(mmap)
         cs = 0
         for i in range(self._start, self._stop+1):
-            # NOTE: mmap[i] returns a slice'd bytes, not an int like a
-            # bytes does
-            cs += mmap[i][0]
+            cs += ord(mmap[i])
         return cs % 256
 
     def update(self, mmap):
         """Update the checksum with the data in @mmap"""
-        mmap = self._asbytes(mmap)
         mmap[self._address] = self.get_calculated(mmap)
 
     def __str__(self):
@@ -231,7 +207,6 @@ class YaesuCloneModeRadio(chirp_common.CloneModeRadio):
     _block_size = 8
 
     VENDOR = "Yaesu"
-    NEEDS_COMPAT_SERIAL = False
     _model = "ABCDE"
 
     @classmethod

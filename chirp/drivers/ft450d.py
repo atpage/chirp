@@ -1,4 +1,5 @@
 # Copyright 2018 by Rick DeWitt (aa0rd@yahoo.com>
+# Bug fix for issue #8183, invalid APO Off value
 # Thanks to Filippi Marco <iz3gme.marco@gmail.com> for Yaesu processes
 #
 # This program is free software: you can redistribute it and/or modify
@@ -304,8 +305,8 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
         struct mem_struct current;
 
     """
-    _CALLSIGN_CHARSET = [chr(x) for x in list(range(ord("0"), ord("9") + 1)) +
-                        list(range(ord("A"), ord("Z") + 1)) + [ord(" ")]]
+    _CALLSIGN_CHARSET = [chr(x) for x in range(ord("0"), ord("9") + 1) +
+                        range(ord("A"), ord("Z") + 1) + [ord(" ")]]
     _CALLSIGN_CHARSET_REV = dict(zip(_CALLSIGN_CHARSET,
                                      range(0, len(_CALLSIGN_CHARSET))))
 
@@ -499,7 +500,7 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
             self._mmap = self._clone_in()
         except errors.RadioError:
             raise
-        except Exception as e:
+        except Exception, e:
             raise errors.RadioError("Failed to communicate with radio: %s"
                                     % e)
         self.process_mmap()
@@ -509,7 +510,7 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
             self._clone_out()
         except errors.RadioError:
             raise
-        except Exception as e:
+        except Exception, e:
             raise errors.RadioError("Failed to communicate with radio: %s"
                                     % e)
 
@@ -1007,9 +1008,9 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
                           RadioSettingValueBoolean(_settings.ext_mnu))
         rs.set_doc("Enables access to extended settings in the radio")
         tab.append(rs)
-
+        # Issue #8183 bugfix
         rs = RadioSetting("apo", "APO time (Hrs)",
-                          RadioSettingValueInteger(1, 12, _settings.apo))
+                          RadioSettingValueInteger(0, 12, _settings.apo))
         tab.append(rs)
 
         options = ["%i" % i for i in range(0, 21)]
@@ -1489,6 +1490,6 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
                     elif element.value.get_mutable():
                         LOG.debug("Setting %s = %s" % (setting, element.value))
                         setattr(obj, setting, element.value)
-                except Exception as e:
+                except Exception, e:
                     LOG.debug(element.get_name())
                     raise

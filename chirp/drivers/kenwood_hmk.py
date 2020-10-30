@@ -79,7 +79,7 @@ class HMKRadio(generic_csv.CSVRadio):
 
         self._blank()
 
-        f = open(self._filename, "r")
+        f = file(self._filename, "r")
         for line in f:
             if line.strip() == "// Memory Channels":
                 break
@@ -114,7 +114,7 @@ class HMKRadio(generic_csv.CSVRadio):
                 mem = self._parse_csv_data_line(header, line)
                 if mem.number is None:
                     raise Exception("Invalid Location field" % lineno)
-            except Exception as e:
+            except Exception, e:
                 LOG.error("Line %i: %s" % (lineno, e))
                 self.errors.append("Line %i: %s" % (lineno, e))
                 continue

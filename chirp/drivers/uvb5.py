@@ -13,8 +13,6 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from __future__ import division
-
 import struct
 import logging
 from chirp import chirp_common, directory, bitwise, memmap, errors, util
@@ -177,21 +175,21 @@ struct {
 
 def do_ident(radio):
     radio.pipe.timeout = 3
-    radio.pipe.write(b"\x05PROGRAM")
-    for x in range(10):
+    radio.pipe.write("\x05PROGRAM")
+    for x in xrange(10):
         ack = radio.pipe.read(1)
-        if ack == b'\x06':
+        if ack == '\x06':
             break
     else:
         raise errors.RadioError("Radio did not ack programming mode")
-    radio.pipe.write(b"\x02")
+    radio.pipe.write("\x02")
     ident = radio.pipe.read(8)
     LOG.debug(util.hexprint(ident))
-    if not ident.startswith(b'HKT511'):
+    if not ident.startswith('HKT511'):
         raise errors.RadioError("Unsupported model")
-    radio.pipe.write(b"\x06")
+    radio.pipe.write("\x06")
     ack = radio.pipe.read(1)
-    if ack != b"\x06":
+    if ack != "\x06":
         raise errors.RadioError("Radio did not ack ident")
 
 
@@ -205,17 +203,17 @@ def do_status(radio, direction, addr):
 
 def do_download(radio):
     do_ident(radio)
-    data = b"KT511 Radio Program data v1.08\x00\x00"
-    data += (b"\x00" * 16)
+    data = "KT511 Radio Program data v1.08\x00\x00"
+    data += ("\x00" * 16)
     firstack = None
     for i in range(0, 0x1000, 16):
-        frame = struct.pack(">cHB", b"R", i, 16)
+        frame = struct.pack(">cHB", "R", i, 16)
         radio.pipe.write(frame)
         result = radio.pipe.read(20)
         if frame[1:4] != result[1:4]:
             LOG.debug(util.hexprint(result))
             raise errors.RadioError("Invalid response for address 0x%04x" % i)
-        radio.pipe.write(b"\x06")
+        radio.pipe.write("\x06")
         ack = radio.pipe.read(1)
         if not firstack:
             firstack = ack
@@ -227,19 +225,19 @@ def do_download(radio):
         data += result[4:]
         do_status(radio, "from", i)
 
-    return memmap.MemoryMapBytes(data)
+    return memmap.MemoryMap(data)
 
 
 def do_upload(radio):
     do_ident(radio)
-    data = radio._mmap.get_byte_compatible()[0x0030:]
+    data = radio._mmap[0x0030:]
 
     for i in range(0, 0x1000, 16):
-        frame = struct.pack(">cHB", b"W", i, 16)
+        frame = struct.pack(">cHB", "W", i, 16)
         frame += data[i:i + 16]
         radio.pipe.write(frame)
         ack = radio.pipe.read(1)
-        if ack != b"\x06":
+        if ack != "\x06":
             # UV-B5/UV-B6 radios with 27 menus do not support service settings
             # and will stop ACKing when the upload reaches 0x0F10
             if i == 0x0F10:
@@ -266,7 +264,6 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
     VENDOR = "Baofeng"
     MODEL = "UV-B5"
     BAUD_RATE = 9600
-    NEEDS_COMPAT_SERIAL = False
     SPECIALS = {
         "VFO1": -2,
         "VFO2": -1,
@@ -318,7 +315,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
                           (220000000, 269000000),
                           (400000000, 520000000)]
         rf.valid_modes = ["FM", "NFM"]
-        rf.valid_special_chans = list(self.SPECIALS.keys())
+        rf.valid_special_chans = self.SPECIALS.keys()
         rf.valid_power_levels = POWER_LEVELS
         rf.has_ctone = True
         rf.has_bank = False
@@ -331,7 +328,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
             self._mmap = do_download(self)
         except errors.RadioError:
             raise
-        except Exception as e:
+        except Exception, e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
         self.process_mmap()
 
@@ -340,7 +337,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
             do_upload(self)
         except errors.RadioError:
             raise
-        except Exception as e:
+        except Exception, e:
             raise errors.RadioError("Failed to communicate with radio: %s" % e)
 
     def process_mmap(self):
@@ -388,7 +385,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
         if isinstance(number, str):
             return (getattr(self._memobj, number.lower()), None)
         elif number < 0:
-            for k, v in list(SPECIALS.items()):
+            for k, v in SPECIALS.items():
                 if number == v:
                     return (getattr(self._memobj, k.lower()), None)
         else:
@@ -404,7 +401,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
         else:
             mem.number = number
 
-        if _mem.freq.get_raw(asbytes=True)[0] == 0xff:
+        if _mem.freq.get_raw()[0] == "\xFF":
             mem.empty = True
             return mem
 
@@ -634,7 +631,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
                           RadioSettingValueBoolean(not _settings.ste_disabled))
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.lower_vhf) // 10
+        _limit = int(self._memobj.limits.lower_vhf) / 10
         rs = RadioSetting("limits.lower_vhf", "VHF Lower Limit (MHz)",
                           RadioSettingValueInteger(128, 270, _limit))
 
@@ -644,7 +641,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
         rs.set_apply_callback(apply_limit, self._memobj.limits)
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.upper_vhf) // 10
+        _limit = int(self._memobj.limits.upper_vhf) / 10
         rs = RadioSetting("limits.upper_vhf", "VHF Upper Limit (MHz)",
                           RadioSettingValueInteger(128, 270, _limit))
 
@@ -654,7 +651,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
         rs.set_apply_callback(apply_limit, self._memobj.limits)
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.lower_uhf) // 10
+        _limit = int(self._memobj.limits.lower_uhf) / 10
         rs = RadioSetting("limits.lower_uhf", "UHF Lower Limit (MHz)",
                           RadioSettingValueInteger(400, 520, _limit))
 
@@ -664,7 +661,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
         rs.set_apply_callback(apply_limit, self._memobj.limits)
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.upper_uhf) // 10
+        _limit = int(self._memobj.limits.upper_uhf) / 10
         rs = RadioSetting("limits.upper_uhf", "UHF Upper Limit (MHz)",
                           RadioSettingValueInteger(400, 520, _limit))
 
@@ -773,7 +770,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
                     else:
                         LOG.debug("Setting %s = %s" % (setting, element.value))
                         setattr(obj, setting, element.value)
-                except Exception as e:
+                except Exception, e:
                     LOG.debug(element.get_name())
                     raise
 
@@ -782,14 +779,14 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
             try:
                 index = (int(element.get_name().split("_")[-1]))
                 val = element.value
-                if list(val)[0].get_value():
-                    value = int(list(val)[1].get_value() * 10 - 650)
+                if val[0].get_value():
+                    value = int(val[1].get_value() * 10 - 650)
                 else:
                     value = 0x01AF
                 LOG.debug("Setting fm_presets[%1i] = %s" % (index, value))
                 setting = self._memobj.fm_presets
                 setting[index] = value
-            except Exception as e:
+            except Exception, e:
                 LOG.debug(element.get_name())
                 raise
 
