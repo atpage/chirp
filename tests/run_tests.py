@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Copyright 2011 Dan Smith <dsmith@danplanet.com>
 #
@@ -1056,7 +1056,7 @@ class TestOutputHTML(TestOutput):
     def prepare(self):
         print "Writing to %s" % self._filename,
         sys.stdout.flush()
-        self._out = file(self._filename, "w")
+        self._out = open(self._filename, "w")
         s = """
 <html>
 <head>
@@ -1140,12 +1140,11 @@ class TestRunner:
 
     def log(self, rclass, tc, e):
         fn = "logs/%s_%s.log" % (directory.radio_class_id(rclass), tc)
-        log = file(fn, "a")
-        print >>log, "---- Begin test %s ----" % tc
-        log.write(e.get_detail())
-        print >>log
-        print >>log, "---- End test %s ----" % tc
-        log.close()
+        with open(fn, "a") as log:
+            print("---- Begin test %s ----" % tc, file=log)
+            log.write(e.get_detail())
+            print(file=log)
+            print("---- End test %s ----" % tc, file=log)
 
     def nuke_log(self, rclass, tc):
         fn = "logs/%s_%s.log" % (directory.radio_class_id(rclass), tc)
@@ -1278,7 +1277,7 @@ Available tests:
         stdout = sys.stdout
         if not os.path.exists("logs"):
             os.mkdir("logs")
-        sys.stdout = file("logs/verbose", "w")
+        sys.stdout = open("logs/verbose", "w")
         test_out = TestOutputANSI(stdout)
 
     test_out.prepare()
