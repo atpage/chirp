@@ -17,3 +17,4 @@ locale/.files
 MANIFEST
 .pytest_cache
 \#*\#
+*.bak
