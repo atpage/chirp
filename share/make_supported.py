@@ -26,7 +26,7 @@ RADIO_TYPES = {
 counter = 0
 
 def radio_type(radio):
-    for k, v in RADIO_TYPES.items():
+    for k, v in list(RADIO_TYPES.items()):
         if isinstance(radio, v):
             return k
     return ""
@@ -58,7 +58,7 @@ def supported_row(radio):
             try:
                 value = ", ".join([str(x) for x in value
                                    if not str(x).startswith("?")])
-            except Exception, e:
+            except Exception as e:
                 raise
 
         if key == "memory_bounds":
@@ -151,7 +151,7 @@ models = []
 
 exclude = [directory.DRV_TO_RADIO["Icom_7200"]]
 
-for radio in directory.DRV_TO_RADIO.values():
+for radio in list(directory.DRV_TO_RADIO.values()):
     if radio in exclude:
         continue
 

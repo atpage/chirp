@@ -248,8 +248,8 @@ class FT818Radio(ft817.FT817Radio):
 
     SPECIAL_MEMORIES.update(SPECIAL_PMS)
 
-    SPECIAL_MEMORIES_REV = dict(zip(SPECIAL_MEMORIES.values(),
-                                    SPECIAL_MEMORIES.keys()))
+    SPECIAL_MEMORIES_REV = dict(list(zip(list(SPECIAL_MEMORIES.values()),
+                                    list(SPECIAL_MEMORIES.keys()))))
 
 
 @directory.register
@@ -276,8 +276,8 @@ class FT818NDUSRadio(FT818Radio):
     SPECIAL_MEMORIES = dict(FT818Radio.SPECIAL_MEMORIES)
     SPECIAL_MEMORIES.update(SPECIAL_60M)
 
-    SPECIAL_MEMORIES_REV = dict(zip(SPECIAL_MEMORIES.values(),
-                                    SPECIAL_MEMORIES.keys()))
+    SPECIAL_MEMORIES_REV = dict(list(zip(list(SPECIAL_MEMORIES.values()),
+                                    list(SPECIAL_MEMORIES.keys()))))
 
     def _get_special_60m(self, number):
         mem = chirp_common.Memory()
@@ -316,10 +316,10 @@ class FT818NDUSRadio(FT818Radio):
         self._set_memory(mem, _mem)
 
     def get_memory(self, number):
-        if number in self.SPECIAL_60M.keys():
+        if number in list(self.SPECIAL_60M.keys()):
             return self._get_special_60m(number)
         elif number < 0 and \
-                self.SPECIAL_MEMORIES_REV[number] in self.SPECIAL_60M.keys():
+                self.SPECIAL_MEMORIES_REV[number] in list(self.SPECIAL_60M.keys()):
             # I can't stop delete operation from loosing extd_number but
             # I know how to get it back
             return self._get_special_60m(self.SPECIAL_MEMORIES_REV[number])
@@ -327,7 +327,7 @@ class FT818NDUSRadio(FT818Radio):
             return FT818Radio.get_memory(self, number)
 
     def set_memory(self, memory):
-        if memory.number in self.SPECIAL_60M.values():
+        if memory.number in list(self.SPECIAL_60M.values()):
             return self._set_special_60m(memory)
         else:
             return FT818Radio.set_memory(self, memory)

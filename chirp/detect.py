@@ -31,7 +31,7 @@ class DetectorRadio(chirp_common.Radio):
 
 
 def _icom_model_data_to_rclass(md):
-    for _rtype, rclass in directory.DRV_TO_RADIO.items():
+    for _rtype, rclass in list(directory.DRV_TO_RADIO.items()):
         if rclass.VENDOR != "Icom":
             continue
         if not hasattr(rclass, 'get_model') or not rclass.get_model():
@@ -101,11 +101,11 @@ def detect_kenwoodlive_radio(port):
     ser.close()
 
     models = {}
-    for rclass in directory.DRV_TO_RADIO.values():
+    for rclass in list(directory.DRV_TO_RADIO.values()):
         if rclass.VENDOR == "Kenwood":
             models[rclass.MODEL] = rclass
 
-    if r_id in models.keys():
+    if r_id in list(models.keys()):
         return models[r_id]
     else:
         raise errors.RadioError("Unsupported model `%s'" % r_id)

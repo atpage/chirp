@@ -96,7 +96,7 @@ struct {
 
 MEM_SIZE = 0x400
 BLOCK_SIZE = 8
-MEM_BLOCKS = range(0, (MEM_SIZE // BLOCK_SIZE))
+MEM_BLOCKS = list(range(0, (MEM_SIZE // BLOCK_SIZE)))
 ACK_CMD = "\x06"
 TIMEOUT = 0.05  # from 0.03 up it' s safe, we set in 0.05 for a margin
 
@@ -242,7 +242,7 @@ def do_download(radio):
      # UI progress
     status = chirp_common.Status()
     status.cur = 0
-    status.max = MEM_SIZE // BLOCK_SIZE
+    status.max = MEM_SIZE / BLOCK_SIZE
     status.msg = "Cloning from radio..."
     radio.status_fn(status)
 
@@ -269,7 +269,7 @@ def do_upload(radio):
      # UI progress
     status = chirp_common.Status()
     status.cur = 0
-    status.max = MEM_SIZE // BLOCK_SIZE
+    status.max = MEM_SIZE / BLOCK_SIZE
     status.msg = "Cloning to radio..."
     radio.status_fn(status)
     count = 0
@@ -630,7 +630,7 @@ class Kenwood_P60_Radio(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
             return
 
         # freq rx
-        _mem.rxfreq = mem.freq // 10
+        _mem.rxfreq = mem.freq / 10
 
         # rx enabled if valid channel,
         # set tx to on, we decide if off after duplex = off
@@ -639,9 +639,9 @@ class Kenwood_P60_Radio(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
 
         # freq tx
         if mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) // 10
+            _mem.txfreq = (mem.freq + mem.offset) / 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) // 10
+            _mem.txfreq = (mem.freq - mem.offset) / 10
         elif mem.duplex == "off":
             # set tx freq on the memap to xff
             for i in range(0, 4):
@@ -649,7 +649,7 @@ class Kenwood_P60_Radio(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
             # erase the txen flag
             _mem.txen = 255
         else:
-            _mem.txfreq = mem.freq // 10
+            _mem.txfreq = mem.freq / 10
 
         # tone data
         ((txmode, txtone, txpol), (rxmode, rxtone, rxpol)) = \

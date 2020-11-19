@@ -74,9 +74,9 @@ struct {
 
 CMD_ACK = "\x06"
 BLOCK_SIZE = 0x08
-UPLOAD_BLOCKS = [range(0x0000, 0x0110, 8),
-                 range(0x02b0, 0x02c0, 8),
-                 range(0x0380, 0x03e0, 8)]
+UPLOAD_BLOCKS = [list(range(0x0000, 0x0110, 8)),
+                 list(range(0x02b0, 0x02c0, 8)),
+                 list(range(0x0380, 0x03e0, 8))]
 
 # TODO: Is it 1 watt?
 H777_POWER_LEVELS = [chirp_common.PowerLevel("Low", watts=1.00),

@@ -206,7 +206,7 @@ def _connect_radio(radio):
         if resp == radio.ID:           # Good comms
             resp = command(radio.pipe, "AI0", 0, W8L)
             return
-        elif resp in RADIO_IDS.keys():
+        elif resp in list(RADIO_IDS.keys()):
             msg = "Radio reported as model %s, not %s!" % \
                 (RADIO_IDS[resp], radio.MODEL)
             raise errors.RadioError(msg)
@@ -958,7 +958,7 @@ class TS590Radio(chirp_common.CloneModeRadio):
         mhz1 = 1000000.
         nsg = not self.SG
         if nsg:     # Make reverse EX_X dictionary
-            x_ex = dict(zip(self.EX_X.values(), self.EX_X.keys()))
+            x_ex = dict(list(zip(list(self.EX_X.values()), list(self.EX_X.keys()))))
 
         # Callback functions
         def _my_readonly(setting, obj, atrb):

@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import GObject
 import logging
 
 from chirp import chirp_common
@@ -37,29 +37,29 @@ class SettingsEditor(common.Editor):
         super(SettingsEditor, self).__init__(rthread)
 
         # The main box
-        self.root = gtk.HBox(False, 0)
+        self.root = Gtk.HBox(False, 0)
 
         # The pane
-        paned = gtk.HPaned()
+        paned = Gtk.HPaned()
         paned.show()
         self.root.pack_start(paned, 1, 1, 0)
 
         # The selection tree
-        self._store = gtk.TreeStore(gobject.TYPE_STRING, gobject.TYPE_INT)
-        self._view = gtk.TreeView(self._store)
+        self._store = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_INT)
+        self._view = Gtk.TreeView(self._store)
         self._view.get_selection().connect("changed", self._view_changed_cb)
         self._view.append_column(
-            gtk.TreeViewColumn("", gtk.CellRendererText(), text=0))
+            Gtk.TreeViewColumn("", Gtk.CellRendererText(), text=0))
         self._view.show()
-        scrolled_window = gtk.ScrolledWindow()
-        scrolled_window.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        scrolled_window = Gtk.ScrolledWindow()
+        scrolled_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         scrolled_window.add_with_viewport(self._view)
         scrolled_window.set_size_request(200, -1)
         scrolled_window.show()
         paned.pack1(scrolled_window)
 
         # The settings notebook
-        self._notebook = gtk.Notebook()
+        self._notebook = Gtk.Notebook()
         self._notebook.set_show_tabs(False)
         self._notebook.set_show_border(False)
         self._notebook.show()
@@ -115,16 +115,16 @@ class SettingsEditor(common.Editor):
     def _build_ui_tab(self, group):
 
         # The scrolled window
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.show()
 
         # Notebook tab
-        tab = self._notebook.append_page(sw, gtk.Label(_(group.get_name())))
+        tab = self._notebook.append_page(sw, Gtk.Label(label=_(group.get_name())))
 
         # Settings table
-        table = gtk.Table(len(group), 2, False)
-        table.set_resize_mode(gtk.RESIZE_IMMEDIATE)
+        table = Gtk.Table(len(group), 2, False)
+        table.set_resize_mode(Gtk.RESIZE_IMMEDIATE)
         table.show()
         sw.add_with_viewport(table)
 
@@ -134,44 +134,44 @@ class SettingsEditor(common.Editor):
                 continue
 
             # Label
-            label = gtk.Label(element.get_shortname() + ":")
+            label = Gtk.Label(label=element.get_shortname() + ":")
             label.set_alignment(0.0, 0.5)
             label.show()
 
             table.attach(label, 0, 1, row, row + 1,
-                         xoptions=gtk.FILL, yoptions=0,
+                         xoptions=Gtk.AttachOptions.FILL, yoptions=0,
                          xpadding=6, ypadding=3)
 
             if isinstance(element.value, list) and \
                     isinstance(element.value[0],
                                settings.RadioSettingValueInteger):
-                box = gtk.HBox(True)
+                box = Gtk.HBox(True)
             else:
-                box = gtk.VBox(True)
+                box = Gtk.VBox(True)
 
             # Widget container
             box.show()
             table.attach(box, 1, 2, row, row + 1,
-                         xoptions=gtk.FILL, yoptions=0,
+                         xoptions=Gtk.AttachOptions.FILL, yoptions=0,
                          xpadding=12, ypadding=3)
 
-            for i in element.keys():
+            for i in list(element.keys()):
                 value = element[i]
                 if isinstance(value, settings.RadioSettingValueInteger):
-                    widget = gtk.SpinButton()
+                    widget = Gtk.SpinButton()
                     adj = widget.get_adjustment()
                     adj.configure(value.get_value(),
                                   value.get_min(), value.get_max(),
                                   value.get_step(), 1, 0)
                     widget.connect("value-changed", self._save_setting, value)
                 elif isinstance(value, settings.RadioSettingValueFloat):
-                    widget = gtk.Entry()
+                    widget = Gtk.Entry()
                     widget.set_width_chars(16)
                     widget.set_text(value.format())
                     widget.connect("focus-out-event", lambda w, e, v:
                                    self._save_setting(w, v), value)
                 elif isinstance(value, settings.RadioSettingValueBoolean):
-                    widget = gtk.CheckButton(_("Enabled"))
+                    widget = Gtk.CheckButton(_("Enabled"))
                     widget.set_active(value.get_value())
                     widget.connect("toggled", self._save_setting, value)
                 elif isinstance(value, settings.RadioSettingValueList):
@@ -185,7 +185,7 @@ class SettingsEditor(common.Editor):
                     widget.set_active(index)
                     widget.connect("changed", self._save_setting, value)
                 elif isinstance(value, settings.RadioSettingValueString):
-                    widget = gtk.Entry()
+                    widget = Gtk.Entry()
                     widget.set_width_chars(32)
                     widget.set_text(str(value).rstrip())
                     widget.connect("focus-out-event", lambda w, e, v:
@@ -225,7 +225,7 @@ class SettingsEditor(common.Editor):
         self._view.expand_all()
 
     def _get_settings_cb(self, settings):
-        gobject.idle_add(self._build_ui, settings)
+        GObject.idle_add(self._build_ui, settings)
 
     def _view_changed_cb(self, selection):
         (lst, iter) = selection.get_selected()

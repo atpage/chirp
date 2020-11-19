@@ -45,7 +45,7 @@ V71_SPECIAL["C VHF"] = 1030
 V71_SPECIAL["C UHF"] = 1031
 
 V71_SPECIAL_REV = {}
-for k, v in V71_SPECIAL.items():
+for k, v in list(V71_SPECIAL.items()):
     V71_SPECIAL_REV[v] = k
 
 

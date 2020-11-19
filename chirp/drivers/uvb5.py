@@ -176,7 +176,7 @@ struct {
 def do_ident(radio):
     radio.pipe.timeout = 3
     radio.pipe.write("\x05PROGRAM")
-    for x in xrange(10):
+    for x in range(10):
         ack = radio.pipe.read(1)
         if ack == '\x06':
             break
@@ -207,7 +207,7 @@ def do_download(radio):
     data += ("\x00" * 16)
     firstack = None
     for i in range(0, 0x1000, 16):
-        frame = struct.pack(">cHB", b"R", i, 16)
+        frame = struct.pack(">cHB", "R", i, 16)
         radio.pipe.write(frame)
         result = radio.pipe.read(20)
         if frame[1:4] != result[1:4]:
@@ -315,7 +315,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
                           (220000000, 269000000),
                           (400000000, 520000000)]
         rf.valid_modes = ["FM", "NFM"]
-        rf.valid_special_chans = self.SPECIALS.keys()
+        rf.valid_special_chans = list(self.SPECIALS.keys())
         rf.valid_power_levels = POWER_LEVELS
         rf.has_ctone = True
         rf.has_bank = False
@@ -385,7 +385,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
         if isinstance(number, str):
             return (getattr(self._memobj, number.lower()), None)
         elif number < 0:
-            for k, v in SPECIALS.items():
+            for k, v in list(SPECIALS.items()):
                 if number == v:
                     return (getattr(self._memobj, k.lower()), None)
         else:

@@ -142,7 +142,7 @@ THD72_SPECIAL["C VHF"] = 1030
 THD72_SPECIAL["C UHF"] = 1031
 
 THD72_SPECIAL_REV = {}
-for k, v in THD72_SPECIAL.items():
+for k, v in list(THD72_SPECIAL.items()):
     THD72_SPECIAL_REV[v] = k
 
 TMODES = {
@@ -244,9 +244,9 @@ class THD72Radio(chirp_common.CloneModeRadio):
         rf.has_bank = False
         rf.has_settings = True
         rf.valid_tuning_steps = []
-        rf.valid_modes = MODES_REV.keys()
-        rf.valid_tmodes = TMODES_REV.keys()
-        rf.valid_duplexes = DUPLEX_REV.keys()
+        rf.valid_modes = list(MODES_REV.keys())
+        rf.valid_tmodes = list(TMODES_REV.keys())
+        rf.valid_duplexes = list(DUPLEX_REV.keys())
         rf.valid_skips = ["", "S"]
         rf.valid_characters = chirp_common.CHARSET_ALPHANUMERIC
         rf.valid_name_length = 8
@@ -281,7 +281,7 @@ class THD72Radio(chirp_common.CloneModeRadio):
         if block not in self._dirty_blocks:
             self._dirty_blocks.append(block)
         self._dirty_blocks.sort()
-        print("dirty blocks: ", self._dirty_blocks)
+        print(("dirty blocks: ", self._dirty_blocks))
 
     def get_channel_name(self, number):
         if number < 999:
@@ -445,14 +445,14 @@ class THD72Radio(chirp_common.CloneModeRadio):
 
     def download(self, raw=False, blocks=None):
         if blocks is None:
-            blocks = range(self._memsize / 256)
+            blocks = list(range(self._memsize / 256))
         else:
             blocks = [b for b in blocks if b < self._memsize / 256]
 
         if self.command("0M PROGRAM") != "0M":
             raise errors.RadioError("No response from self")
 
-        allblocks = range(self._memsize / 256)
+        allblocks = list(range(self._memsize / 256))
         self.pipe.baudrate = 57600
         try:
             self.pipe.setRTS()
@@ -484,7 +484,7 @@ class THD72Radio(chirp_common.CloneModeRadio):
 
     def upload(self, blocks=None):
         if blocks is None:
-            blocks = range((self._memsize / 256) - 2)
+            blocks = list(range((self._memsize / 256) - 2))
         else:
             blocks = [b for b in blocks if b < self._memsize / 256]
 
@@ -738,9 +738,9 @@ if __name__ == "__main__":
         return r
 
     def usage():
-        print( "Usage: %s <-i input.img>|<-o output.img> -p port " \
+        print("Usage: %s <-i input.img>|<-o output.img> -p port " \
             "[[-f first-addr] [-l last-addr] | [-b list,of,blocks]]" % \
-            sys.argv[0] )
+            sys.argv[0])
         sys.exit(1)
 
     opts, args = getopt.getopt(sys.argv[1:], "i:o:p:f:l:b:")
@@ -785,7 +785,7 @@ if __name__ == "__main__":
         if last % 256 != 0:
             last += 256
         last /= 256
-        blocks = range(first, last)
+        blocks = list(range(first, last))
 
     if download:
         data = r.download(True, blocks)
@@ -793,4 +793,4 @@ if __name__ == "__main__":
     else:
         r._mmap = file(fname, "rb").read(r._memsize)
         r.upload(blocks)
-    print( "\nDone" )
+    print("\nDone")

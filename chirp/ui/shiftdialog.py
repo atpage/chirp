@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import GObject
 import threading
 import logging
 
@@ -24,20 +24,20 @@ from chirp import errors, chirp_common
 LOG = logging.getLogger(__name__)
 
 
-class ShiftDialog(gtk.Dialog):
+class ShiftDialog(Gtk.Dialog):
     def __init__(self, rthread, parent=None):
-        gtk.Dialog.__init__(self,
+        GObject.GObject.__init__(self,
                             title=_("Shift"),
-                            buttons=(gtk.STOCK_CLOSE, gtk.RESPONSE_OK))
+                            buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.OK))
 
-        self.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        self.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
 
         self.rthread = rthread
 
-        self.__prog = gtk.ProgressBar()
+        self.__prog = Gtk.ProgressBar()
         self.__prog.show()
 
-        self.__labl = gtk.Label("")
+        self.__labl = Gtk.Label(label="")
         self.__labl.show()
 
         self.vbox.pack_start(self.__prog, 1, 1, 1)
@@ -52,7 +52,7 @@ class ShiftDialog(gtk.Dialog):
         self.__prog.set_fraction(prog)
 
     def status(self, msg, prog):
-        gobject.idle_add(self._status, msg, prog)
+        GObject.idle_add(self._status, msg, prog)
 
     def _shift_memories(self, delta, memories):
         count = 0.0
@@ -125,10 +125,10 @@ class ShiftDialog(gtk.Dialog):
 
     def finished(self):
         if self.quiet:
-            gobject.idle_add(self.response, gtk.RESPONSE_OK)
+            GObject.idle_add(self.response, Gtk.ResponseType.OK)
         else:
-            gobject.idle_add(self.set_response_sensitive,
-                             gtk.RESPONSE_OK, True)
+            GObject.idle_add(self.set_response_sensitive,
+                             Gtk.ResponseType.OK, True)
 
     def threadfn(self, newhole, func, *args):
         self.status("Waiting for radio to become available", 0)
@@ -151,11 +151,11 @@ class ShiftDialog(gtk.Dialog):
         self.thread = threading.Thread(target=self.threadfn,
                                        args=(newhole, self._insert_hole))
         self.thread.start()
-        gtk.Dialog.run(self)
+        Gtk.Dialog.run(self)
 
     def delete(self, newhole, quiet=False, all=False):
         self.quiet = quiet
         self.thread = threading.Thread(target=self.threadfn,
                                        args=(newhole, self._delete_hole, all))
         self.thread.start()
-        gtk.Dialog.run(self)
+        Gtk.Dialog.run(self)

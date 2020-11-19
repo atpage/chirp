@@ -11,9 +11,9 @@ import time
 def printDiff(pos, byte1, byte2, args):
     bits1 = '{0:08b}'.format(byte1)
     bits2 = '{0:08b}'.format(byte2)
-    print "@%04Xh" % pos
-    print "1:%02Xh, %sb" % (byte1, bits1)
-    print "2:%02Xh, %sb" % (byte2, bits2)
+    print("@%04Xh" % pos)
+    print("1:%02Xh, %sb" % (byte1, bits1))
+    print("2:%02Xh, %sb" % (byte2, bits2))
     if args.csv:
         writeDiffCSV(pos, byte1, byte2, args)
 
@@ -53,7 +53,7 @@ def compareFiles(args):
             printDiff(pos, b1, b2, args)
 
     pos = f1.tell() - args.offset
-    print "bytes read: %02d" % pos
+    print("bytes read: %02d" % pos)
     f1.close()
     f2.close()
 
@@ -67,9 +67,9 @@ def compareFilesDat(args):
     f2.close()
 
     f1strlist = f1contents.split()
-    f1intlist = map(int, f1strlist)
+    f1intlist = list(map(int, f1strlist))
     f2strlist = f2contents.split()
-    f2intlist = map(int, f2strlist)
+    f2intlist = list(map(int, f2strlist))
     f1bytes = bytearray(f1intlist)
     f2bytes = bytearray(f2intlist)
 
@@ -82,7 +82,7 @@ def compareFilesDat(args):
             printDiff(pos, b1, b2, args)
 
     pos = length
-    print "bytes read: %02d" % pos
+    print("bytes read: %02d" % pos)
 
 
 def convertFileToBin(args):
@@ -90,7 +90,7 @@ def convertFileToBin(args):
     f1contents = f1.read()
     f1.close()
     f1strlist = f1contents.split()
-    f1intlist = map(int, f1strlist)
+    f1intlist = list(map(int, f1strlist))
     f1bytes = bytearray(f1intlist)
     f2 = open(args.file2, "wb")
     f2.write(f1bytes)
@@ -147,9 +147,9 @@ args = ap.parse_args()
 if args.offset:
     args.offset = int(args.offset, 16)
 
-print "f1:", args.file1, " f2:", args.file2
+print("f1:", args.file1, " f2:", args.file2)
 if args.setting or args.value:
-    print "setting:", args.setting, "- value:", args.value
+    print("setting:", args.setting, "- value:", args.value)
 
 while True:
     if (args.dat):
@@ -162,5 +162,5 @@ while True:
         compareFiles(args)
     if not args.watch:
         break
-    print "------"
+    print("------")
     time.sleep(delay)

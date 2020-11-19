@@ -282,8 +282,8 @@ def zero_indexed_seq_map(user_options):
     returns a list of tuples of form (str, int).
 
     """
-    mem_vals = range(0, len(user_options))
-    return zip(user_options, mem_vals)
+    mem_vals = list(range(0, len(user_options)))
+    return list(zip(user_options, mem_vals))
 
 
 class RadioSettings(list):
@@ -353,11 +353,11 @@ class RadioSettingGroup(object):
             def __iter__(self):
                 return self
 
-            def next(self):
+            def __next__(self):
                 """Next Iterator Interface"""
-                if self.__i >= len(self.__rsg.keys()):
+                if self.__i >= len(list(self.__rsg.keys())):
                     raise StopIteration()
-                e = self.__rsg[self.__rsg.keys()[self.__i]]
+                e = self.__rsg[list(self.__rsg.keys())[self.__i]]
                 self.__i += 1
                 return e
         return RSGIterator(self)
@@ -414,7 +414,7 @@ class RadioSetting(RadioSettingGroup):
     def changed(self):
         """Returns True if any of the elements
         in the group have been changed"""
-        for element in self._elements.values():
+        for element in list(self._elements.values()):
             if element.changed():
                 return True
         return False
@@ -431,7 +431,7 @@ class RadioSetting(RadioSettingGroup):
             if len(self) == 1:
                 return self._elements[self._element_order[0]]
             else:
-                return self._elements.values()
+                return list(self._elements.values())
         else:
             return self.__dict__[name]
 

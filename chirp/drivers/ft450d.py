@@ -307,8 +307,8 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
     """
     _CALLSIGN_CHARSET = [chr(x) for x in list(range(ord("0"), ord("9") + 1)) +
                         list(range(ord("A"), ord("Z") + 1)) + [ord(" ")]]
-    _CALLSIGN_CHARSET_REV = dict(zip(_CALLSIGN_CHARSET,
-                                     range(0, len(_CALLSIGN_CHARSET))))
+    _CALLSIGN_CHARSET_REV = dict(list(zip(_CALLSIGN_CHARSET,
+                                     list(range(0, len(_CALLSIGN_CHARSET))))))
 
     # WARNING Indecis are hard wired in get/set_memory code !!!
     # Channels print in + increasing index order (PMS first)
@@ -365,8 +365,8 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
     LAST_60M_INDEX = -32
     SPECIAL_MEMORIES.update(SPECIAL_60M)
 
-    SPECIAL_MEMORIES_REV = dict(zip(SPECIAL_MEMORIES.values(),
-                                    SPECIAL_MEMORIES.keys()))
+    SPECIAL_MEMORIES_REV = dict(list(zip(list(SPECIAL_MEMORIES.values()),
+                                    list(SPECIAL_MEMORIES.keys()))))
 
     @classmethod
     def get_prompts(cls):
@@ -591,7 +591,7 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
         elif mem.number == -1:
             _mem = self._memobj.mtune
             immutable = ["number", "extd_number", "name", "power"]
-        elif mem.number in self.SPECIAL_PMS.values():
+        elif mem.number in list(self.SPECIAL_PMS.values()):
             bitindex = (-self.LAST_PMS_INDEX) + mem.number
             used = (self._memobj.pmsvisible >> bitindex) & 0x01
             valid = (self._memobj.pmsfilled >> bitindex) & 0x01
@@ -608,7 +608,7 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
             immutable = ["number", "rtone", "ctone", "extd_number",
                          "tmode", "cross_mode",
                          "power", "duplex", "offset"]
-        elif mem.number in self.SPECIAL_60M.values():
+        elif mem.number in list(self.SPECIAL_60M.values()):
             mx = (-self.LAST_60M_INDEX) + mem.number
             _mem = self._memobj.m60[mx]
             mx = mx + 1
@@ -627,7 +627,7 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
         return mem
 
     def _set_special(self, mem):
-        if mem.empty and mem.number not in self.SPECIAL_PMS.values():
+        if mem.empty and mem.number not in list(self.SPECIAL_PMS.values()):
             # can't delete special memories!
             raise Exception("Sorry, special memory can't be deleted")
 
@@ -647,7 +647,7 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
             _mem = self._memobj.mtqmb
         elif mem.number == -1:
             _mem = self._memobj.mtune
-        elif mem.number in self.SPECIAL_PMS.values():
+        elif mem.number in list(self.SPECIAL_PMS.values()):
             bitindex = (-self.LAST_PMS_INDEX) + mem.number
             wasused = (self._memobj.pmsvisible >> bitindex) & 0x01
             wasvalid = (self._memobj.pmsfilled >> bitindex) & 0x01

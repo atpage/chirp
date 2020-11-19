@@ -166,8 +166,8 @@ class KenwoodTMx710Radio(chirp_common.CloneModeRadio):
                         "Call C0": 1030, "Call C1": 1031
                         }
     # _REV dict is used to retrieve name given number
-    SPECIAL_MEMORIES_REV = dict(zip(SPECIAL_MEMORIES.values(),
-                                    SPECIAL_MEMORIES.keys()))
+    SPECIAL_MEMORIES_REV = dict(list(zip(list(SPECIAL_MEMORIES.values()),
+                                    list(SPECIAL_MEMORIES.keys()))))
 
     def get_features(self):
         rf = chirp_common.RadioFeatures()
@@ -505,7 +505,7 @@ class KenwoodTMx710Radio(chirp_common.CloneModeRadio):
         def _pswd_vfy(setting, obj, atrb):
             """ Verify password is 1-6 chars, numbers 1-5 """
             str1 = str(setting.value).strip()   # initial
-            str2 = filter(lambda c: c in '12345', str1)    # valid chars
+            str2 = [c for c in str1 if c in '12345']    # valid chars
             if str1 != str2:
                 # Two lines due to python 73 char limit
                 sx = "Bad characters in Password"

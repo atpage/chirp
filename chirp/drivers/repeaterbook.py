@@ -23,10 +23,10 @@ class RBRadio(generic_csv.CSVRadio, chirp_common.NetworkSourceRadio):
 
     def _clean_comment(self, headers, line, mem):
         "Converts iso-8859-1 encoded comments to unicode for pyGTK."
-        mem.comment = unicode(mem.comment, 'iso-8859-1')
+        mem.comment = str(mem.comment, 'iso-8859-1')
         return mem
 
     def _clean_name(self, headers, line, mem):
         "Converts iso-8859-1 encoded names to unicode for pyGTK."
-        mem.name = unicode(mem.name, 'iso-8859-1')
+        mem.name = str(mem.name, 'iso-8859-1')
         return mem

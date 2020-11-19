@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gtk
+from gi.repository import Gtk
 import os
 import logging
 
@@ -95,7 +95,7 @@ class ValueEditor:
 
 class StringEditor(ValueEditor):
     def _init(self, data):
-        self._widget = gtk.Entry(int(data))
+        self._widget = Gtk.Entry(int(data))
         self._widget.set_text(str(self._mem_value()))
         self._widget.connect("changed", self.changed)
 
@@ -156,7 +156,7 @@ class FreqEditor(StringEditor):
 
 class BooleanEditor(ValueEditor):
     def _init(self, data):
-        self._widget = gtk.CheckButton("Enabled")
+        self._widget = Gtk.CheckButton("Enabled")
         self._widget.set_active(self._mem_value())
         self._widget.connect("toggled", self.toggled)
 
@@ -171,26 +171,26 @@ class OffsetEditor(FreqEditor):
     pass
 
 
-class MemoryDetailEditor(gtk.Dialog):
+class MemoryDetailEditor(Gtk.Dialog):
     """Detail editor for a memory"""
 
     def _add(self, tab, row, name, editor, text, colindex=0):
-        label = gtk.Label(text + ":")
+        label = Gtk.Label(label=text + ":")
         label.set_alignment(0.0, 0.5)
         label.show()
         tab.attach(label, colindex, colindex + 1, row, row + 1,
-                   xoptions=gtk.FILL, yoptions=0, xpadding=6, ypadding=3)
+                   xoptions=Gtk.AttachOptions.FILL, yoptions=0, xpadding=6, ypadding=3)
 
         widget = editor.get_widget()
         widget.show()
         tab.attach(widget, colindex + 1, colindex + 2, row, row + 1,
-                   xoptions=gtk.FILL, yoptions=0, xpadding=3, ypadding=3)
+                   xoptions=Gtk.AttachOptions.FILL, yoptions=0, xpadding=3, ypadding=3)
 
-        img = gtk.Image()
+        img = Gtk.Image()
         img.set_size_request(16, -1)
         img.show()
         tab.attach(img, colindex + 2, colindex + 3, row, row + 1,
-                   xoptions=gtk.FILL, yoptions=0, xpadding=3, ypadding=3)
+                   xoptions=Gtk.AttachOptions.FILL, yoptions=0, xpadding=3, ypadding=3)
 
         self._editors[name] = label, editor, img
         return label, editor, img
@@ -201,25 +201,25 @@ class MemoryDetailEditor(gtk.Dialog):
 
     def _make_ui(self):
 
-        box = gtk.VBox()
+        box = Gtk.VBox()
         box.show()
 
-        notebook = gtk.Notebook()
+        notebook = Gtk.Notebook()
         notebook.set_show_border(False)
         notebook.show()
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         sw.show()
 
-        hbox = gtk.HBox()
+        hbox = Gtk.HBox()
         hbox.pack_start(sw, 1, 1, 1)
         hbox.show()
 
-        tab = notebook.append_page(hbox, gtk.Label(_("General")))
+        tab = notebook.append_page(hbox, Gtk.Label(label=_("General")))
 
-        table = gtk.Table(len(self._order), 4, False)
-        table.set_resize_mode(gtk.RESIZE_IMMEDIATE)
+        table = Gtk.Table(len(self._order), 4, False)
+        table.set_resize_mode(Gtk.RESIZE_IMMEDIATE)
         table.show()
         sw.add_with_viewport(table)
 
@@ -227,16 +227,16 @@ class MemoryDetailEditor(gtk.Dialog):
             try:
                 _img = self._editors[name][2]
             except KeyError:
-                LOG.error(self._editors.keys())
+                LOG.error(list(self._editors.keys()))
             if msg is None:
                 _img.clear()
                 self._tips.set_tip(_img, "")
             else:
-                _img.set_from_stock(gtk.STOCK_DIALOG_WARNING,
-                                    gtk.ICON_SIZE_MENU)
+                _img.set_from_stock(Gtk.STOCK_DIALOG_WARNING,
+                                    Gtk.IconSize.MENU)
                 self._tips.set_tip(_img, str(msg))
             self._errors[self._order.index(name)] = msg is not None
-            self.set_response_sensitive(gtk.RESPONSE_OK,
+            self.set_response_sensitive(Gtk.ResponseType.OK,
                                         True not in self._errors)
 
         row = 0
@@ -250,18 +250,18 @@ class MemoryDetailEditor(gtk.Dialog):
             row += 1
 
         if len(self._memory.extra):
-            sw = gtk.ScrolledWindow()
-            sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+            sw = Gtk.ScrolledWindow()
+            sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
             sw.show()
 
-            hbox = gtk.HBox()
+            hbox = Gtk.HBox()
             hbox.pack_start(sw, 1, 1, 1)
             hbox.show()
 
-            tab = notebook.append_page(hbox, gtk.Label(_("Other")))
+            tab = notebook.append_page(hbox, Gtk.Label(label=_("Other")))
 
-            table = gtk.Table(len(self._memory.extra), 4, False)
-            table.set_resize_mode(gtk.RESIZE_IMMEDIATE)
+            table = Gtk.Table(len(self._memory.extra), 4, False)
+            table.set_resize_mode(Gtk.RESIZE_IMMEDIATE)
             table.show()
             sw.add_with_viewport(table)
 
@@ -288,14 +288,14 @@ class MemoryDetailEditor(gtk.Dialog):
 
     def __init__(self, features, memory, parent=None):
         self._memory = memory
-        gtk.Dialog.__init__(self,
+        GObject.GObject.__init__(self,
                             title="Memory Properties",
-                            flags=gtk.DIALOG_MODAL,
+                            flags=Gtk.DialogFlags.MODAL,
                             parent=parent,
-                            buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+                            buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                                     Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
         self.set_size_request(-1, 500)
-        self._tips = gtk.Tooltips()
+        self._tips = Gtk.Tooltips()
 
         self._features = features
 
@@ -370,7 +370,7 @@ class MemoryDetailEditor(gtk.Dialog):
         self.connect("response", self._validate)
 
     def _validate(self, _dialog, response):
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             all_msgs = self._features.validate_memory(self._memory)
             errors = []
             for msg in all_msgs:
@@ -402,13 +402,13 @@ class MultiMemoryDetailEditor(MemoryDetailEditor):
         label, editor, img = super(MultiMemoryDetailEditor, self)._add(
             tab, row, name, editor, text, 1)
 
-        selector = gtk.CheckButton()
+        selector = Gtk.CheckButton()
         tab.attach(selector, 0, 1, row, row + 1,
-                   xoptions=gtk.FILL, yoptions=0, xpadding=0, ypadding=3)
+                   xoptions=Gtk.AttachOptions.FILL, yoptions=0, xpadding=0, ypadding=3)
         selector.show()
         self._toggle_selector(selector, label, editor, img)
         selector.connect("toggled", self._toggle_selector, label, editor, img)
         self._selections[name] = selector
 
     def get_fields(self):
-        return [k for k, v in self._selections.items() if v.get_active()]
+        return [k for k, v in list(self._selections.items()) if v.get_active()]

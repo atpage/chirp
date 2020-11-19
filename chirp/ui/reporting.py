@@ -43,7 +43,7 @@ LOG = logging.getLogger(__name__)
 try:
     # Don't let failure to import any of these modules cause trouble
     from chirp.ui import config
-    import xmlrpclib
+    import xmlrpc.client
 except:
     ENABLED = False
 
@@ -73,7 +73,7 @@ def _report_model_usage(model, direction, success):
 
     LOG.debug("Reporting model usage: %s" % data)
 
-    proxy = xmlrpclib.ServerProxy(REPORT_URL)
+    proxy = xmlrpc.client.ServerProxy(REPORT_URL)
     id = proxy.report_stats(CHIRP_VERSION,
                             platform.get_platform().os_version_string(),
                             "model_use",
@@ -88,7 +88,7 @@ def _report_exception(stack):
 
     LOG.debug("Reporting exception")
 
-    proxy = xmlrpclib.ServerProxy(REPORT_URL)
+    proxy = xmlrpc.client.ServerProxy(REPORT_URL)
     id = proxy.report_exception(CHIRP_VERSION,
                                 platform.get_platform().os_version_string(),
                                 "exception",
@@ -103,7 +103,7 @@ def _report_misc_error(module, data):
 
     LOG.debug("Reporting misc error with %s" % module)
 
-    proxy = xmlrpclib.ServerProxy(REPORT_URL)
+    proxy = xmlrpc.client.ServerProxy(REPORT_URL)
     id = proxy.report_misc_error(CHIRP_VERSION,
                                  platform.get_platform().os_version_string(),
                                  module, data)
@@ -114,7 +114,7 @@ def _report_misc_error(module, data):
 
 def _check_for_updates(callback):
     LOG.debug("Checking for updates")
-    proxy = xmlrpclib.ServerProxy(REPORT_URL)
+    proxy = xmlrpc.client.ServerProxy(REPORT_URL)
     ver = proxy.check_for_updates(CHIRP_VERSION,
                                   platform.get_platform().os_version_string())
 

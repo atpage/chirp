@@ -120,7 +120,7 @@ def parse(data):
         def __iter__(self):
             return self
 
-        def next(self):
+        def __next__(self):
             self.line += 1
             try:
                 # Note, FileInput objects keep the newlines

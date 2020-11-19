@@ -288,7 +288,7 @@ class TYTUVF8DRadio(chirp_common.CloneModeRadio):
         rf.valid_skips = ["", "S"]
         rf.valid_power_levels = POWER_LEVELS
         rf.valid_modes = ["FM", "NFM"]
-        rf.valid_special_chans = SPECIALS.keys()
+        rf.valid_special_chans = list(SPECIALS.keys())
         rf.valid_name_length = 7
         return rf
 
@@ -348,7 +348,7 @@ class TYTUVF8DRadio(chirp_common.CloneModeRadio):
         if isinstance(number, str):
             return (getattr(self._memobj, number.lower()), None)
         elif number < 0:
-            for k, v in SPECIALS.items():
+            for k, v in list(SPECIALS.items()):
                 if number == v:
                     return (getattr(self._memobj, k.lower()), None)
         else:

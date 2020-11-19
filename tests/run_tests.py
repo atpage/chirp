@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 #
 # Copyright 2011 Dan Smith <dsmith@danplanet.com>
 #
@@ -135,7 +135,7 @@ class TestWrapper:
         if self._make_reload:
             try:
                 self.open()
-            except Exception, e:
+            except Exception as e:
                 raise TestCrashError(get_tb(), e, "[Loading]")
 
         try:
@@ -145,7 +145,7 @@ class TestWrapper:
 
         try:
             ret = fn(*args, **kwargs)
-        except Exception, e:
+        except Exception as e:
             if type(e) in self._ignored_exceptions:
                 raise e
             details = str(args) + str(kwargs)
@@ -153,13 +153,13 @@ class TestWrapper:
                 if isinstance(arg, chirp_common.Memory):
                     details += os.linesep + \
                         os.linesep.join(["%s:%s" % (k, v) for k, v
-                                         in arg.__dict__.items()])
+                                         in list(arg.__dict__.items())])
             raise TestCrashError(get_tb(), e, details)
 
         if self._make_reload:
             try:
                 self.close()
-            except Exception, e:
+            except Exception as e:
                 raise TestCrashError(get_tb(), e, "[Saving]")
 
         return ret
@@ -193,7 +193,7 @@ class TestCase:
         if a.tmode == "Cross":
             tx_mode, rx_mode = a.cross_mode.split("->")
 
-        for k, v in a.__dict__.items():
+        for k, v in list(a.__dict__.items()):
             if ignore and k in ignore:
                 continue
             if k == "power":
@@ -249,14 +249,14 @@ class TestCase:
                     details = msg
                     details += os.linesep + "### Wanted:" + os.linesep
                     details += os.linesep.join(["%s:%s" % (k, v) for k, v
-                                                in a.__dict__.items()])
+                                                in list(a.__dict__.items())])
                     details += os.linesep + "### Got:" + os.linesep
                     details += os.linesep.join(["%s:%s" % (k, v) for k, v
-                                                in b.__dict__.items()])
+                                                in list(b.__dict__.items())])
                     raise TestFailedError(msg, details)
-            except KeyError, e:
-                print sorted(a.__dict__.keys())
-                print sorted(b.__dict__.keys())
+            except KeyError as e:
+                print(sorted(a.__dict__.keys()))
+                print(sorted(b.__dict__.keys()))
                 raise
 
 
@@ -296,11 +296,11 @@ class TestCaseCopyAll(TestCase):
                                          src_mem)
             except import_logic.DestNotCompatible:
                 continue
-            except import_logic.ImportError, e:
+            except import_logic.ImportError as e:
                 failures.append(TestFailedError("<%i>: Import Failed: %s" %
                                                 (dst_number, e)))
                 continue
-            except Exception, e:
+            except Exception as e:
                 raise TestCrashError(get_tb(), e, "[Import]")
 
             self._wrapper.do("set_memory", dst_mem)
@@ -308,7 +308,7 @@ class TestCaseCopyAll(TestCase):
 
             try:
                 self.compare_mem(dst_mem, ret_mem)
-            except TestFailedError, e:
+            except TestFailedError as e:
                 failures.append(
                     TestFailedError("<%i>: %s" % (number, e), e.get_detail()))
 
@@ -363,7 +363,7 @@ class TestCaseBruteForce(TestCase):
 
                 try:
                     self.set_and_compare(m)
-                except errors.UnsupportedToneError, e:
+                except errors.UnsupportedToneError as e:
                     # If a radio doesn't support a particular tone value,
                     # don't punish it
                     pass
@@ -457,7 +457,7 @@ class TestCaseBruteForce(TestCase):
             if rf.validate_memory(tmp):
                 # A result (of error messages) from validate means the radio
                 # thinks this is invalid, so don't fail the test
-                print('Failed to validate %s: %s' % (tmp, rf.validate_memory(tmp)))
+                print(('Failed to validate %s: %s' % (tmp, rf.validate_memory(tmp))))
                 continue
 
             self.set_and_compare(tmp)
@@ -577,7 +577,7 @@ class TestCaseEdges(TestCase):
         m = self._mem(rf)
 
         for low, high in rf.valid_bands:
-            for band, totest in odd_steps.items():
+            for band, totest in list(odd_steps.items()):
                 if band < low or band > high:
                     continue
                 for testfreq in totest:
@@ -657,12 +657,12 @@ class TestCaseSettings(TestCase):
         o = self._wrapper.do("get_settings")
         self._wrapper.do("set_settings", o)
         n = self._wrapper.do("get_settings")
-        map(self.compare_settings, o, n)
+        list(map(self.compare_settings, o, n))
 
     @staticmethod
     def compare_settings(a, b):
         try:
-            map(TestCaseSettings.compare_settings, a, b)
+            list(map(TestCaseSettings.compare_settings, a, b))
         except TypeError:
             if a.get_value() != b.get_value():
                 msg = "Field is `%s', " % b + \
@@ -698,7 +698,7 @@ class TestCaseBanks(TestCase):
                 bank.set_name(testname)
             except AttributeError:
                 return [], []
-            except Exception, e:
+            except Exception as e:
                 if str(e) == "Not implemented":
                     return [], []
                 else:
@@ -827,7 +827,7 @@ class TestCaseBanks(TestCase):
                 raise TestFailedError("Bank index not persisted")
 
         suggested_index = model.get_next_mapping_index(banks[0])
-        if suggested_index not in range(*index_bounds):
+        if suggested_index not in list(range(*index_bounds)):
             raise TestFailedError("Suggested bank index not in valid range",
                                   "Got %i, range is %s" % (suggested_index,
                                                            index_bounds))
@@ -863,7 +863,7 @@ class TestCaseDetect(TestCase):
 
         try:
             radio = directory.get_radio_by_image(filename)
-        except Exception, e:
+        except Exception as e:
             raise TestFailedError("Failed to detect", str(e))
 
         if radio.__class__.__name__ == 'DynamicRadioAlias':
@@ -929,7 +929,7 @@ class TestCaseClone(TestCase):
         try:
             radio = self._wrapper._dst.__class__(serial)
             radio.status_fn = lambda s: True
-        except Exception, e:
+        except Exception as e:
             error = e
 
         if not live:
@@ -945,7 +945,7 @@ class TestCaseClone(TestCase):
         error = None
         try:
             radio.sync_in()
-        except Exception, e:
+        except Exception as e:
             error = e
 
         if error is None:
@@ -964,7 +964,7 @@ class TestCaseClone(TestCase):
         error = None
         try:
             radio.sync_out()
-        except Exception, e:
+        except Exception as e:
             error = e
 
         if error is None:
@@ -1002,7 +1002,7 @@ class TestOutput:
         pass
 
     def _print(self, string):
-        print >>self._out, string
+        print(string, file=self._out)
 
     def report(self, rclass, tc, msg, e):
         name = ("%s %s" % (rclass.MODEL, rclass.VARIANT))[:13]
@@ -1045,7 +1045,7 @@ class TestOutputANSI(TestOutput):
         self._print("-" * 70)
         self._print("Results:")
         self._print("  %-7s: %i" % ("TOTAL", self.__total))
-        for t, c in self.__counts.items():
+        for t, c in list(self.__counts.items()):
             self._print("  %-7s: %i" % (t, c))
 
 
@@ -1054,9 +1054,9 @@ class TestOutputHTML(TestOutput):
         self._filename = filename
 
     def prepare(self):
-        print "Writing to %s" % self._filename,
+        print("Writing to %s" % self._filename, end=' ')
         sys.stdout.flush()
-        self._out = open(self._filename, "w")
+        self._out = file(self._filename, "w")
         s = """
 <html>
 <head>
@@ -1098,12 +1098,12 @@ td.SKIPPED {
   <th>Status</th><th>Message</th>
 </tr>
 """ % (CHIRP_VERSION, CHIRP_VERSION, time.strftime("%x at %X"), os.name)
-        print >>self._out, s
+        print(s, file=self._out)
 
     def cleanup(self):
-        print >>self._out, "</table></body>"
+        print("</table></body>", file=self._out)
         self._out.close()
-        print "Done"
+        print("Done")
 
     def report(self, rclass, tc, msg, e):
         s = ("<tr class='%s'>" % msg) + \
@@ -1114,7 +1114,7 @@ td.SKIPPED {
             ("<td class='%s'>%s</td>" % (msg, msg)) + \
             ("<td class='error'>%s</td>" % e) + \
             "</tr>"
-        print >>self._out, s
+        print(s, file=self._out)
         sys.stdout.write(".")
         sys.stdout.flush()
 
@@ -1140,11 +1140,12 @@ class TestRunner:
 
     def log(self, rclass, tc, e):
         fn = "logs/%s_%s.log" % (directory.radio_class_id(rclass), tc)
-        with open(fn, "a") as log:
-            print("---- Begin test %s ----" % tc, file=log)
-            log.write(e.get_detail())
-            print(file=log)
-            print("---- End test %s ----" % tc, file=log)
+        log = file(fn, "a")
+        print("---- Begin test %s ----" % tc, file=log)
+        log.write(e.get_detail())
+        print(file=log)
+        print("---- End test %s ----" % tc, file=log)
+        log.close()
 
     def nuke_log(self, rclass, tc):
         fn = "logs/%s_%s.log" % (directory.radio_class_id(rclass), tc)
@@ -1170,18 +1171,18 @@ class TestRunner:
                         self.log(rclass, tc, e)
                     nfailed += 1
                     nprinted += 1
-            except TestFailedError, e:
+            except TestFailedError as e:
                 self.report(rclass, tc, "FAILED", e)
                 if e.get_detail():
                     self.log(rclass, tc, e)
                 nfailed += 1
                 nprinted += 1
-            except TestCrashError, e:
+            except TestCrashError as e:
                 self.report(rclass, tc, "CRASHED", e)
                 self.log(rclass, tc, e)
                 nfailed += 1
                 nprinted += 1
-            except TestSkippedError, e:
+            except TestSkippedError as e:
                 self.report(rclass, tc, "SKIPPED", e)
                 self.log(rclass, tc, e)
                 nprinted += 1
@@ -1277,7 +1278,7 @@ Available tests:
         stdout = sys.stdout
         if not os.path.exists("logs"):
             os.mkdir("logs")
-        sys.stdout = open("logs/verbose", "w")
+        sys.stdout = file("logs/verbose", "w")
         test_out = TestOutputANSI(stdout)
 
     test_out.prepare()
@@ -1288,11 +1289,11 @@ Available tests:
     if options.test:
         tr = TestRunner("images", [TESTS[options.test]], test_out)
     else:
-        tr = TestRunner("images", TESTS.values(), test_out)
+        tr = TestRunner("images", list(TESTS.values()), test_out)
 
     if options.live:
         if not options.driver:
-            print "Live mode requires a driver to be specified"
+            print("Live mode requires a driver to be specified")
             sys.exit(1)
         failed = tr.run_one_live(options.driver, options.live)
     elif options.driver:

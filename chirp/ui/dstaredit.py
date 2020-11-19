@@ -13,8 +13,8 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import GObject
 import logging
 
 from chirp.ui import common, miscwidgets
@@ -25,9 +25,9 @@ WIDGETW = 80
 WIDGETH = 30
 
 
-class CallsignEditor(gtk.HBox):
+class CallsignEditor(Gtk.HBox):
     __gsignals__ = {
-        "changed": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
+        "changed": (GObject.SignalFlags.RUN_LAST, None, ()),
         }
 
     def _cs_changed(self, listw, callid):
@@ -39,9 +39,9 @@ class CallsignEditor(gtk.HBox):
         return True
 
     def make_list(self, width):
-        cols = [(gobject.TYPE_INT, ""),
-                (gobject.TYPE_INT, ""),
-                (gobject.TYPE_STRING, _("Callsign")),
+        cols = [(GObject.TYPE_INT, ""),
+                (GObject.TYPE_INT, ""),
+                (GObject.TYPE_STRING, _("Callsign")),
                 ]
 
         self.listw = miscwidgets.KeyedListWidget(cols)
@@ -54,15 +54,15 @@ class CallsignEditor(gtk.HBox):
         rend.set_property("family", "Monospace")
         rend.set_property("width-chars", width)
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add_with_viewport(self.listw)
         sw.show()
 
         return sw
 
     def __init__(self, first_fixed=False, width=8):
-        gtk.HBox.__init__(self, False, 2)
+        GObject.GObject.__init__(self, False, 2)
 
         self.first_fixed = first_fixed
 
@@ -122,11 +122,11 @@ class DStarEditor(common.Editor):
         self.emit("changed")
 
     def make_callsigns(self):
-        box = gtk.HBox(True, 2)
+        box = Gtk.HBox(True, 2)
 
         fixed = self.rthread.radio.get_features().has_implicit_calls
 
-        frame = gtk.Frame(_("Your callsign"))
+        frame = Gtk.Frame(_("Your callsign"))
         self.editor_ucall = CallsignEditor(first_fixed=fixed)
         self.editor_ucall.set_size_request(-1, 200)
         self.editor_ucall.show()
@@ -134,7 +134,7 @@ class DStarEditor(common.Editor):
         frame.show()
         box.pack_start(frame, 1, 1, 0)
 
-        frame = gtk.Frame(_("Repeater callsign"))
+        frame = Gtk.Frame(_("Repeater callsign"))
         self.editor_rcall = CallsignEditor(first_fixed=fixed)
         self.editor_rcall.set_size_request(-1, 200)
         self.editor_rcall.show()
@@ -142,7 +142,7 @@ class DStarEditor(common.Editor):
         frame.show()
         box.pack_start(frame, 1, 1, 0)
 
-        frame = gtk.Frame(_("My callsign"))
+        frame = Gtk.Frame(_("My callsign"))
         self.editor_mcall = CallsignEditor()
         self.editor_mcall.set_size_request(-1, 200)
         self.editor_mcall.show()
@@ -190,10 +190,10 @@ class DStarEditor(common.Editor):
 
         self.editor_ucall = self.editor_rcall = None
 
-        vbox = gtk.VBox(False, 2)
+        vbox = Gtk.VBox(False, 2)
         vbox.pack_start(self.make_callsigns(), 0, 0, 0)
 
-        tmp = gtk.Label("")
+        tmp = Gtk.Label(label="")
         tmp.show()
         vbox.pack_start(tmp, 1, 1, 1)
 

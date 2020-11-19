@@ -13,9 +13,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gtk
-import gobject
-import pango
+from gi.repository import Gtk
+from gi.repository import GObject
+from gi.repository import Pango
 
 import threading
 import time
@@ -31,17 +31,17 @@ LOG = logging.getLogger(__name__)
 CONF = config.get()
 
 
-class Editor(gobject.GObject):
+class Editor(GObject.GObject):
     __gsignals__ = {
-        'changed': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
-        'usermsg': (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
-                    (gobject.TYPE_STRING,)),
+        'changed': (GObject.SignalFlags.RUN_LAST, None, ()),
+        'usermsg': (GObject.SignalFlags.RUN_LAST, None,
+                    (GObject.TYPE_STRING,)),
         }
 
     root = None
 
     def __init__(self, rthread):
-        gobject.GObject.__init__(self)
+        GObject.GObject.__init__(self)
         self.read_only = False
         self._focused = False
         self.rthread = rthread
@@ -76,7 +76,7 @@ class Editor(gobject.GObject):
     def other_editor_changed(self, editor):
         pass
 
-gobject.type_register(Editor)
+GObject.type_register(Editor)
 
 
 def DBG(*args):
@@ -126,7 +126,7 @@ class RadioJob:
             result = e
 
         if self.cb:
-            gobject.idle_add(self.cb, result, *self.cb_args)
+            GObject.idle_add(self.cb, result, *self.cb_args)
 
     def execute(self, radio):
         if not self.target:
@@ -142,15 +142,15 @@ class RadioJob:
         self._execute(self.target, func)
 
 
-class RadioThread(threading.Thread, gobject.GObject):
+class RadioThread(threading.Thread, GObject.GObject):
     __gsignals__ = {
-        "status": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE,
-                   (gobject.TYPE_STRING,)),
+        "status": (GObject.SignalFlags.RUN_LAST, None,
+                   (GObject.TYPE_STRING,)),
         }
 
     def __init__(self, radio, parent=None):
         threading.Thread.__init__(self)
-        gobject.GObject.__init__(self)
+        GObject.GObject.__init__(self)
         self.__queue = {}
         if parent:
             self.__runlock = parent._get_run_lock()
@@ -214,7 +214,7 @@ class RadioThread(threading.Thread, gobject.GObject):
         self._qlock()
 
         if priority is None:
-            for i in self.__queue.keys():
+            for i in list(self.__queue.keys()):
                 self.__queue[i] = []
         else:
             self.__queue[priority] = []
@@ -230,7 +230,7 @@ class RadioThread(threading.Thread, gobject.GObject):
         jobs = 0
         for i in dict(self.__queue):
                 jobs += len(self.__queue[i])
-        gobject.idle_add(self.emit, "status", "[%i] %s" % (jobs, msg))
+        GObject.idle_add(self.emit, "status", "[%i] %s" % (jobs, msg))
 
     def _queue_pop(self, priority):
         try:
@@ -277,29 +277,29 @@ def log_exception():
 
 
 def show_error(msg, parent=None):
-    d = gtk.MessageDialog(buttons=gtk.BUTTONS_OK, parent=parent,
-                          type=gtk.MESSAGE_ERROR)
+    d = Gtk.MessageDialog(buttons=Gtk.ButtonsType.OK, parent=parent,
+                          type=Gtk.MessageType.ERROR)
     d.set_property("text", msg)
 
     if not parent:
-        d.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        d.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
 
     d.run()
     d.destroy()
 
 
 def ask_yesno_question(msg, parent=None):
-    d = gtk.MessageDialog(buttons=gtk.BUTTONS_YES_NO, parent=parent,
-                          type=gtk.MESSAGE_QUESTION)
+    d = Gtk.MessageDialog(buttons=Gtk.ButtonsType.YES_NO, parent=parent,
+                          type=Gtk.MessageType.QUESTION)
     d.set_property("text", msg)
 
     if not parent:
-        d.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        d.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
 
     r = d.run()
     d.destroy()
 
-    return r == gtk.RESPONSE_YES
+    return r == Gtk.ResponseType.YES
 
 
 def combo_select(box, value):
@@ -315,12 +315,12 @@ def combo_select(box, value):
 
 
 def _add_text(d, text):
-    v = gtk.TextView()
+    v = Gtk.TextView()
     v.get_buffer().set_text(text)
     v.set_editable(False)
     v.set_cursor_visible(False)
     v.show()
-    sw = gtk.ScrolledWindow()
+    sw = Gtk.ScrolledWindow()
     sw.add(v)
     sw.show()
     d.vbox.pack_start(sw, 1, 1, 1)
@@ -328,13 +328,13 @@ def _add_text(d, text):
 
 
 def show_error_text(msg, text, parent=None):
-    d = gtk.MessageDialog(buttons=gtk.BUTTONS_OK, parent=parent,
-                          type=gtk.MESSAGE_ERROR)
+    d = Gtk.MessageDialog(buttons=Gtk.ButtonsType.OK, parent=parent,
+                          type=Gtk.MessageType.ERROR)
     d.set_property("text", msg)
 
     _add_text(d, text)
     if not parent:
-        d.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        d.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
 
     d.set_size_request(600, 400)
     d.run()
@@ -345,25 +345,25 @@ def show_warning(msg, text,
                  parent=None, buttons=None, title="Warning",
                  can_squelch=False):
     if buttons is None:
-        buttons = gtk.BUTTONS_OK
-    d = gtk.MessageDialog(buttons=buttons,
+        buttons = Gtk.ButtonsType.OK
+    d = Gtk.MessageDialog(buttons=buttons,
                           parent=parent,
-                          type=gtk.MESSAGE_WARNING)
+                          type=Gtk.MessageType.WARNING)
     d.set_title(title)
     d.set_property("text", msg)
-    l = gtk.Label(_("Details") + ":")
+    l = Gtk.Label(label=_("Details") + ":")
     l.show()
     d.vbox.pack_start(l, 0, 0, 0)
-    l = gtk.Label(_("Proceed?"))
+    l = Gtk.Label(label=_("Proceed?"))
     l.show()
     d.get_action_area().pack_start(l, 0, 0, 0)
     d.get_action_area().reorder_child(l, 0)
     textview = _add_text(d, text)
-    textview.set_wrap_mode(gtk.WRAP_WORD)
+    textview.set_wrap_mode(Gtk.WrapMode.WORD)
     if not parent:
-        d.set_position(gtk.WIN_POS_CENTER_ALWAYS)
+        d.set_position(Gtk.WindowPosition.CENTER_ALWAYS)
     if can_squelch:
-        cb = gtk.CheckButton(_("Do not show this next time"))
+        cb = Gtk.CheckButton(_("Do not show this next time"))
         cb.show()
         d.vbox.pack_start(cb, 0, 0, 0)
 
@@ -400,17 +400,17 @@ def simple_diff(a, b, diffsonly=False):
 # using fixed-width fonts. It also highlights lines that start with
 # a '-' in red bold font and '+' with blue bold font.
 def show_diff_blob(title, result):
-    d = gtk.Dialog(title=title,
-                   buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK))
-    b = gtk.TextBuffer()
+    d = Gtk.Dialog(title=title,
+                   buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK))
+    b = Gtk.TextBuffer()
 
     tags = b.get_tag_table()
     for color in ["red", "blue", "green", "grey"]:
-        tag = gtk.TextTag(color)
+        tag = Gtk.TextTag(color)
         tag.set_property("foreground", color)
         tags.add(tag)
-    tag = gtk.TextTag("bold")
-    tag.set_property("weight", pango.WEIGHT_BOLD)
+    tag = Gtk.TextTag("bold")
+    tag.set_property("weight", Pango.Weight.BOLD)
     tags.add(tag)
 
     try:
@@ -430,12 +430,12 @@ def show_diff_blob(title, result):
         else:
             tags = ()
         b.insert_with_tags_by_name(b.get_end_iter(), line + os.linesep, *tags)
-    v = gtk.TextView(b)
-    fontdesc = pango.FontDescription("Courier %i" % fontsize)
+    v = Gtk.TextView(b)
+    fontdesc = Pango.FontDescription("Courier %i" % fontsize)
     v.modify_font(fontdesc)
     v.set_editable(False)
     v.show()
-    s = gtk.ScrolledWindow()
+    s = Gtk.ScrolledWindow()
     s.add(v)
     s.show()
     d.vbox.pack_start(s, 1, 1, 1)

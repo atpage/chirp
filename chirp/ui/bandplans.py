@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gtk
+from gi.repository import Gtk
 import logging
 from chirp import bandplan, bandplan_na, bandplan_au
 from chirp import bandplan_iaru_r1, bandplan_iaru_r2, bandplan_iaru_r3
@@ -60,7 +60,7 @@ class BandPlans(object):
         freq = int(freq)
         result = bandplan.Band((freq, freq), repr(freq))
 
-        for shortname, details in self.plans.items():
+        for shortname, details in list(self.plans.items()):
             if self._config.get_bool(shortname, "bandplan"):
                 matches = [x for x in details[1].bands if x.contains(result)]
                 # Add matches to defaults, favoring more specific matches.
@@ -85,7 +85,7 @@ class BandPlans(object):
 
     def select_bandplan(self, parent_window):
         plans = ["None"]
-        for shortname, details in self.plans.iteritems():
+        for shortname, details in self.plans.items():
             if self._config.get_bool(shortname, "bandplan"):
                 plans.insert(0, details[0])
             else:
@@ -100,9 +100,9 @@ class BandPlans(object):
         d.label.set_line_wrap(True)
         r = d.run()
 
-        if r == gtk.RESPONSE_OK:
+        if r == Gtk.ResponseType.OK:
             selection = d.choice.get_active_text()
-            for shortname, details in self.plans.iteritems():
+            for shortname, details in self.plans.items():
                 self._config.set_bool(shortname, selection == details[0],
                                       "bandplan")
                 if selection == details[0]:

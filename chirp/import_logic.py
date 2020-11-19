@@ -204,7 +204,7 @@ def import_mem(dst_radio, src_features, src_mem, overrides={}):
 
     dst_mem = src_mem.dupe()
 
-    for k, v in overrides.items():
+    for k, v in list(overrides.items()):
         dst_mem.__dict__[k] = v
 
     helpers = [_import_name,

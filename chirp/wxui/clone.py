@@ -126,7 +126,7 @@ class ChirpCloneDialog(wx.Dialog):
         panel.SetSizer(vbox)
 
         self._vendors = collections.defaultdict(list)
-        for rclass in directory.DRV_TO_RADIO.values():
+        for rclass in list(directory.DRV_TO_RADIO.values()):
             if (not issubclass(rclass, chirp_common.CloneModeRadio) and
                     not issubclass(rclass, chirp_common.LiveRadio)):
                 continue

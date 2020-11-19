@@ -4,7 +4,7 @@ import serial as base_serial
 import six
 
 try:
-    import gtk
+    from gi.repository import gtk.as gtk
 except ImportError:
     # FIXME
     # For chirpc

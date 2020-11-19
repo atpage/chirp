@@ -515,7 +515,7 @@ def _ident_radio(radio):
             error = e
             time.sleep(2)
 
-    for magic, reason in IDENT_BLACKLIST.items():
+    for magic, reason in list(IDENT_BLACKLIST.items()):
         try:
             _do_ident(radio, magic, secondack=False)
         except errors.RadioError as e:
@@ -579,7 +579,7 @@ def _do_download(radio):
             data += _read_block(radio, i, 0x40, False)
 
     if append_model:
-        data += radio.MODEL.ljust(8).encode()
+        data += radio.MODEL.ljust(8)
 
     LOG.debug("done.")
     return memmap.MemoryMap(data)

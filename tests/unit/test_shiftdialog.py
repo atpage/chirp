@@ -59,7 +59,7 @@ class ShiftDialogTest(base.BaseTest):
 
         self.assertEqual(expected, sorted(radio._mems.keys()))
         self.assertEqual(expected,
-                         sorted([mem.number for mem in radio._mems.values()]))
+                         sorted([mem.number for mem in list(radio._mems.values())]))
 
     def _test_delete_hole(self, starting, arg, expected):
         self._test_hole('_delete_hole', starting, arg, expected)

@@ -898,7 +898,7 @@ class FT8800Radio(FTx800Radio):
             return
 
         val = int(mem.offset / 10000) / 5
-        for i in reversed(range(2, 6)):
+        for i in reversed(list(range(2, 6))):
             _mem.name[i] = (_mem.name[i] & 0x3F) | ((val & 0x03) << 6)
             val >>= 2
 

@@ -566,7 +566,7 @@ class IcomIndexedBankModel(IcomBankModel,
             raise Exception("Memory %i is not in bank %s" % (memory.number,
                                                              bank))
 
-        if index not in range(*self._radio._bank_index_bounds):
+        if index not in list(range(*self._radio._bank_index_bounds)):
             raise Exception("Invalid index")
         self._radio._set_bank_index(memory.number, index)
 

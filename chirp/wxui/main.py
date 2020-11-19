@@ -508,7 +508,7 @@ class ChirpMain(wx.Frame):
         import code
         locals = {'main': self,
                   'radio': radio}
-        code.interact(banner='Locals are: %s' % (', '.join(locals.keys())),
+        code.interact(banner='Locals are: %s' % (', '.join(list(locals.keys()))),
                       local=locals)
 
     def _menu_about(self, event):

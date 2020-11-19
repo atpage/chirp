@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import hashlib
 import re
 import logging
@@ -180,7 +180,7 @@ class RFinderParser:
         LOG.debug(user)
         LOG.debug(pw)
         args = {
-            "email": urllib.quote_plus(user),
+            "email": urllib.parse.quote_plus(user),
             "pass": hashlib.new("md5", pw).hexdigest(),
             "lat": "%7.5f" % coords[0],
             "lon": "%7.5f" % coords[1],
@@ -189,11 +189,11 @@ class RFinderParser:
             }
 
         _url = "https://www.rfinder.net/query.php?%s" % \
-               ("&".join(["%s=%s" % (k, v) for k, v in args.items()]))
+               ("&".join(["%s=%s" % (k, v) for k, v in list(args.items())]))
 
         LOG.debug("Query URL: %s" % _url)
 
-        f = urllib.urlopen(_url)
+        f = urllib.request.urlopen(_url)
         data = f.read()
         f.close()
 
@@ -287,10 +287,11 @@ class RFinderRadio(chirp_common.NetworkSourceRadio):
 
         self._rfp = None
 
-    def set_params(self, lat_lon, miles, email, password):
+    def set_params(self, xxx_todo_changeme, miles, email, password):
         """Sets the parameters to use for the query"""
-        self._lat = lat_lon[0]
-        self._lon = lat_lon[1]
+        (lat, lon) = xxx_todo_changeme
+        self._lat = lat
+        self._lon = lon
         self._miles = miles
         self._user = email
         self._pass = password

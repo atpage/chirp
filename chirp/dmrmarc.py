@@ -16,7 +16,7 @@
 import json
 import logging
 import tempfile
-import urllib
+import urllib.request, urllib.parse, urllib.error
 from chirp import chirp_common, errors
 from chirp.settings import RadioSetting, RadioSettingGroup, \
      RadioSettingValueList
@@ -51,7 +51,7 @@ class DMRMARCRadio(chirp_common.NetworkSourceRadio):
 
     def do_fetch(self):
         fn = tempfile.mktemp(".json")
-        filename, headers = urllib.urlretrieve(self.URL, fn)
+        filename, headers = urllib.request.urlretrieve(self.URL, fn)
         with open(fn, 'r') as f:
             try:
                 self._repeaters = json.load(f)['repeaters']
@@ -108,7 +108,7 @@ class DMRMARCRadio(chirp_common.NetworkSourceRadio):
 
         rs = RadioSetting(
             "color_code", "Color Code", RadioSettingValueList(
-                range(16), int(repeater.get('color_code', 0))))
+                list(range(16)), int(repeater.get('color_code', 0))))
         mem.extra.append(rs)
 
         return mem

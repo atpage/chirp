@@ -72,7 +72,7 @@ class TestSplitTone(base.BaseTest):
     def _test_split_tone_decode(self, tx, rx, **vals):
         mem = chirp_common.Memory()
         chirp_common.split_tone_decode(mem, tx, rx)
-        for key, value in vals.items():
+        for key, value in list(vals.items()):
             self.assertEqual(getattr(mem, key), value)
 
     def test_split_tone_decode_none(self):
@@ -150,7 +150,7 @@ class TestSplitTone(base.BaseTest):
 
     def _set_mem(self, **vals):
         mem = chirp_common.Memory()
-        for key, value in vals.items():
+        for key, value in list(vals.items()):
             setattr(mem, key, value)
         return chirp_common.split_tone_encode(mem)
 
@@ -227,7 +227,7 @@ class TestStepFunctions(base.BaseTest):
 
     def test_is_fractional_step(self):
         for freq in self._125 + self._625:
-            print freq
+            print(freq)
             self.assertTrue(chirp_common.is_fractional_step(freq))
 
     def test_is_6_25(self):
@@ -252,7 +252,7 @@ class TestStepFunctions(base.BaseTest):
                  6.25: self._625,
                  12.5: self._125,
                  }
-        for step, freqs in steps.items():
+        for step, freqs in list(steps.items()):
             for freq in freqs:
                 self.assertEqual(step, chirp_common.required_step(freq))
 

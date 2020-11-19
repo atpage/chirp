@@ -16,15 +16,10 @@
 
 import threading
 
-import gtk
-import pango
-from gobject import TYPE_INT, \
-    TYPE_DOUBLE as TYPE_FLOAT, \
-    TYPE_STRING, \
-    TYPE_BOOLEAN, \
-    TYPE_PYOBJECT, \
-    TYPE_INT64
-import gobject
+from gi.repository import Gtk
+from gi.repository import Pango
+from gi.repository import GObject
+
 import pickle
 import os
 import logging
@@ -34,7 +29,6 @@ from chirp.ui import bandplans
 from chirp import chirp_common, errors, directory, import_logic
 
 LOG = logging.getLogger(__name__)
-
 
 if __name__ == "__main__":
     import sys
@@ -54,9 +48,9 @@ def handle_ed(_, iter, new, store, col):
         return False
 
 
-class ValueErrorDialog(gtk.MessageDialog):
+class ValueErrorDialog(Gtk.MessageDialog):
     def __init__(self, exception, **args):
-        gtk.MessageDialog.__init__(self, buttons=gtk.BUTTONS_OK, **args)
+        GObject.GObject.__init__(self, buttons=Gtk.ButtonsType.OK, **args)
         self.set_property("text", _("Invalid value for this field"))
         self.format_secondary_text(str(exception))
 
@@ -70,26 +64,26 @@ def iter_prev(store, iter):
 
 class MemoryEditor(common.Editor):
     cols = [
-        (_("Loc"),            TYPE_INT,      gtk.CellRendererText,),
-        (_("Frequency"),      TYPE_INT64,    gtk.CellRendererText,),
-        (_("Name"),           TYPE_STRING,   gtk.CellRendererText,),
-        (_("Tone Mode"),      TYPE_STRING,   gtk.CellRendererCombo,),
-        (_("Tone"),           TYPE_FLOAT,    gtk.CellRendererCombo,),
-        (_("ToneSql"),        TYPE_FLOAT,    gtk.CellRendererCombo,),
-        (_("DTCS Code"),      TYPE_INT,      gtk.CellRendererCombo,),
-        (_("DTCS Rx Code"),   TYPE_INT,      gtk.CellRendererCombo,),
-        (_("DTCS Pol"),       TYPE_STRING,   gtk.CellRendererCombo,),
-        (_("Cross Mode"),     TYPE_STRING,   gtk.CellRendererCombo,),
-        (_("Duplex"),         TYPE_STRING,   gtk.CellRendererCombo,),
-        (_("Offset"),         TYPE_INT64,    gtk.CellRendererText,),
-        (_("Mode"),           TYPE_STRING,   gtk.CellRendererCombo,),
-        (_("Power"),          TYPE_STRING,   gtk.CellRendererCombo,),
-        (_("Tune Step"),      TYPE_FLOAT,    gtk.CellRendererCombo,),
-        (_("Skip"),           TYPE_STRING,   gtk.CellRendererCombo,),
-        (_("Comment"),        TYPE_STRING,   gtk.CellRendererText,),
-        ("_filled",           TYPE_BOOLEAN,  None,),
-        ("_hide_cols",        TYPE_PYOBJECT, None,),
-        ("_extd",             TYPE_STRING,   None,),
+        (_("Loc"),            GObject.TYPE_INT,      Gtk.CellRendererText,),
+        (_("Frequency"),      GObject.TYPE_INT64,    Gtk.CellRendererText,),
+        (_("Name"),           GObject.TYPE_STRING,   Gtk.CellRendererText,),
+        (_("Tone Mode"),      GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Tone"),           GObject.TYPE_DOUBLE,    Gtk.CellRendererCombo,),
+        (_("ToneSql"),        GObject.TYPE_DOUBLE,    Gtk.CellRendererCombo,),
+        (_("DTCS Code"),      GObject.TYPE_INT,      Gtk.CellRendererCombo,),
+        (_("DTCS Rx Code"),   GObject.TYPE_INT,      Gtk.CellRendererCombo,),
+        (_("DTCS Pol"),       GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Cross Mode"),     GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Duplex"),         GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Offset"),         GObject.TYPE_INT64,    Gtk.CellRendererText,),
+        (_("Mode"),           GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Power"),          GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Tune Step"),      GObject.TYPE_DOUBLE,    Gtk.CellRendererCombo,),
+        (_("Skip"),           GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Comment"),        GObject.TYPE_STRING,   Gtk.CellRendererText,),
+        ("_filled",           GObject.TYPE_BOOLEAN,  None,),
+        ("_hide_cols",        GObject.TYPE_PYOBJECT, None,),
+        ("_extd",             GObject.TYPE_STRING,   None,),
         ]
 
     defaults = {
@@ -363,13 +357,13 @@ class MemoryEditor(common.Editor):
             LOG.error("Bad value for {col}: {val}".format(col=cap, val=new))
             return
 
-        if self.store.get_column_type(colnum) == TYPE_INT:
+        if self.store.get_column_type(colnum) == GObject.TYPE_INT:
             new = int(new)
-        elif self.store.get_column_type(colnum) == TYPE_FLOAT:
+        elif self.store.get_column_type(colnum) == GObject.TYPE_DOUBLE:
             new = float(new)
-        elif self.store.get_column_type(colnum) == TYPE_BOOLEAN:
+        elif self.store.get_column_type(colnum) == GObject.TYPE_BOOLEAN:
             new = bool(new)
-        elif self.store.get_column_type(colnum) == TYPE_STRING:
+        elif self.store.get_column_type(colnum) == GObject.TYPE_STRING:
             if new == "(None)":
                 new = ""
 
@@ -432,7 +426,7 @@ class MemoryEditor(common.Editor):
 
     def insert_new(self, iter, loc=None):
         line = []
-        for key, val in self.defaults.items():
+        for key, val in list(self.defaults.items()):
             line.append(self.col(key))
             line.append(val)
 
@@ -506,7 +500,7 @@ class MemoryEditor(common.Editor):
             def handler(mem):
                 if not isinstance(mem, Exception):
                     if not mem.empty or self.show_empty:
-                        gobject.idle_add(self.set_memory, mem)
+                        GObject.idle_add(self.set_memory, mem)
 
             job = common.RadioJob(handler, "get_memory", cur_pos)
             job.set_desc(_("Getting memory {number}").format(number=cur_pos))
@@ -586,7 +580,7 @@ class MemoryEditor(common.Editor):
             sel = self.view.get_selection()
             sel.unselect_all()
             for path in paths:
-                gobject.idle_add(sel.select_path, (path[0]+delta,))
+                GObject.idle_add(sel.select_path, (path[0]+delta,))
 
         def save_victim(mem, ctx):
             ctx.victim_mem = mem
@@ -677,7 +671,7 @@ class MemoryEditor(common.Editor):
 
     def _show_raw(self, cur_pos):
         def idle_show_raw(result):
-            gobject.idle_add(common.show_diff_blob,
+            GObject.idle_add(common.show_diff_blob,
                              _("Raw memory {number}").format(
                                  number=cur_pos), result)
 
@@ -701,9 +695,9 @@ class MemoryEditor(common.Editor):
             raw[which] = _("Memory {number}").format(number=which) + \
                 os.linesep + result
 
-            if len(raw.keys()) == 2:
+            if len(list(raw.keys())) == 2:
                 diff = common.simple_diff(raw[loc_a], raw[loc_b])
-                gobject.idle_add(common.show_diff_blob,
+                GObject.idle_add(common.show_diff_blob,
                                  _("Diff of {a} and {b}").format(a=loc_a,
                                                                  b=loc_b),
                                  diff)
@@ -748,7 +742,7 @@ class MemoryEditor(common.Editor):
         else:
             dlg = memdetail.MemoryDetailEditor(self._features, memory)
         r = dlg.run()
-        if r == gtk.RESPONSE_OK:
+        if r == Gtk.ResponseType.OK:
             self.need_refresh = True
             mem = dlg.get_memory()
             if len(locations) > 1:
@@ -888,10 +882,10 @@ class MemoryEditor(common.Editor):
         no_multiple = ["insert_prev", "insert_next", "paste", "devshowraw"]
         only_two = ["devdiffraw", "exchange"]
 
-        ag = gtk.ActionGroup("Menu")
+        ag = Gtk.ActionGroup("Menu")
 
         for name, label in actions:
-            a = gtk.Action(name, label, "", 0)
+            a = Gtk.Action(name, label, "", 0)
             a.connect("activate", self.mh, store, paths)
             if name in no_multiple:
                 a.set_sensitive(issingle)
@@ -905,7 +899,7 @@ class MemoryEditor(common.Editor):
             if cur_pos == self._features.memory_bounds[1]:
                 ag.get_action("delete_s").set_sensitive(False)
 
-        uim = gtk.UIManager()
+        uim = Gtk.UIManager()
         uim.insert_action_group(ag, 0)
         uim.add_ui_from_string(menu_xml)
 
@@ -939,22 +933,22 @@ class MemoryEditor(common.Editor):
 
     def cell_editing_stopped(self, *args):
         self._in_editing = False
-        print 'Would activate %s' % str(self._edit_path)
+        print('Would activate %s' % str(self._edit_path))
         self.view.grab_focus()
         self.view.set_cursor(*self._edit_path)
 
     def make_editor(self):
         types = tuple([x[1] for x in self.cols])
-        self.store = gtk.ListStore(*types)
+        self.store = Gtk.ListStore(*types)
 
-        self.view = gtk.TreeView(self.store)
-        self.view.get_selection().set_mode(gtk.SELECTION_MULTIPLE)
+        self.view = Gtk.TreeView(self.store)
+        self.view.get_selection().set_mode(Gtk.SelectionMode.MULTIPLE)
         self.view.set_rules_hint(True)
 
-        hbox = gtk.HBox()
+        hbox = Gtk.HBox()
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add(self.view)
 
         filled = self.col("_filled")
@@ -991,16 +985,16 @@ class MemoryEditor(common.Editor):
             rend.connect('editing-canceled', self.cell_editing_stopped)
             rend.connect('edited', self.cell_editing_stopped)
 
-            if _type == TYPE_BOOLEAN:
+            if _type == GObject.TYPE_BOOLEAN:
                 # rend.set_property("activatable", True)
                 # rend.connect("toggled", handle_toggle, self.store, i)
-                col = gtk.TreeViewColumn(_cap, rend, active=i,
+                col = Gtk.TreeViewColumn(_cap, rend, active=i,
                                          sensitive=filled)
-            elif _rend == gtk.CellRendererCombo:
-                if isinstance(self.choices[_cap], gtk.ListStore):
+            elif _rend == Gtk.CellRendererCombo:
+                if isinstance(self.choices[_cap], Gtk.ListStore):
                     choices = self.choices[_cap]
                 else:
-                    choices = gtk.ListStore(TYPE_STRING, TYPE_STRING)
+                    choices = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
                     for choice in self.choices[_cap]:
                         choices.append([choice, self._render(i, choice)])
                 rend.set_property("model", choices)
@@ -1008,12 +1002,12 @@ class MemoryEditor(common.Editor):
                 rend.set_property("editable", True)
                 rend.set_property("has-entry", False)
                 rend.connect("edited", self.edited, _cap)
-                col = gtk.TreeViewColumn(_cap, rend, text=i, sensitive=filled)
+                col = Gtk.TreeViewColumn(_cap, rend, text=i, sensitive=filled)
                 col.set_cell_data_func(rend, self.render, i)
             else:
                 rend.set_property("editable", _cap not in non_editable)
                 rend.connect("edited", self.edited, _cap)
-                col = gtk.TreeViewColumn(_cap, rend, text=i, sensitive=filled)
+                col = Gtk.TreeViewColumn(_cap, rend, text=i, sensitive=filled)
                 col.set_cell_data_func(rend, self.render, i)
 
             col.set_reorderable(True)
@@ -1029,7 +1023,7 @@ class MemoryEditor(common.Editor):
         for cap in col_order:
             self.view.append_column(cols[cap])
 
-        self.store.set_sort_column_id(self.col(_("Loc")), gtk.SORT_ASCENDING)
+        self.store.set_sort_column_id(self.col(_("Loc")), Gtk.SortType.ASCENDING)
 
         self.view.show()
         sw.show()
@@ -1059,13 +1053,13 @@ class MemoryEditor(common.Editor):
         def handler(mem, number):
             if not isinstance(mem, Exception):
                 if not mem.empty or self.show_empty:
-                    gobject.idle_add(self.set_memory, mem)
+                    GObject.idle_add(self.set_memory, mem)
             else:
                 mem = chirp_common.Memory()
                 mem.number = number
                 mem.name = "ERROR"
                 mem.empty = True
-                gobject.idle_add(self.set_memory, mem)
+                GObject.idle_add(self.set_memory, mem)
 
         for i in range(lo, hi+1):
             job = common.RadioJob(handler, "get_memory", i)
@@ -1161,7 +1155,7 @@ class MemoryEditor(common.Editor):
         mem.empty = not vals[self.col("_filled")]
 
     def _get_memory(self, iter):
-        vals = self.store.get(iter, *range(0, len(self.cols)))
+        vals = self.store.get(iter, *list(range(0, len(self.cols))))
         mem = chirp_common.Memory()
         self._set_mem_vals(mem, vals, iter)
 
@@ -1178,9 +1172,9 @@ class MemoryEditor(common.Editor):
         self._config.set_int(self._limit_key(which), int(sb.get_value()))
 
     def make_controls(self, min, max):
-        hbox = gtk.HBox(False, 2)
+        hbox = Gtk.HBox(False, 2)
 
-        lab = gtk.Label(_("Memory Range:"))
+        lab = Gtk.Label(label=_("Memory Range:"))
         lab.show()
         hbox.pack_start(lab, 0, 0, 0)
 
@@ -1191,24 +1185,24 @@ class MemoryEditor(common.Editor):
         histart = self._config.is_defined(hikey) and \
             self._config.get_int(hikey) or 999
 
-        self.lo_limit_adj = gtk.Adjustment(lostart, min, max-1, 1, 10)
-        lo = gtk.SpinButton(self.lo_limit_adj)
+        self.lo_limit_adj = Gtk.Adjustment(lostart, min, max-1, 1, 10)
+        lo = Gtk.SpinButton(self.lo_limit_adj)
         lo.connect("value-changed", self._store_limit, "lo")
         lo.show()
         hbox.pack_start(lo, 0, 0, 0)
 
-        lab = gtk.Label(" - ")
+        lab = Gtk.Label(label=" - ")
         lab.show()
         hbox.pack_start(lab, 0, 0, 0)
 
-        self.hi_limit_adj = gtk.Adjustment(histart, min+1, max, 1, 10)
-        hi = gtk.SpinButton(self.hi_limit_adj)
+        self.hi_limit_adj = Gtk.Adjustment(histart, min+1, max, 1, 10)
+        hi = Gtk.SpinButton(self.hi_limit_adj)
         hi.connect("value-changed", self._store_limit, "hi")
         hi.show()
         hbox.pack_start(hi, 0, 0, 0)
 
-        refresh = gtk.Button(_("Refresh"))
-        refresh.set_relief(gtk.RELIEF_NONE)
+        refresh = Gtk.Button(_("Refresh"))
+        refresh.set_relief(Gtk.ReliefStyle.NONE)
         refresh.connect("clicked", lambda x: self.prefill())
         refresh.show()
         hbox.pack_start(refresh, 0, 0, 0)
@@ -1226,35 +1220,35 @@ class MemoryEditor(common.Editor):
         lo.connect_after("activate", activate_go)
         hi.connect_after("activate", activate_go)
 
-        sep = gtk.VSeparator()
+        sep = Gtk.VSeparator()
         sep.show()
         hbox.pack_start(sep, 0, 0, 2)
 
-        showspecial = gtk.ToggleButton(_("Special Channels"))
-        showspecial.set_relief(gtk.RELIEF_NONE)
+        showspecial = Gtk.ToggleButton(_("Special Channels"))
+        showspecial.set_relief(Gtk.ReliefStyle.NONE)
         showspecial.set_active(self.show_special)
         showspecial.connect("toggled",
                             lambda x: self.set_show_special(x.get_active()))
         showspecial.show()
         hbox.pack_start(showspecial, 0, 0, 0)
 
-        showempty = gtk.ToggleButton(_("Show Empty"))
-        showempty.set_relief(gtk.RELIEF_NONE)
+        showempty = Gtk.ToggleButton(_("Show Empty"))
+        showempty.set_relief(Gtk.ReliefStyle.NONE)
         showempty.set_active(self.show_empty)
         showempty.connect("toggled",
                           lambda x: self.set_show_empty(x.get_active()))
         showempty.show()
         hbox.pack_start(showempty, 0, 0, 0)
 
-        sep = gtk.VSeparator()
+        sep = Gtk.VSeparator()
         sep.show()
         hbox.pack_start(sep, 0, 0, 2)
 
-        props = gtk.Button(_("Properties"))
-        props.set_relief(gtk.RELIEF_NONE)
+        props = Gtk.Button(_("Properties"))
+        props.set_relief(Gtk.ReliefStyle.NONE)
         props.connect("clicked",
                       lambda x: self.hotkey(
-                            gtk.Action("properties", "", "", 0)))
+                            Gtk.Action("properties", "", "", 0)))
         props.show()
         hbox.pack_start(props, 0, 0, 0)
 
@@ -1378,7 +1372,7 @@ class MemoryEditor(common.Editor):
         if self.defaults[_("Mode")] not in self._features.valid_modes:
             self.defaults[_("Mode")] = self._features.valid_modes[0]
 
-        vbox = gtk.VBox(False, 2)
+        vbox = Gtk.VBox(False, 2)
         vbox.pack_start(self.make_controls(min, max), 0, 0, 0)
         vbox.pack_start(self.make_editor(), 1, 1, 1)
         vbox.show()
@@ -1431,7 +1425,7 @@ class MemoryEditor(common.Editor):
                 self._set_memory(iter, mem)
 
         result = pickle.dumps((self._features, selection))
-        clipboard = gtk.Clipboard(selection="CLIPBOARD")
+        clipboard = Gtk.Clipboard(selection="CLIPBOARD")
         clipboard.set_text(result)
         clipboard.store()
 
@@ -1472,9 +1466,9 @@ class MemoryEditor(common.Editor):
                                     self.col(_("Loc")), self.col("_filled"))
             if filled and not always:
                 d = miscwidgets.YesNoDialog(title=_("Overwrite?"),
-                                            buttons=(gtk.STOCK_YES, 1,
-                                                     gtk.STOCK_NO, 2,
-                                                     gtk.STOCK_CANCEL, 3,
+                                            buttons=(Gtk.STOCK_YES, 1,
+                                                     Gtk.STOCK_NO, 2,
+                                                     Gtk.STOCK_CANCEL, 3,
                                                      "All", 4))
                 d.set_text(
                     _("Overwrite location {number}?").format(number=loc))
@@ -1503,8 +1497,8 @@ class MemoryEditor(common.Editor):
                         if isinstance(x, chirp_common.ValidationError)]
                 if errs:
                     d = miscwidgets.YesNoDialog(title=_("Incompatible Memory"),
-                                                buttons=(gtk.STOCK_OK, 1,
-                                                         gtk.STOCK_CANCEL, 2))
+                                                buttons=(Gtk.STOCK_OK, 1,
+                                                         Gtk.STOCK_CANCEL, 2))
                     d.set_text(
                         _("Pasted memory {number} is not compatible with "
                           "this radio because:").format(number=src_number) +
@@ -1526,7 +1520,7 @@ class MemoryEditor(common.Editor):
             self.rthread.submit(job)
 
     def paste_selection(self):
-        clipboard = gtk.Clipboard(selection="CLIPBOARD")
+        clipboard = Gtk.Clipboard(selection="CLIPBOARD")
         clipboard.request_text(self._paste_selection)
 
     def select_all(self):
@@ -1572,7 +1566,7 @@ class DstarMemoryEditor(MemoryEditor):
             d_unless_mode("DV")
 
     def _get_memory(self, iter):
-        vals = self.store.get(iter, *range(0, len(self.cols)))
+        vals = self.store.get(iter, *list(range(0, len(self.cols))))
         if vals[self.col(_("Mode"))] != "DV":
             return MemoryEditor._get_memory(self, iter)
 
@@ -1591,21 +1585,21 @@ class DstarMemoryEditor(MemoryEditor):
         # I think self.cols is "static" or "unbound" or something else
         # like that and += modifies the type, not self (how bizarre)
         self.cols = list(self.cols)
-        new_cols = [("URCALL", TYPE_STRING, gtk.CellRendererCombo),
-                    ("RPT1CALL", TYPE_STRING, gtk.CellRendererCombo),
-                    ("RPT2CALL", TYPE_STRING, gtk.CellRendererCombo),
-                    ("Digital Code", TYPE_INT, gtk.CellRendererText),
+        new_cols = [("URCALL", GObject.TYPE_STRING, Gtk.CellRendererCombo),
+                    ("RPT1CALL", GObject.TYPE_STRING, Gtk.CellRendererCombo),
+                    ("RPT2CALL", GObject.TYPE_STRING, Gtk.CellRendererCombo),
+                    ("Digital Code", GObject.TYPE_INT, Gtk.CellRendererText),
                     ]
         for col in new_cols:
-            index = self.cols.index(("_filled", TYPE_BOOLEAN, None))
+            index = self.cols.index(("_filled", GObject.TYPE_BOOLEAN, None))
             self.cols.insert(index, col)
 
         self.choices = dict(self.choices)
         self.defaults = dict(self.defaults)
 
-        self.choices["URCALL"] = gtk.ListStore(TYPE_STRING, TYPE_STRING)
-        self.choices["RPT1CALL"] = gtk.ListStore(TYPE_STRING, TYPE_STRING)
-        self.choices["RPT2CALL"] = gtk.ListStore(TYPE_STRING, TYPE_STRING)
+        self.choices["URCALL"] = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
+        self.choices["RPT1CALL"] = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
+        self.choices["RPT2CALL"] = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
 
         self.defaults["URCALL"] = ""
         self.defaults["RPT1CALL"] = ""

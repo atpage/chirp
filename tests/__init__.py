@@ -7,7 +7,7 @@ import unittest
 
 from chirp import directory
 
-import run_tests
+from . import run_tests
 
 
 class TestAdapterMeta(type):
@@ -95,8 +95,7 @@ def load_tests(loader, tests, pattern):
         rclass = directory.get_radio(test)
         for device in _get_sub_devices(rclass, image):
             class_name = 'TestCase_%s' % (
-                filter(lambda c: c.isalnum(),
-                       device.get_name()))
+                [c for c in device.get_name() if c.isalnum()])
             if isinstance(device, type):
                 dst = None
             else:

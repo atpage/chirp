@@ -97,7 +97,7 @@ KEYS = {
 
 MEM_SIZE = 0x400
 BLOCK_SIZE = 8
-MEM_BLOCKS = range(0, (MEM_SIZE // BLOCK_SIZE))
+MEM_BLOCKS = list(range(0, (MEM_SIZE // BLOCK_SIZE)))
 ACK_CMD = "\x06"
 # from 0.03 up it' s safe
 # I have to turn it up, some users reported problems with this, was 0.05
@@ -256,7 +256,7 @@ def do_download(radio):
      # UI progress
     status = chirp_common.Status()
     status.cur = 0
-    status.max = MEM_SIZE // BLOCK_SIZE
+    status.max = MEM_SIZE / BLOCK_SIZE
     status.msg = "Cloning from radio..."
     radio.status_fn(status)
 
@@ -283,7 +283,7 @@ def do_upload(radio):
      # UI progress
     status = chirp_common.Status()
     status.cur = 0
-    status.max = MEM_SIZE // BLOCK_SIZE
+    status.max = MEM_SIZE / BLOCK_SIZE
     status.msg = "Cloning to radio..."
     radio.status_fn(status)
     count = 0
@@ -637,18 +637,18 @@ class Kenwood_M60_Radio(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
             return
 
         # freq rx
-        _mem.rxfreq = mem.freq // 10
+        _mem.rxfreq = mem.freq / 10
 
         # freq tx
         if mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) // 10
+            _mem.txfreq = (mem.freq + mem.offset) / 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) // 10
+            _mem.txfreq = (mem.freq - mem.offset) / 10
         elif mem.duplex == "off":
             for byte in _mem.txfreq:
                 byte.set_raw("\xFF")
         else:
-            _mem.txfreq = mem.freq // 10
+            _mem.txfreq = mem.freq / 10
 
         # tone data
         ((txmode, txtone, txpol), (rxmode, rxtone, rxpol)) = \
@@ -737,26 +737,26 @@ class Kenwood_M60_Radio(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
 
         # front keys
         mon = RadioSetting("settings.kMON", "MON",
-                           RadioSettingValueList(KEYS.values(),
-                           KEYS.values()[KEYS.keys().index(
+                           RadioSettingValueList(list(KEYS.values()),
+                           list(KEYS.values())[list(KEYS.keys()).index(
                                int(sett.kMON))]))
         fkeys.append(mon)
 
         a = RadioSetting("settings.kA", "A",
-                         RadioSettingValueList(KEYS.values(),
-                         KEYS.values()[KEYS.keys().index(
+                         RadioSettingValueList(list(KEYS.values()),
+                         list(KEYS.values())[list(KEYS.keys()).index(
                              int(sett.kA))]))
         fkeys.append(a)
 
         scn = RadioSetting("settings.kSCN", "SCN",
-                           RadioSettingValueList(KEYS.values(),
-                           KEYS.values()[KEYS.keys().index(
+                           RadioSettingValueList(list(KEYS.values()),
+                           list(KEYS.values())[list(KEYS.keys()).index(
                                int(sett.kSCN))]))
         fkeys.append(scn)
 
         da = RadioSetting("settings.kDA", "D/A",
-                          RadioSettingValueList(KEYS.values(),
-                          KEYS.values()[KEYS.keys().index(
+                          RadioSettingValueList(list(KEYS.values()),
+                          list(KEYS.values())[list(KEYS.keys()).index(
                               int(sett.kDA))]))
         fkeys.append(da)
 
@@ -787,7 +787,7 @@ class Kenwood_M60_Radio(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
 
                 # case keys, with special config
                 if setting[0] == "k":
-                    value = KEYS.keys()[KEYS.values().index(str(value))]
+                    value = list(KEYS.keys())[list(KEYS.values()).index(str(value))]
 
                 # integers case + special case
                 if setting in ["tot", "min_vol"]:

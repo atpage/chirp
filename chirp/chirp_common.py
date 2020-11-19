@@ -194,7 +194,7 @@ class PowerLevel:
     def __gt__(self, val):
         return int(self) > int(val)
 
-    def __nonzero__(self):
+    def __bool__(self):
         return int(self) != 0
 
     def __repr__(self):
@@ -315,14 +315,14 @@ class Memory:
     def dupe(self):
         """Return a deep copy of @self"""
         mem = self.__class__()
-        for k, v in self.__dict__.items():
+        for k, v in list(self.__dict__.items()):
             mem.__dict__[k] = v
 
         return mem
 
     def clone(self, source):
         """Absorb all of the properties of @source"""
-        for k, v in source.__dict__.items():
+        for k, v in list(source.__dict__.items()):
             self.__dict__[k] = v
 
     CSV_FORMAT = ["Location", "Name", "Frequency",
@@ -744,7 +744,7 @@ class RadioFeatures:
         if name.startswith("_"):
             self.__dict__[name] = val
             return
-        elif name not in self._valid_map.keys():
+        elif name not in list(self._valid_map.keys()):
             raise ValueError("No such attribute `%s'" % name)
 
         if type(self._valid_map[name]) == tuple:
@@ -874,7 +874,7 @@ class RadioFeatures:
 
     def is_a_feature(self, name):
         """Returns True if @name is a valid feature flag name"""
-        return name in self._valid_map.keys()
+        return name in list(self._valid_map.keys())
 
     def __getitem__(self, name):
         return self.__dict__[name]
@@ -1564,7 +1564,7 @@ def sanitize_string(astring, validcharset=CHARSET_ASCII, replacechar='*'):
     myfilter = ''.join(
         [
             [replacechar, chr(x)][chr(x) in validcharset]
-            for x in xrange(256)
+            for x in range(256)
         ])
     return astring.translate(myfilter)
 

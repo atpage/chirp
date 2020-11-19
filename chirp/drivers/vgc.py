@@ -1343,7 +1343,7 @@ class VGCStyleRadio(chirp_common.CloneModeRadio,
         dtmf.append(ttautod)
 
         # setup 9 dtmf autodial entries
-        for i in map(str, range(1, 10)):
+        for i in map(str, list(range(1, 10))):
             objname = "code" + i
             strname = "Code " + str(i)
             dtmfsetting = getattr(_mem.dtmfcode, objname)

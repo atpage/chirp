@@ -18,7 +18,7 @@ import struct
 import logging
 from math import floor
 from chirp import chirp_common, directory, bitwise, memmap, errors, util
-from uvb5 import BaofengUVB5
+from .uvb5 import BaofengUVB5
 
 LOG = logging.getLogger(__name__)
 
@@ -177,7 +177,7 @@ struct {
 def do_ident(radio):
     radio.pipe.timeout = 3
     radio.pipe.write("\x05TROGRAM")
-    for x in xrange(10):
+    for x in range(10):
         ack = radio.pipe.read(1)
         if ack == '\x06':
             break
@@ -290,7 +290,7 @@ class Th350Radio(BaofengUVB5):
                           (220000000, 269000000),
                           (400000000, 520000000)]
         rf.valid_modes = ["FM", "NFM"]
-        rf.valid_special_chans = self.SPECIALS.keys()
+        rf.valid_special_chans = list(self.SPECIALS.keys())
         rf.valid_power_levels = POWER_LEVELS
         rf.has_ctone = True
         rf.has_bank = False
@@ -382,7 +382,7 @@ class Th350Radio(BaofengUVB5):
         if isinstance(number, str):
             return (getattr(self._memobj, number.lower()), None)
         elif number < 0:
-            for k, v in self.SPECIALS.items():
+            for k, v in list(self.SPECIALS.items()):
                 if number == v:
                     return (getattr(self._memobj, k.lower()), None)
         else:

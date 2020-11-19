@@ -13,12 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import GObject
 import time
 import logging
-
-from gobject import TYPE_INT, TYPE_STRING, TYPE_BOOLEAN
 
 from chirp import chirp_common
 from chirp.ui import common, miscwidgets
@@ -39,7 +37,7 @@ class MappingNamesJob(common.RadioJob):
         for mapping in mappings:
             self.__editor.mappings.append((mapping, mapping.get_name()))
 
-        gobject.idle_add(self.cb, *self.cb_args)
+        GObject.idle_add(self.cb, *self.cb_args)
 
 
 class MappingNameEditor(common.Editor):
@@ -88,9 +86,9 @@ class MappingNameEditor(common.Editor):
         self._model = model
         self._type = common.unpluralize(model.get_name())
 
-        types = [(gobject.TYPE_STRING, "key"),
-                 (gobject.TYPE_STRING, self._type),
-                 (gobject.TYPE_STRING, _("Name"))]
+        types = [(GObject.GObject.TYPE_STRING, "key"),
+                 (GObject.GObject.TYPE_STRING, self._type),
+                 (GObject.GObject.TYPE_STRING, _("Name"))]
 
         self.listw = miscwidgets.KeyedListWidget(types)
         self.listw.set_editable(1, True)
@@ -100,8 +98,8 @@ class MappingNameEditor(common.Editor):
 
         self.mappings = []
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add_with_viewport(self.listw)
 
         self.root = sw
@@ -278,14 +276,14 @@ class MappingMembershipEditor(common.Editor):
         self._type = common.unpluralize(model.get_name())
 
         self._view_cols = [
-            (_("Loc"),       TYPE_INT,     gtk.CellRendererText, ),
-            (_("Frequency"), TYPE_STRING,  gtk.CellRendererText, ),
-            (_("Name"),      TYPE_STRING,  gtk.CellRendererText, ),
-            (_("Index"),     TYPE_INT,     gtk.CellRendererText, ),
+            (_("Loc"),       GObject.TYPE_INT,     Gtk.CellRendererText, ),
+            (_("Frequency"), GObject.TYPE_STRING,  Gtk.CellRendererText, ),
+            (_("Name"),      GObject.TYPE_STRING,  Gtk.CellRendererText, ),
+            (_("Index"),     GObject.TYPE_INT,     Gtk.CellRendererText, ),
             ]
 
         self._cols = [
-            ("_filled",      TYPE_BOOLEAN, None, ),
+            ("_filled",      GObject.TYPE_BOOLEAN, None, ),
             ] + self._view_cols
 
         self.C_FILLED = 0
@@ -301,10 +299,10 @@ class MappingMembershipEditor(common.Editor):
 
         for i in range(0, self._model.get_num_mappings()):
             label = "%s %i" % (self._type, (i+1))
-            cols.append((label, TYPE_BOOLEAN, gtk.CellRendererToggle))
+            cols.append((label, GObject.TYPE_BOOLEAN, Gtk.CellRendererToggle))
 
-        self._store = gtk.ListStore(*tuple([y for x, y, z in cols]))
-        self._view = gtk.TreeView(self._store)
+        self._store = Gtk.ListStore(*tuple([y for x, y, z in cols]))
+        self._view = Gtk.TreeView(self._store)
 
         is_indexed = isinstance(self._model,
                                 chirp_common.MappingModelIndexInterface)
@@ -315,13 +313,13 @@ class MappingMembershipEditor(common.Editor):
                 colnum += 1
                 continue
             rend = rtype()
-            if dtype == TYPE_BOOLEAN:
+            if dtype == GObject.TYPE_BOOLEAN:
                 rend.set_property("activatable", True)
                 rend.connect("toggled", self._toggled_cb, colnum)
-                col = gtk.TreeViewColumn(label, rend, active=colnum,
+                col = Gtk.TreeViewColumn(label, rend, active=colnum,
                                          sensitive=self.C_FILLED)
             else:
-                col = gtk.TreeViewColumn(label, rend, text=colnum,
+                col = Gtk.TreeViewColumn(label, rend, text=colnum,
                                          sensitive=self.C_FILLED)
 
             self._view.append_column(col)
@@ -335,10 +333,10 @@ class MappingMembershipEditor(common.Editor):
             colnum += 1
 
         # A non-rendered column to absorb extra space in the row
-        self._view.append_column(gtk.TreeViewColumn())
+        self._view.append_column(Gtk.TreeViewColumn())
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add(self._view)
         self._view.show()
 

@@ -180,7 +180,7 @@ class ChirpIntegerEditor(ChirpEditor):
                          'Dec': (10, '{:d}'),
                          'Bin': (2, '{:0%ib}' % bindigits)}
         self._entries = {}
-        for name, (base, fmt) in self._editors.items():
+        for name, (base, fmt) in list(self._editors.items()):
             label = wx.StaticText(self, label=name)
             entry = wx.TextCtrl(self, value=fmt.format(int(self._obj)),
                                 style=wx.TE_PROCESS_ENTER)
@@ -196,7 +196,7 @@ class ChirpIntegerEditor(ChirpEditor):
 
     def _edited(self, event, base=10):
         entry = event.GetEventObject()
-        others = {n: e for n, e in self._entries.items()
+        others = {n: e for n, e in list(self._entries.items())
                   if e != entry}
 
         try:
@@ -210,7 +210,7 @@ class ChirpIntegerEditor(ChirpEditor):
         else:
             self._mark_changed(entry)
 
-        for name, entry in others.items():
+        for name, entry in list(others.items()):
             base, fmt = self._editors[name]
             entry.ChangeValue(fmt.format(val))
 
@@ -269,7 +269,7 @@ class ChirpBrowserPanel(wx.lib.scrolledpanel.ScrolledPanel):
         self._editors[name] = editor
 
     def selected(self):
-        for name, editor in self._editors.items():
+        for name, editor in list(self._editors.items()):
             editor.set_up()
             label = wx.StaticText(self, label='%s: ' % name)
             tt = wx.ToolTip(repr(editor))
@@ -337,7 +337,7 @@ class ChirpRadioBrowser(common.ChirpEditor):
             else:
                 self._treebook.AddPage(page, name)
 
-            for subname, item in memobj.items():
+            for subname, item in list(memobj.items()):
                 self._load_from_radio(subname, item, pd, parent=page)
 
 
@@ -357,8 +357,8 @@ class ChirpRadioBrowser(common.ChirpEditor):
         elif isinstance(memobj, bitwise.intDataElement):
             editor = ChirpIntegerEditor(parent, memobj)
         else:
-            print('Unsupported editor type for %s (%s)' % (
-                name, memobj.__class__))
+            print(('Unsupported editor type for %s (%s)' % (
+                name, memobj.__class__)))
 
         if editor:
             parent.add_editor(name, editor)

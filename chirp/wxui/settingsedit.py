@@ -44,7 +44,7 @@ class ChirpSettingsEdit(common.ChirpEditor):
         LOG.debug('Adding page for %s' % group.get_shortname())
         self._group_control.AddPage(propgrid, group.get_shortname())
 
-        for element in group.values():
+        for element in list(group.values()):
             if not isinstance(element, settings.RadioSetting):
                 self._add_group(element)
 
@@ -70,7 +70,7 @@ class ChirpSettingsEdit(common.ChirpEditor):
             return False
 
     def _apply_setting_group(self, all_values, group):
-        for element in group.values():
+        for element in list(group.values()):
             if isinstance(element, settings.RadioSetting):
                 if element.value.get_mutable():
                     element.value = all_values[element.get_name()]

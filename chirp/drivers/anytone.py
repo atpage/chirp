@@ -520,7 +520,7 @@ class AnyTone5888UVRadio(chirp_common.CloneModeRadio,
 
         rs = RadioSetting("welcome", "Welcome Message",
                           RadioSettingValueString(0, 8,
-                                                  filter(_settings.welcome)))
+                                                  list(filter(_settings.welcome))))
         basic.append(rs)
 
         rs = RadioSetting("beep", "Beep Enabled",

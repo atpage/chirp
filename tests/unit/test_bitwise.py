@@ -21,7 +21,7 @@ from chirp import memmap
 
 class BaseTest(unittest.TestCase):
     def _compare_structure(self, obj, primitive):
-        for key, value in primitive.iteritems():
+        for key, value in primitive.items():
             if isinstance(value, dict):
                 self._compare_structure(getattr(obj, key), value)
             else:

@@ -509,7 +509,7 @@ BUTTON_MODES = ["Send call list data",
                 "Open squelch"]
 BOOT_MESSAGE_TYPES = ["Off", "Battery voltage", "Custom message"]
 TALKBACK = ['Off', 'Chinese', 'English']
-BACKLIGHT_COLORS = zip(["Blue", "Orange", "Purple"], range(1, 4))
+BACKLIGHT_COLORS = list(zip(["Blue", "Orange", "Purple"], list(range(1, 4))))
 VOX_GAIN = OFF_INT[0:10]
 VOX_DELAYS = ['1s', '2s', '3s', '4s']
 TRANSMIT_ALARMS = ['Off', '30s', '60s', '90s', '120s',
@@ -527,7 +527,7 @@ BACKLIGHT_MODES = ["Off", "Auto", "On"]
 TONE_RESET_TIME = ['Off'] + ['%ds' % x for x in range(1, 256)]
 DTMF_TONE_RESET_TIME = TONE_RESET_TIME[0:16]
 
-DTMF_GROUPS = zip(["Off", "A", "B", "C", "D", "*", "#"], [255]+list(range(10, 16)))
+DTMF_GROUPS = list(zip(["Off", "A", "B", "C", "D", "*", "#"], [255]+list(range(10, 16))))
 FIVE_TONE_STANDARDS = ['ZVEI1', 'ZVEI2', 'CCIR1', 'CCITT']
 
 # should mimic the defaults in the memedit MemoryEditor somewhat
@@ -540,13 +540,13 @@ SANE_MEMORY_DEFAULT = b"\x14\x61\x00\x00\x14\x61\x00\x00" + \
 # these two option sets are listed differently like this in the stock software,
 # so I'm keeping them separate for now if they are in fact identical
 # in behaviour, that should probably be amended
-DTMF_ALERT_TRANSPOND = zip(['Off', 'Call alert',
+DTMF_ALERT_TRANSPOND = list(zip(['Off', 'Call alert',
                             'Transpond-alert',
                             'Transpond-ID code'],
-                           [255]+list(range(1, 4)))
-FIVE_TONE_ALERT_TRANSPOND = zip(['Off', 'Alert tone',
+                           [255]+list(range(1, 4))))
+FIVE_TONE_ALERT_TRANSPOND = list(zip(['Off', 'Alert tone',
                                  'Transpond', 'Transpond-ID code'],
-                                [255]+list(range(1, 4)))
+                                [255]+list(range(1, 4))))
 
 BFM_BANDS = ['87.5-108MHz', '76.0-91.0MHz', '76.0-108.0MHz', '65.0-76.0MHz']
 BFM_STRIDE = ['100kHz', '50kHz']
@@ -903,7 +903,7 @@ class MappedListSettingValue(settings.RadioSettingValueMap):
         self._val_mem = val_mem
         self._autowrite = autowrite
         if not isinstance(options[0], tuple):
-            options = zip(options, range(len(options)))
+            options = list(zip(options, list(range(len(options)))))
         settings.RadioSettingValueMap.__init__(
                 self,
                 options, mem_val=int(val_mem))
@@ -1142,7 +1142,7 @@ class Puxing_PX888K_Radio(chirp_common.CloneModeRadio):
         rf.valid_name_length = 6
         rf.valid_cross_modes = CROSS_MODES
         rf.memory_bounds = (1, 128)
-        rf.valid_special_chans = SPECIAL_CHANNELS.keys()
+        rf.valid_special_chans = list(SPECIAL_CHANNELS.keys())
         rf.valid_tuning_steps = [5.0, 6.25, 10.0, 12.5, 25.0]
         return rf
 
@@ -1182,11 +1182,11 @@ class Puxing_PX888K_Radio(chirp_common.CloneModeRadio):
         _name = None
         _present = None
         _priority = None
-        if number in SPECIAL_NUMBERS.keys():
+        if number in list(SPECIAL_NUMBERS.keys()):
             index = number
             # speical by index
             designator = SPECIAL_NUMBERS[number]
-        elif number in SPECIAL_CHANNELS.keys():
+        elif number in list(SPECIAL_CHANNELS.keys()):
             # special by name
             index = SPECIAL_CHANNELS[number]
             designator = number

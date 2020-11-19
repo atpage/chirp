@@ -23,7 +23,7 @@ from chirp.settings import RadioSetting, RadioSettingGroup, \
                 RadioSettingValueBoolean, RadioSettingValueList, \
                 RadioSettingValueInteger, RadioSettingValueString, \
                 RadioSettingValueFloat, RadioSettings
-from chirp.drivers.wouxun_common import wipe_memory, do_download, do_upload
+from .wouxun_common import wipe_memory, do_download, do_upload
 from textwrap import dedent
 
 LOG = logging.getLogger(__name__)
@@ -242,7 +242,7 @@ class KGUVD1PRadio(chirp_common.CloneModeRadio,
         """Do the original wouxun identification dance"""
         query = self._get_querymodel()
         for _i in range(0, 10):
-            self.pipe.write(query.next())
+            self.pipe.write(next(query))
             resp = self.pipe.read(9)
             if len(resp) != 9:
                 LOG.debug("Got:\n%s" % util.hexprint(resp))

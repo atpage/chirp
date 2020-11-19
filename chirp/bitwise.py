@@ -91,12 +91,12 @@ def pp(structure, level=0):
             pp(i, level+2)
         elif isinstance(i, tuple):
             if isinstance(i[1], str):
-                print "%s%s: %s" % (" " * level, i[0], i[1])
+                print("%s%s: %s" % (" " * level, i[0], i[1]))
             else:
-                print "%s%s:" % (" " * level, i[0])
+                print("%s%s:" % (" " * level, i[0]))
                 pp(i, level+2)
         elif isinstance(i, str):
-            print "%s%s" % (" " * level, i)
+            print("%s%s" % (" " * level, i))
 
 
 def array_copy(dst, src):
@@ -120,7 +120,7 @@ def bcd_to_int(bcd_array):
 
 def int_to_bcd(bcd_array, value):
     """Convert an int like 1234 into bcdDataElements like "\x12\x34" """
-    for i in reversed(range(0, len(bcd_array))):
+    for i in reversed(list(range(0, len(bcd_array)))):
         bcd_array[i].set_value(value % 100)
         value /= 100
 
@@ -410,7 +410,7 @@ class intDataElement(DataElement):
     def __ge__(self, val):
         return self.get_value() >= val
 
-    def __nonzero__(self):
+    def __bool__(self):
         return self.get_value() != 0
 
 
@@ -647,7 +647,7 @@ class structDataElement(DataElement):
         self._generators = {}
         self._keys = []
         self._count = 1
-        if "name" in kwargs.keys():
+        if "name" in list(kwargs.keys()):
             self._name = kwargs["name"]
             del kwargs["name"]
         else:
@@ -657,7 +657,7 @@ class structDataElement(DataElement):
 
     def _value(self, data, generators):
         result = {}
-        for name, gen in generators.items():
+        for name, gen in list(generators.items()):
             result[name] = gen.get_value(data)
         return result
 
@@ -695,7 +695,7 @@ class structDataElement(DataElement):
 
     def size(self):
         size = 0
-        for name, gen in self._generators.items():
+        for name, gen in list(self._generators.items()):
             if not isinstance(gen, list):
                 gen = [gen]
 
@@ -715,7 +715,7 @@ class structDataElement(DataElement):
         self._data[self._offset] = buffer
 
     def __iter__(self):
-        for item in self._generators.values():
+        for item in list(self._generators.values()):
             yield item
 
     def items(self):
@@ -908,14 +908,14 @@ struct {
     data = "\xab\x7F\x81abc\x12\x34"
     tree = parse(defn, data)
 
-    print repr(tree)
+    print(repr(tree))
 
-    print "Foo %i" % tree.mystruct.foo
-    print "Highbit: %i SixZeros: %i: Lowbit: %i" % (tree.mystruct.highbit,
+    print("Foo %i" % tree.mystruct.foo)
+    print("Highbit: %i SixZeros: %i: Lowbit: %i" % (tree.mystruct.highbit,
                                                     tree.mystruct.sixzeros,
-                                                    tree.mystruct.lowbit)
-    print "String: %s" % tree.mystruct.string
-    print "Fourdigits: %i" % tree.mystruct.fourdigits
+                                                    tree.mystruct.lowbit))
+    print("String: %s" % tree.mystruct.string)
+    print("Fourdigits: %i" % tree.mystruct.fourdigits)
 
     import sys
     sys.exit(0)
@@ -947,26 +947,26 @@ struct {
     # Mess with it a little
     p = Processor(data, 0)
     obj = p.parse(ast)
-    print "Object: %s" % obj
-    print obj["foo"][0]["bcdL"]
-    print obj["tail"]
-    print obj["foo"][0]["bar"]
+    print("Object: %s" % obj)
+    print(obj["foo"][0]["bcdL"])
+    print(obj["tail"])
+    print(obj["foo"][0]["bar"])
     obj["foo"][0]["bar"].set_value(255 << 8)
     obj["foo"][0]["twobit"].set_value(0)
     obj["foo"][0]["onebit"].set_value(1)
-    print "%i" % int(obj["foo"][0]["bar"])
+    print("%i" % int(obj["foo"][0]["bar"]))
 
     for i in obj["foo"][0]["array"]:
-        print int(i)
+        print(int(i))
     obj["foo"][0]["array"][1].set_value(255)
 
     for i in obj["foo"][0]["bcdL"]:
-        print i.get_value()
+        print(i.get_value())
 
     int_to_bcd(obj["foo"][0]["bcdL"], 1234)
-    print bcd_to_int(obj["foo"][0]["bcdL"])
+    print(bcd_to_int(obj["foo"][0]["bcdL"]))
 
     set_string(obj["foo"][0]["str"], "xyz")
-    print get_string(obj["foo"][0]["str"])
+    print(get_string(obj["foo"][0]["str"]))
 
-    print repr(data.get_packed())
+    print(repr(data.get_packed()))

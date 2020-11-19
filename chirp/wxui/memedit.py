@@ -149,7 +149,7 @@ class ChirpToneColumn(ChirpMemoryColumn):
         current = self.value(memory)
         return wx.propgrid.EnumProperty(self.label, self._name,
                                         self._str_choices,
-                                        range(len(self._choices)),
+                                        list(range(len(self._choices))),
                                         self._choices.index(current))
 
 
@@ -179,7 +179,7 @@ class ChirpChoiceColumn(ChirpMemoryColumn):
             cur_index = 0
         return wx.propgrid.EnumProperty(self.label, self._name,
                                         self._str_choices,
-                                        range(len(self._str_choices)),
+                                        list(range(len(self._str_choices))),
                                         cur_index)
 
 

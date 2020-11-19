@@ -24,7 +24,7 @@ from PIL import Image as im
 
 
 def die(msg):
-    print msg
+    print(msg)
     sys.exit(1)
 
 
@@ -66,26 +66,26 @@ def display_thd72(buf):
             line += dots[(ord(buf[byte]) >> (y % 8)) & 0x01]
         lines.append(line)
     for l in lines:
-        print l
+        print(l)
 
 
 def usage():
-    print "\nUsage: %s <-s|-g> [-i] [-d] " \
-          "<image-file> <thd72-nvram-file>" % sys.argv[0]
-    print "\nThis program will modify whatever nvram file provided or will"
-    print "create a new one if the file does not exist.  After using this to"
-    print "modify the image, you can use that file to upload all or part of"
-    print "it to your radio"
-    print "\nOption explanations:"
-    print "  -s     Save as the startup image"
-    print "  -g     Save as the GPS logger image"
-    print "  -i     Invert colors (black for white)"
-    print "         Depending on the file format the bits may be inverted."
-    print "         If your bitmap file turns out to be inverted, use -i."
-    print "  -d     Display the bitmap as dots (for confirmation)"
-    print "         Each black pixel is '*' and each white pixel is ' '"
-    print "         This will print up to 120 dots wide, so beware your"
-    print "         terminal size."
+    print("\nUsage: %s <-s|-g> [-i] [-d] " \
+          "<image-file> <thd72-nvram-file>" % sys.argv[0])
+    print("\nThis program will modify whatever nvram file provided or will")
+    print("create a new one if the file does not exist.  After using this to")
+    print("modify the image, you can use that file to upload all or part of")
+    print("it to your radio")
+    print("\nOption explanations:")
+    print("  -s     Save as the startup image")
+    print("  -g     Save as the GPS logger image")
+    print("  -i     Invert colors (black for white)")
+    print("         Depending on the file format the bits may be inverted.")
+    print("         If your bitmap file turns out to be inverted, use -i.")
+    print("  -d     Display the bitmap as dots (for confirmation)")
+    print("         Each black pixel is '*' and each white pixel is ' '")
+    print("         This will print up to 120 dots wide, so beware your")
+    print("         terminal size.")
     sys.exit(1)
 
 if __name__ == "__main__":
@@ -124,4 +124,4 @@ if __name__ == "__main__":
     blocks.append(imgpos/256)
     blocks.append(1+imgpos/256)
     blocks.append(2+imgpos/256)
-    print "Modified block list:", blocks
+    print("Modified block list:", blocks)

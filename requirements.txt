@@ -2,3 +2,4 @@ six
 PyGObject;python_version>="3.0"
 pyserial
 future
+python3-libxml2

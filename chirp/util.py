@@ -91,7 +91,7 @@ def bcd_encode(val, bigendian=True, width=None):
 def get_dict_rev(thedict, value):
     """Return the first matching key for a given @value in @dict"""
     _dict = {}
-    for k, v in thedict.items():
+    for k, v in list(thedict.items()):
         _dict[v] = k
     return _dict[value]
 

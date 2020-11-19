@@ -206,7 +206,7 @@ class IP620Radio(chirp_common.CloneModeRadio,
         except Exception as e:
             raise errors.RadioError("Error communicating with radio: %s" % e)
         if not _ident.startswith("\x06\x4B\x47\x36\x37\x01\x56\xF8"):
-            print( util.hexprint(_ident) )
+            print(util.hexprint(_ident))
             raise errors.RadioError("Radio returned unknown identification string")
         try:
             self.pipe.write(CMD_ACK)

@@ -44,7 +44,7 @@ def decode_base100(u16):
 
 def drain(pipe):
     """Chew up any data waiting on @pipe"""
-    for x in xrange(3):
+    for x in range(3):
         buf = pipe.read(4096)
         if not buf:
             return
@@ -53,7 +53,7 @@ def drain(pipe):
 
 def enter_setup(pipe):
     """Put AP510 in configuration mode."""
-    for x in xrange(30):
+    for x in range(30):
         if x % 2:
             pipe.write("@SETUP")
         else:
@@ -84,7 +84,7 @@ def download(radio):
         radio.pipe.write("@DISP")
     buf = ""
 
-    for status.cur in xrange(status.cur, status.max):
+    for status.cur in range(status.cur, status.max):
         buf += radio.pipe.read(1024)
         if buf.endswith("\r\n"):
             status.cur = status.max
@@ -109,8 +109,8 @@ def upload(radio):
 
     status.msg = "Uploading"
     status.cur = 1
-    status.max = len(radio._mmap._memobj.items())
-    for k, v in radio._mmap._memobj.items():
+    status.max = len(list(radio._mmap._memobj.items()))
+    for k, v in list(radio._mmap._memobj.items()):
         if k == '00':
             continue
         if new:
@@ -214,7 +214,7 @@ class AP510Memory(object):
             raise NotImplementedError(e)
 
     def get_smartbeacon(self):
-        return dict(zip((
+        return dict(list(zip((
             'lowspeed',
             'slowrate',
             'highspeed',
@@ -222,10 +222,10 @@ class AP510Memory(object):
             'turnslope',
             'turnangle',
             'turntime',
-        ), map(
+        ), list(map(
             decode_base100,
-            struct.unpack(">7H", self._memobj[self.ATTR_MAP['smartbeacon']]))
-        ))
+            struct.unpack(">7H", self._memobj[self.ATTR_MAP['smartbeacon']])))
+        )))
 
     def set_smartbeacon(self, d):
         self._memobj[self.ATTR_MAP['smartbeacon']] = \
@@ -242,7 +242,7 @@ class AP510Memory(object):
 
 class AP510Memory20141215(AP510Memory):
     """Compatible with firmware version 20141215"""
-    ATTR_MAP = dict(AP510Memory.ATTR_MAP.items() + {
+    ATTR_MAP = dict(list(AP510Memory.ATTR_MAP.items()) + list({
         'tx_volume': '21',  # 1-6
         'rx_volume': '22',  # 1-9
         'tx_power': '23',  # 1: 1 watt,  0: 0.5 watt
@@ -252,10 +252,10 @@ class AP510Memory20141215(AP510Memory):
         'path3': '27',  # like "WIDE1 1" else "0"
         'multiple': '28',
         'auto_on': '29',
-    }.items())
+    }.items()))
 
     def get_multiple(self):
-        return dict(zip(
+        return dict(list(zip(
            (
             'mice_message',     # conveniently matches APRS spec Mic-E messages
             'voltage',          # voltage in comment
@@ -271,9 +271,9 @@ class AP510Memory20141215(AP510Memory):
             'dcd',              # 0: Blue LED displays squelch,
                                 # 1: Blue LED displays software DCD
             'tf_card'           # 0: KML,  1: WPL
-            ), map(int, chunks(self._memobj[self.ATTR_MAP['multiple']],
-                               (1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1)))
-        ))
+            ), list(map(int, chunks(self._memobj[self.ATTR_MAP['multiple']],
+                               (1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 1, 1))))
+        )))
 
     def set_multiple(self, d):
         self._memobj[self.ATTR_MAP['multiple']] = "%(mice_message)1d" \
@@ -292,7 +292,7 @@ class AP510Memory20141215(AP510Memory):
     def get_smartbeacon(self):
         # raw:    18=0100300060010240028005
         # chunks: 18=010 0300 060 010 240 028 005
-        return dict(zip((
+        return dict(list(zip((
             'lowspeed',
             'slowrate',
             'highspeed',
@@ -300,10 +300,10 @@ class AP510Memory20141215(AP510Memory):
             'turnslope',
             'turnangle',
             'turntime',
-        ), map(int, chunks(
+        ), list(map(int, chunks(
             self._memobj[self.ATTR_MAP['smartbeacon']],
-            (3, 4, 3, 3, 3, 3, 3)))
-        ))
+            (3, 4, 3, 3, 3, 3, 3))))
+        )))
 
     def set_smartbeacon(self, d):
         self._memobj[self.ATTR_MAP['smartbeacon']] = "%(lowspeed)03d" \
@@ -328,10 +328,10 @@ PATH = [
     'WIDE2-1',
 ]
 TABLE = "/\#&0>AW^_acnsuvz"
-SYMBOL = "".join(map(chr, range(ord("!"), ord("~")+1)))
+SYMBOL = "".join(map(chr, list(range(ord("!"), ord("~")+1))))
 BEACON = ['manual', 'auto', 'auto + manual', 'smart', 'smart + manual']
 ALIAS = ['WIDE1-N', 'WIDE2-N', 'WIDE1-N + WIDE2-N']
-CHARSET = "".join(map(chr, range(0, 256)))
+CHARSET = "".join(map(chr, list(range(0, 256))))
 MICE_MESSAGE = ['Emergency', 'Priority', 'Special', 'Committed', 'Returning',
                 'In Service', 'En Route', 'Off Duty']
 TF_CARD = ['WPL', 'KML']
@@ -600,13 +600,13 @@ class AP510Radio(chirp_common.CloneModeRadio):
         try:
             system.append(RadioSetting("tx_volume", "Transmit volume",
                           RadioSettingValueList(
-                              map(str, range(1, 7)), self._mmap.tx_volume)))
+                              list(map(str, list(range(1, 7)))), self._mmap.tx_volume)))
             system.append(RadioSetting("rx_volume", "Receive volume",
                           RadioSettingValueList(
-                              map(str, range(1, 10)), self._mmap.rx_volume)))
+                              list(map(str, list(range(1, 10)))), self._mmap.rx_volume)))
             system.append(RadioSetting("squelch", "Squelch",
                           RadioSettingValueList(
-                              map(str, range(0, 9)),
+                              list(map(str, list(range(0, 9)))),
                               str(self._mmap.multiple['squelch']))))
             system.append(RadioSetting("tx_serial_ui_out", "Tx serial UI out",
                           RadioSettingValueBoolean(

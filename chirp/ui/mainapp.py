@@ -17,14 +17,15 @@
 from datetime import datetime
 import os
 import tempfile
-import urllib
+import urllib.request, urllib.parse, urllib.error
 import webbrowser
 from glob import glob
 import shutil
 import time
 import logging
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
 import sys
 
 from chirp.ui import inputdialog, common
@@ -36,7 +37,7 @@ from chirp import CHIRP_VERSION, chirp_common, detect, errors
 from chirp.ui import editorset, clone, miscwidgets, config, reporting, fips
 from chirp.ui import bandplans
 
-gobject.threads_init()
+GObject.threads_init()
 
 LOG = logging.getLogger(__name__)
 
@@ -80,7 +81,7 @@ class ModifiedError(Exception):
     pass
 
 
-class ChirpMain(gtk.Window):
+class ChirpMain(Gtk.Window):
 
     def get_current_editorset(self):
         page = self.tabs.get_current_page()
@@ -140,7 +141,7 @@ class ChirpMain(gtk.Window):
             "memedit": ["view", "edit"],
         }
 
-        for _editortype, actions in mappings.items():
+        for _editortype, actions in list(mappings.items()):
             for _action in actions:
                 action = self.menu_ag.get_action(_action)
                 action.set_sensitive(editortype.startswith(_editortype))
@@ -160,12 +161,12 @@ class ChirpMain(gtk.Window):
         for i in range(0, self.tabs.get_n_pages()):
             esets.append(self.tabs.get_nth_page(i))
 
-        d = gtk.Dialog(title="Diff Radios",
-                       buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL),
+        d = Gtk.Dialog(title="Diff Radios",
+                       buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL),
                        parent=self)
 
-        label = gtk.Label("")
+        label = Gtk.Label(label="")
         label.set_markup("<b>-1</b> for either Mem # does a full-file hex " +
                          "dump with diffs highlighted.\n" +
                          "<b>-2</b> for first Mem # shows " +
@@ -180,10 +181,10 @@ class ChirpMain(gtk.Window):
                                            eset.filename))
         choice_a = miscwidgets.make_choice(choices, False, choices[0])
         choice_a.show()
-        chan_a = gtk.SpinButton()
+        chan_a = Gtk.SpinButton()
         chan_a.get_adjustment().set_all(1, -2, 999, 1, 10, 0)
         chan_a.show()
-        hbox = gtk.HBox(False, 3)
+        hbox = Gtk.HBox(False, 3)
         hbox.pack_start(choice_a, 1, 1, 1)
         hbox.pack_start(chan_a, 0, 0, 0)
         hbox.show()
@@ -191,10 +192,10 @@ class ChirpMain(gtk.Window):
 
         choice_b = miscwidgets.make_choice(choices, False, choices[1])
         choice_b.show()
-        chan_b = gtk.SpinButton()
+        chan_b = Gtk.SpinButton()
         chan_b.get_adjustment().set_all(1, -1, 999, 1, 10, 0)
         chan_b.show()
-        hbox = gtk.HBox(False, 3)
+        hbox = Gtk.HBox(False, 3)
         hbox.pack_start(choice_b, 1, 1, 1)
         hbox.pack_start(chan_b, 0, 0, 0)
         hbox.show()
@@ -206,7 +207,7 @@ class ChirpMain(gtk.Window):
         sel_b = choice_b.get_active_text()
         sel_chan_b = chan_b.get_value()
         d.destroy()
-        if r == gtk.RESPONSE_CANCEL:
+        if r == Gtk.ResponseType.CANCEL:
             return
 
         if sel_a == sel_b:
@@ -275,12 +276,12 @@ class ChirpMain(gtk.Window):
 
     def _do_manual_select(self, filename):
         radiolist = {}
-        for drv, radio in directory.DRV_TO_RADIO.items():
+        for drv, radio in list(directory.DRV_TO_RADIO.items()):
             if not issubclass(radio, chirp_common.CloneModeRadio):
                 continue
             radiolist["%s %s" % (radio.VENDOR, radio.MODEL)] = drv
 
-        lab = gtk.Label("""<b><big>Unable to detect model!</big></b>
+        lab = Gtk.Label("""<b><big>Unable to detect model!</big></b>
 
 If you think that it is valid, you can select a radio model below to
 force an open attempt. If selecting the model manually works, please
@@ -289,15 +290,15 @@ does not work, it is likely that you are trying to open some other type
 of file.
 """)
 
-        lab.set_justify(gtk.JUSTIFY_FILL)
+        lab.set_justify(Gtk.Justification.FILL)
         lab.set_line_wrap(True)
         lab.set_use_markup(True)
         lab.show()
         choice = miscwidgets.make_choice(sorted(radiolist.keys()), False,
                                          sorted(radiolist.keys())[0])
-        d = gtk.Dialog(title="Detection Failed",
-                       buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+        d = Gtk.Dialog(title="Detection Failed",
+                       buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
         d.vbox.pack_start(lab, 0, 0, 0)
         d.vbox.pack_start(choice, 0, 0, 0)
         d.vbox.set_spacing(5)
@@ -306,7 +307,7 @@ of file.
         # d.set_resizable(False)
         r = d.run()
         d.destroy()
-        if r != gtk.RESPONSE_OK:
+        if r != Gtk.ResponseType.OK:
             return
         try:
             rc = directory.DRV_TO_RADIO[radiolist[choice.get_active_text()]]
@@ -406,7 +407,7 @@ of file.
         self._show_information(radio)
 
     def do_live_warning(self, radio):
-        d = gtk.MessageDialog(parent=self, buttons=gtk.BUTTONS_OK)
+        d = Gtk.MessageDialog(parent=self, buttons=Gtk.ButtonsType.OK)
         d.set_markup("<big><b>" + _("Note:") + "</b></big>")
         msg = _("The {vendor} {model} operates in <b>live mode</b>. "
                 "This means that any changes you make are immediately sent "
@@ -417,7 +418,7 @@ of file.
         msg = msg.format(vendor=radio.VENDOR, model=radio.MODEL)
         d.format_secondary_markup(msg)
 
-        again = gtk.CheckButton(_("Don't show this again"))
+        again = Gtk.CheckButton(_("Don't show this again"))
         again.show()
         d.vbox.pack_start(again, 0, 0, 0)
         d.run()
@@ -484,7 +485,7 @@ of file.
                 dlg = inputdialog.OverwriteDialog(fname)
                 owrite = dlg.run()
                 dlg.destroy()
-                if owrite == gtk.RESPONSE_OK:
+                if owrite == Gtk.ResponseType.OK:
                     break
             else:
                 break
@@ -540,13 +541,13 @@ of file.
             widget_name = action_name
             widget_label = "_%i. %s" % (i + 1, file_basename)
             widget_tip = _("Open recent file") + (" {name}").format(name=fname)
-            action = gtk.Action(action_name, widget_label, widget_tip, "")
+            action = Gtk.Action(action_name, widget_label, widget_tip, "")
 
             action.connect("activate", lambda a, f: self.do_open(f), fname)
             mid = self.menu_uim.new_merge_id()
             self.menu_uim.add_ui(mid, path,
                                  action_name, action_name,
-                                 gtk.UI_MANAGER_MENUITEM, False)
+                                 Gtk.UIManagerItemType.MENUITEM, False)
             self.menu_ag.add_action(action)
 
             widget_uim_path = path + "/" + widget_name
@@ -604,7 +605,7 @@ of file.
             name = os.path.splitext(os.path.basename(config))[0]
             action_name = "stock-%i" % configs.index(config)
             path = "/MenuBar/radio/stock"
-            action = gtk.Action(action_name,
+            action = Gtk.Action(action_name,
                                 name,
                                 _("Import stock "
                                   "configuration {name}").format(name=name),
@@ -613,14 +614,14 @@ of file.
             mid = self.menu_uim.new_merge_id()
             mid = self.menu_uim.add_ui(mid, path,
                                        action_name, action_name,
-                                       gtk.UI_MANAGER_MENUITEM, False)
+                                       Gtk.UIManagerItemType.MENUITEM, False)
             self.menu_ag.add_action(action)
 
         def _do_open_action(config):
             name = os.path.splitext(os.path.basename(config))[0]
             action_name = "openstock-%i" % configs.index(config)
             path = "/MenuBar/file/openstock"
-            action = gtk.Action(action_name,
+            action = Gtk.Action(action_name,
                                 name,
                                 _("Open stock "
                                   "configuration {name}").format(name=name),
@@ -629,7 +630,7 @@ of file.
             mid = self.menu_uim.new_merge_id()
             mid = self.menu_uim.add_ui(mid, path,
                                        action_name, action_name,
-                                       gtk.UI_MANAGER_MENUITEM, False)
+                                       Gtk.UIManagerItemType.MENUITEM, False)
             self.menu_ag.add_action(action)
 
         configs = glob(os.path.join(stock_dir, "*.csv"))
@@ -649,11 +650,11 @@ of file.
                 "Do you want to proceed?")
         resp, squelch = common.show_warning(msg, text,
                                             title=title,
-                                            buttons=gtk.BUTTONS_YES_NO,
+                                            buttons=Gtk.ButtonsType.YES_NO,
                                             can_squelch=True)
-        if resp == gtk.RESPONSE_YES:
+        if resp == Gtk.ResponseType.YES:
             CONF.set_bool(sql_key, not squelch, "state")
-        return resp == gtk.RESPONSE_YES
+        return resp == Gtk.ResponseType.YES
 
     def _show_information(self, radio):
         message = radio.get_prompts().info
@@ -663,13 +664,13 @@ of file.
         if CONF.get_bool("clone_information", "noconfirm"):
             return
 
-        d = gtk.MessageDialog(parent=self, buttons=gtk.BUTTONS_OK)
+        d = Gtk.MessageDialog(parent=self, buttons=Gtk.ButtonsType.OK)
         d.set_markup("<big><b>" + _("{name} Information").format(
                  name=radio.get_name()) + "</b></big>")
         msg = _("{information}").format(information=message)
         d.format_secondary_markup(msg)
 
-        again = gtk.CheckButton(
+        again = Gtk.CheckButton(
             _("Don't show information for any radio again"))
         again.show()
         again.connect("toggled", lambda action:
@@ -693,13 +694,13 @@ of file.
         if CONF.get_bool("clone_instructions", "noconfirm"):
             return
 
-        d = gtk.MessageDialog(parent=self, buttons=gtk.BUTTONS_OK)
+        d = Gtk.MessageDialog(parent=self, buttons=Gtk.ButtonsType.OK)
         d.set_markup("<big><b>" + _("{name} Instructions").format(
                      name=radio.get_name()) + "</b></big>")
         msg = _("{instructions}").format(instructions=message)
         d.format_secondary_markup(msg)
 
-        again = gtk.CheckButton(
+        again = Gtk.CheckButton(
             _("Don't show instructions for any radio again"))
         again.show()
         again.connect("toggled", lambda action:
@@ -813,16 +814,16 @@ of file.
         if eset.is_modified():
             dlg = miscwidgets.YesNoDialog(
                 title=_("Save Changes?"), parent=self,
-                buttons=(gtk.STOCK_YES, gtk.RESPONSE_YES,
-                         gtk.STOCK_NO, gtk.RESPONSE_NO,
-                         gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+                buttons=(Gtk.STOCK_YES, Gtk.ResponseType.YES,
+                         Gtk.STOCK_NO, Gtk.ResponseType.NO,
+                         Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
             dlg.set_text(_("File is modified, save changes before closing?"))
             res = dlg.run()
             dlg.destroy()
 
-            if res == gtk.RESPONSE_YES:
+            if res == Gtk.ResponseType.YES:
                 self.do_save(eset)
-            elif res != gtk.RESPONSE_NO:
+            elif res != Gtk.ResponseType.NO:
                 raise ModifiedError()
 
         eset.rthread.stop()
@@ -867,9 +868,9 @@ of file.
         reporting.report_model_usage(eset.rthread.radio, "import", count > 0)
 
     def do_dmrmarc_prompt(self):
-        fields = {"1City":      (gtk.Entry(), lambda x: x),
-                  "2State":     (gtk.Entry(), lambda x: x),
-                  "3Country":   (gtk.Entry(), lambda x: x),
+        fields = {"1City":      (Gtk.Entry(), lambda x: x),
+                  "2State":     (Gtk.Entry(), lambda x: x),
+                  "3Country":   (Gtk.Entry(), lambda x: x),
                   }
 
         d = inputdialog.FieldDialog(title=_("DMR-MARC Repeater Database Dump"),
@@ -878,7 +879,7 @@ of file.
             d.add_field(k[1:], fields[k][0])
             fields[k][0].set_text(CONF.get(k[1:], "dmrmarc") or "")
 
-        while d.run() == gtk.RESPONSE_OK:
+        while d.run() == Gtk.ResponseType.OK:
             for k in sorted(fields.keys()):
                 widget, validator = fields[k]
                 try:
@@ -895,7 +896,7 @@ of file.
         return False
 
     def do_dmrmarc(self, do_import):
-        self.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
+        self.window.set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
         if not self.do_dmrmarc_prompt():
             self.window.set_cursor(None)
             return
@@ -906,9 +907,9 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        gtk.gdk.Window.process_all_updates()
-        while gtk.events_pending():
-            gtk.main_iteration_do(False)
+        Gdk.window_process_all_updates()
+        while Gtk.events_pending():
+            Gtk.main_iteration(False)
 
         if do_import:
             eset = self.get_current_editorset()
@@ -927,7 +928,7 @@ of file.
 
     def do_repeaterbook_political_prompt(self):
         if not CONF.get_bool("has_seen_credit", "repeaterbook"):
-            d = gtk.MessageDialog(parent=self, buttons=gtk.BUTTONS_OK)
+            d = Gtk.MessageDialog(parent=self, buttons=Gtk.ButtonsType.OK)
             d.set_markup("<big><big><b>RepeaterBook</b></big>\r\n" +
                          "<i>North American Repeater Directory</i></big>")
             d.format_secondary_markup("For more information about this " +
@@ -945,20 +946,20 @@ of file.
                 code = int(CONF.get("state", "repeaterbook"))
             except:
                 code = CONF.get("state", "repeaterbook")
-            for k, v in fips.FIPS_STATES.items():
+            for k, v in list(fips.FIPS_STATES.items()):
                 if code == v:
                     default_state = k
                     break
 
             code = CONF.get("county", "repeaterbook")
-            items = fips.FIPS_COUNTIES[fips.FIPS_STATES[default_state]].items()
+            items = list(fips.FIPS_COUNTIES[fips.FIPS_STATES[default_state]].items())
             for k, v in items:
                 if code == v:
                     default_county = k
                     break
 
             code = int(CONF.get("band", "repeaterbook"))
-            for k, v in RB_BANDS.items():
+            for k, v in list(RB_BANDS.items()):
                 if code == v:
                     default_band = k
                     break
@@ -970,7 +971,7 @@ of file.
         county = miscwidgets.make_choice(
             sorted(fips.FIPS_COUNTIES[fips.FIPS_STATES[default_state]].keys()),
             False, default_county)
-        band = miscwidgets.make_choice(sorted(RB_BANDS.keys(), key=key_bands),
+        band = miscwidgets.make_choice(sorted(list(RB_BANDS.keys()), key=key_bands),
                                        False, default_band)
 
         def _changed(box, county):
@@ -989,7 +990,7 @@ of file.
 
         r = d.run()
         d.destroy()
-        if r != gtk.RESPONSE_OK:
+        if r != Gtk.ResponseType.OK:
             return False
 
         code = fips.FIPS_STATES[state.get_active_text()]
@@ -1002,7 +1003,7 @@ of file.
         return True
 
     def do_repeaterbook_political(self, do_import):
-        self.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
+        self.window.set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
         if not self.do_repeaterbook_political_prompt():
             self.window.set_cursor(None)
             return
@@ -1031,16 +1032,16 @@ of file.
         query = query % (code,
                          band and band or "%%",
                          county and county or "%%")
-        print query
+        print(query)
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        gtk.gdk.Window.process_all_updates()
-        while gtk.events_pending():
-            gtk.main_iteration_do(False)
+        Gdk.window_process_all_updates()
+        while Gtk.events_pending():
+            Gtk.main_iteration(False)
 
         fn = tempfile.mktemp(".csv")
-        filename, headers = urllib.urlretrieve(query, fn)
+        filename, headers = urllib.request.urlretrieve(query, fn)
         if not os.path.exists(filename):
             LOG.error("Failed, headers were: %s", headers)
             common.show_error(_("RepeaterBook query failed"))
@@ -1075,16 +1076,16 @@ of file.
         default_band = "--All--"
         try:
             code = int(CONF.get("band", "repeaterbook"))
-            for k, v in RB_BANDS.items():
+            for k, v in list(RB_BANDS.items()):
                 if code == v:
                     default_band = k
                     break
         except:
             pass
-        fields = {"1Location":  (gtk.Entry(), lambda x: x.get_text()),
-                  "2Distance":  (gtk.Entry(), lambda x: x.get_text()),
+        fields = {"1Location":  (Gtk.Entry(), lambda x: x.get_text()),
+                  "2Distance":  (Gtk.Entry(), lambda x: x.get_text()),
                   "3Band":      (miscwidgets.make_choice(
-                                sorted(RB_BANDS.keys(), key=key_bands),
+                                sorted(list(RB_BANDS.keys()), key=key_bands),
                                 False, default_band),
                                 lambda x: RB_BANDS[x.get_active_text()]),
                   }
@@ -1093,13 +1094,13 @@ of file.
                                     parent=self)
         for k in sorted(fields.keys()):
             d.add_field(k[1:], fields[k][0])
-            if isinstance(fields[k][0], gtk.Entry):
+            if isinstance(fields[k][0], Gtk.Entry):
                 fields[k][0].set_text(
                     CONF.get(k[1:].lower(), "repeaterbook") or "")
 
-        while d.run() == gtk.RESPONSE_OK:
+        while d.run() == Gtk.ResponseType.OK:
             valid = True
-            for k, (widget, fn) in fields.items():
+            for k, (widget, fn) in list(fields.items()):
                 try:
                     CONF.set(k[1:].lower(), str(fn(widget)), "repeaterbook")
                     continue
@@ -1117,7 +1118,7 @@ of file.
         return False
 
     def do_repeaterbook_proximity(self, do_import):
-        self.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
+        self.window.set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
         if not self.do_repeaterbook_proximity_prompt():
             self.window.set_cursor(None)
             return
@@ -1137,16 +1138,16 @@ of file.
 
         query = "http://chirp.danplanet.com/query/rb/1.0/app_direct" \
                 "?loc=%s&band=%s&dist=%s" % (loc, band, dist)
-        print( query )
+        print(query)
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        gtk.gdk.Window.process_all_updates()
-        while gtk.events_pending():
-            gtk.main_iteration_do(False)
+        Gdk.window_process_all_updates()
+        while Gtk.events_pending():
+            Gtk.main_iteration(False)
 
         fn = tempfile.mktemp(".csv")
-        filename, headers = urllib.urlretrieve(query, fn)
+        filename, headers = urllib.request.urlretrieve(query, fn)
         if not os.path.exists(filename):
             LOG.error("Failed, headers were: %s", headers)
             common.show_error(_("RepeaterBook query failed"))
@@ -1197,18 +1198,18 @@ of file.
             "Only Working":
                 (miscwidgets.make_choice(['', 'yes'], False),
                  lambda x: str(x.get_active_text())),
-            "Latitude": (gtk.Entry(), lambda x: float(x.get_text())),
-            "Longitude": (gtk.Entry(), lambda x: float(x.get_text())),
-            "Range": (gtk.Entry(), lambda x: int(x.get_text())),
+            "Latitude": (Gtk.Entry(), lambda x: float(x.get_text())),
+            "Longitude": (Gtk.Entry(), lambda x: float(x.get_text())),
+            "Range": (Gtk.Entry(), lambda x: int(x.get_text())),
         }
         for name in sorted(fields.keys()):
             value, fn = fields[name]
             d.add_field(name, value)
-        while d.run() == gtk.RESPONSE_OK:
+        while d.run() == Gtk.ResponseType.OK:
             query = "http://przemienniki.net/export/chirp.csv?"
             args = []
-            for name, (value, fn) in fields.items():
-                if isinstance(value, gtk.Entry):
+            for name, (value, fn) in list(fields.items()):
+                if isinstance(value, Gtk.Entry):
                     contents = value.get_text()
                 else:
                     contents = value.get_active_text()
@@ -1236,7 +1237,7 @@ of file.
             return
 
         fn = tempfile.mktemp(".csv")
-        filename, headers = urllib.urlretrieve(url, fn)
+        filename, headers = urllib.request.urlretrieve(url, fn)
         if not os.path.exists(filename):
             LOG.error("Failed, headers were: %s", str(headers))
             common.show_error(_("Query failed"))
@@ -1260,13 +1261,13 @@ of file.
             self.do_open_live(radio, read_only=True)
 
     def do_rfinder_prompt(self):
-        fields = {"1Email": (gtk.Entry(), lambda x: "@" in x),
-                  "2Password": (gtk.Entry(), lambda x: x),
-                  "3Latitude": (gtk.Entry(),
+        fields = {"1Email": (Gtk.Entry(), lambda x: "@" in x),
+                  "2Password": (Gtk.Entry(), lambda x: x),
+                  "3Latitude": (Gtk.Entry(),
                                 lambda x: float(x) < 90 and float(x) > -90),
-                  "4Longitude": (gtk.Entry(),
+                  "4Longitude": (Gtk.Entry(),
                                  lambda x: float(x) < 180 and float(x) > -180),
-                  "5Range_in_Miles": (gtk.Entry(),
+                  "5Range_in_Miles": (Gtk.Entry(),
                                       lambda x: int(x) > 0 and int(x) < 5000),
                   }
 
@@ -1276,7 +1277,7 @@ of file.
             fields[k][0].set_text(CONF.get(k[1:], "rfinder") or "")
             fields[k][0].set_visibility(k != "2Password")
 
-        while d.run() == gtk.RESPONSE_OK:
+        while d.run() == Gtk.ResponseType.OK:
             valid = True
             for k in sorted(fields.keys()):
                 widget, validator = fields[k]
@@ -1298,7 +1299,7 @@ of file.
         return False
 
     def do_rfinder(self, do_import):
-        self.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
+        self.window.set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
         if not self.do_rfinder_prompt():
             self.window.set_cursor(None)
             return
@@ -1311,9 +1312,9 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        gtk.gdk.Window.process_all_updates()
-        while gtk.events_pending():
-            gtk.main_iteration_do(False)
+        Gdk.window_process_all_updates()
+        while Gtk.events_pending():
+            Gtk.main_iteration(False)
 
         if do_import:
             eset = self.get_current_editorset()
@@ -1329,9 +1330,9 @@ of file.
         self.window.set_cursor(None)
 
     def do_radioreference_prompt(self):
-        fields = {"1Username":  (gtk.Entry(), lambda x: x),
-                  "2Password":  (gtk.Entry(), lambda x: x),
-                  "3Zipcode":   (gtk.Entry(), lambda x: x),
+        fields = {"1Username":  (Gtk.Entry(), lambda x: x),
+                  "2Password":  (Gtk.Entry(), lambda x: x),
+                  "3Zipcode":   (Gtk.Entry(), lambda x: x),
                   }
 
         d = inputdialog.FieldDialog(title=_("RadioReference.com Query"),
@@ -1341,7 +1342,7 @@ of file.
             fields[k][0].set_text(CONF.get(k[1:], "radioreference") or "")
             fields[k][0].set_visibility(k != "2Password")
 
-        while d.run() == gtk.RESPONSE_OK:
+        while d.run() == Gtk.ResponseType.OK:
             valid = True
             for k in sorted(fields.keys()):
                 widget, validator = fields[k]
@@ -1363,7 +1364,7 @@ of file.
         return False
 
     def do_radioreference(self, do_import):
-        self.window.set_cursor(gtk.gdk.Cursor(gtk.gdk.WATCH))
+        self.window.set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
         if not self.do_radioreference_prompt():
             self.window.set_cursor(None)
             return
@@ -1374,9 +1375,9 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        gtk.gdk.Window.process_all_updates()
-        while gtk.events_pending():
-            gtk.main_iteration_do(False)
+        Gdk.window_process_all_updates()
+        while Gtk.events_pending():
+            Gtk.main_iteration(False)
 
         if do_import:
             eset = self.get_current_editorset()
@@ -1416,25 +1417,24 @@ of file.
             dlg = inputdialog.OverwriteDialog(filen)
             owrite = dlg.run()
             dlg.destroy()
-            if owrite != gtk.RESPONSE_OK:
+            if owrite != Gtk.ResponseType.OK:
                 return
             os.remove(filen)
 
         count = eset.do_export(filen)
-        success = count > 0 if count is not None else False
-        reporting.report_model_usage(eset.rthread.radio, "export", success)
+        reporting.report_model_usage(eset.rthread.radio, "export", count > 0)
 
     def do_about(self):
-        d = gtk.AboutDialog()
+        d = Gtk.AboutDialog()
         d.set_transient_for(self)
         import sys
         verinfo = "GTK %s\nPyGTK %s\nPython %s\n" % (
-            ".".join([str(x) for x in gtk.gtk_version]),
-            ".".join([str(x) for x in gtk.pygtk_version]),
+            ".".join([str(x) for x in Gtk.gtk_version]),
+            ".".join([str(x) for x in Gtk.pygtk_version]),
             sys.version.split()[0])
 
         # Set url hook to handle user activating a URL link in the about dialog
-        gtk.about_dialog_set_url_hook(lambda dlg, url: webbrowser.open(url))
+        Gtk.about_dialog_set_url_hook(lambda dlg, url: webbrowser.open(url))
 
         d.set_name("CHIRP")
         d.set_version(CHIRP_VERSION)
@@ -1473,15 +1473,15 @@ of file.
         radio_name = "%s %s %s" % (eset.rthread.radio.VENDOR,
                                    eset.rthread.radio.MODEL,
                                    eset.rthread.radio.VARIANT)
-        d = gtk.Dialog(title=_("Select Columns"),
+        d = Gtk.Dialog(title=_("Select Columns"),
                        parent=self,
-                       buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL))
+                       buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                                Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
 
-        vbox = gtk.VBox()
+        vbox = Gtk.VBox()
         vbox.show()
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_NEVER, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC)
         sw.add_with_viewport(vbox)
         sw.show()
         d.vbox.pack_start(sw, 1, 1, 1)
@@ -1489,9 +1489,9 @@ of file.
         d.set_resizable(False)
 
         labelstr = _("Visible columns for {radio}").format(radio=radio_name)
-        label = gtk.Label(labelstr)
+        label = Gtk.Label(label=labelstr)
         label.show()
-        vbox.pack_start(label)
+        vbox.pack_start(label, True, True, 0)
 
         fields = []
         memedit = eset.get_current_editor()  # .editors["memedit"]
@@ -1503,7 +1503,7 @@ of file.
                 continue
             label = colspec[0]
             visible = memedit.get_column_visible(memedit.col(label))
-            widget = gtk.CheckButton(label)
+            widget = Gtk.CheckButton(label)
             widget.set_active(visible)
             fields.append(widget)
             vbox.pack_start(widget, 1, 1, 1)
@@ -1511,7 +1511,7 @@ of file.
 
         res = d.run()
         selected_columns = []
-        if res == gtk.RESPONSE_OK:
+        if res == Gtk.ResponseType.OK:
             for widget in fields:
                 colnum = memedit.col(widget.get_label())
                 memedit.set_column_visible(colnum, widget.get_active())
@@ -1550,7 +1550,7 @@ of file.
 
     def do_toggle_report(self, action):
         if not action.get_active():
-            d = gtk.MessageDialog(buttons=gtk.BUTTONS_YES_NO, parent=self)
+            d = Gtk.MessageDialog(buttons=Gtk.ButtonsType.YES_NO, parent=self)
             markup = "<b><big>" + _("Reporting is disabled") + "</big></b>"
             d.set_markup(markup)
             msg = _("The reporting feature of CHIRP is designed to help "
@@ -1565,7 +1565,7 @@ of file.
             d.format_secondary_markup(msg.replace("\n", "\r\n"))
             r = d.run()
             d.destroy()
-            if r == gtk.RESPONSE_NO:
+            if r == Gtk.ResponseType.NO:
                 action.set_active(not action.get_active())
 
         conf = config.get()
@@ -1602,7 +1602,7 @@ of file.
                            "will take effect"))
         d.label.set_line_wrap(True)
         r = d.run()
-        if r == gtk.RESPONSE_OK:
+        if r == Gtk.ResponseType.OK:
             LOG.debug("Chose language %s" % d.choice.get_active_text())
             conf = config.get()
             conf.set("language", d.choice.get_active_text(), "state")
@@ -1622,7 +1622,7 @@ of file.
         # its normal better judgement
         directory.enable_reregistrations()
 
-        self.modify_bg(gtk.STATE_NORMAL, gtk.gdk.Color('#ea6262'))
+        self.modify_bg(Gtk.StateType.NORMAL, Gdk.Color('#ea6262'))
 
         try:
             with file(filen) as module:
@@ -1639,7 +1639,7 @@ of file.
         action = _action.get_name()
 
         if action == "quit":
-            gtk.main_quit()
+            Gtk.main_quit()
         elif action == "new":
             self.do_new()
         elif action == "open":
@@ -1802,15 +1802,15 @@ of file.
             CTRL_KEY = "<Meta>"
         actions = [
             ('file', None, _("_File"), None, None, self.mh),
-            ('new', gtk.STOCK_NEW, None, None, None, self.mh),
-            ('open', gtk.STOCK_OPEN, None, None, None, self.mh),
+            ('new', Gtk.STOCK_NEW, None, None, None, self.mh),
+            ('open', Gtk.STOCK_OPEN, None, None, None, self.mh),
             ('openstock', None, _("Open stock config"), None, None, self.mh),
             ('recent', None, _("_Recent"), None, None, self.mh),
-            ('save', gtk.STOCK_SAVE, None, None, None, self.mh),
-            ('saveas', gtk.STOCK_SAVE_AS, None, None, None, self.mh),
+            ('save', Gtk.STOCK_SAVE, None, None, None, self.mh),
+            ('saveas', Gtk.STOCK_SAVE_AS, None, None, None, self.mh),
             ('loadmod', None, _("Load Module"), None, None, self.mh),
-            ('close', gtk.STOCK_CLOSE, None, None, None, self.mh),
-            ('quit', gtk.STOCK_QUIT, None, None, None, self.mh),
+            ('close', Gtk.STOCK_CLOSE, None, None, None, self.mh),
+            ('quit', Gtk.STOCK_QUIT, None, None, None, self.mh),
             ('edit', None, _("_Edit"), None, None, self.mh),
             ('cut', None, _("_Cut"), "%sx" % CTRL_KEY, None, self.mh),
             ('copy', None, _("_Copy"), "%sc" % CTRL_KEY, None, self.mh),
@@ -1872,9 +1872,9 @@ of file.
              None, None, self.mh),
             ('channel_defaults', None, _("Channel defaults"),
              None, None, self.mh),
-            ('cancelq', gtk.STOCK_STOP, None, "Escape", None, self.mh),
+            ('cancelq', Gtk.STOCK_STOP, None, "Escape", None, self.mh),
             ('help', None, _('Help'), None, None, self.mh),
-            ('about', gtk.STOCK_ABOUT, None, None, None, self.mh),
+            ('about', Gtk.STOCK_ABOUT, None, None, None, self.mh),
             ('gethelp', None, _("Get Help Online..."), None, None, self.mh),
         ]
 
@@ -1900,8 +1900,8 @@ of file.
                     None, None, self.mh, dv),
                    ]
 
-        self.menu_uim = gtk.UIManager()
-        self.menu_ag = gtk.ActionGroup("MenuBar")
+        self.menu_uim = Gtk.UIManager()
+        self.menu_ag = Gtk.ActionGroup("MenuBar")
         self.menu_ag.add_actions(actions)
         self.menu_ag.add_toggle_actions(toggles)
 
@@ -1922,7 +1922,7 @@ of file.
         return self.menu_uim.get_widget("/MenuBar")
 
     def make_tabs(self):
-        self.tabs = gtk.Notebook()
+        self.tabs = Gtk.Notebook()
         self.tabs.set_scrollable(True)
 
         return self.tabs
@@ -1937,20 +1937,20 @@ of file.
             except ModifiedError:
                 return False
 
-        gtk.main_quit()
+        Gtk.main_quit()
 
         return True
 
     def make_status_bar(self):
-        box = gtk.HBox(False, 2)
+        box = Gtk.HBox(False, 2)
 
-        self.sb_general = gtk.Statusbar()
-        self.sb_general.set_has_resize_grip(False)
+        self.sb_general = Gtk.Statusbar()
+        #self.sb_general.set_has_resize_grip(False)
         self.sb_general.show()
         box.pack_start(self.sb_general, 1, 1, 1)
 
-        self.sb_radio = gtk.Statusbar()
-        self.sb_radio.set_has_resize_grip(True)
+        self.sb_radio = Gtk.Statusbar()
+        #self.sb_radio.set_has_resize_grip(True)
         self.sb_radio.show()
         box.pack_start(self.sb_radio, 1, 1, 1)
 
@@ -1976,7 +1976,7 @@ of file.
         ]
 
         for name, key, fn in actions:
-            a = gtk.Action(name, name, name, "")
+            a = Gtk.Action(name, name, name, "")
             a.connect("activate", fn)
             self.menu_ag.add_action_with_accel(a, key)
             a.set_accel_group(accelg)
@@ -2009,8 +2009,8 @@ of file.
             return
 
         CONF.set_int("last_update_check", int(time.time()), "state")
-        d = gtk.MessageDialog(buttons=gtk.BUTTONS_OK_CANCEL, parent=self,
-                              type=gtk.MESSAGE_INFO)
+        d = Gtk.MessageDialog(buttons=Gtk.ButtonsType.OK_CANCEL, parent=self,
+                              type=Gtk.MessageType.INFO)
         d.label.set_markup(
             _('A new version of CHIRP is available: ' +
               '{ver}. '.format(ver=version) +
@@ -2019,7 +2019,7 @@ of file.
               'http://chirp.danplanet.com</a>'))
         response = d.run()
         d.destroy()
-        if response == gtk.RESPONSE_OK:
+        if response == Gtk.ResponseType.OK:
             webbrowser.open('http://chirp.danplanet.com/'
                             'projects/chirp/wiki/Download')
 
@@ -2049,7 +2049,7 @@ of file.
                 this_platform.find_resource(os.path.join("pixmaps",
                                                          "chirp.png")))
         if os.path.exists(icon):
-            icon_pixmap = gtk.gdk.pixbuf_new_from_file(icon)
+            icon_pixmap = GdkPixbuf.Pixbuf.new_from_file(icon)
             macapp.set_dock_icon_pixbuf(icon_pixmap)
 
         menu_bar.hide()
@@ -2070,18 +2070,18 @@ of file.
         LOG.debug("Initialized MacOS support")
 
     def __init__(self, *args, **kwargs):
-        gtk.Window.__init__(self, *args, **kwargs)
+        GObject.GObject.__init__(self, *args, **kwargs)
 
         def expose(window, event):
             allocation = window.get_allocation()
             CONF.set_int("window_w", allocation.width, "state")
             CONF.set_int("window_h", allocation.height, "state")
-        self.connect("expose_event", expose)
+        self.connect("draw", expose)
 
         def state_change(window, event):
             CONF.set_bool(
                 "window_maximized",
-                event.new_window_state == gtk.gdk.WINDOW_STATE_MAXIMIZED,
+                event.new_window_state == Gdk.WindowState.MAXIMIZED,
                 "state")
         self.connect("window-state-event", state_change)
 
@@ -2089,7 +2089,7 @@ of file.
         if d and os.path.isdir(d):
             platform.get_platform().set_last_dir(d)
 
-        vbox = gtk.VBox(False, 2)
+        vbox = Gtk.VBox(False, 2)
 
         self._recent = []
 
@@ -2134,7 +2134,7 @@ of file.
 
         if not CONF.get_bool("warned_about_reporting") and \
                 not CONF.get_bool("no_report"):
-            d = gtk.MessageDialog(buttons=gtk.BUTTONS_OK, parent=self)
+            d = Gtk.MessageDialog(buttons=Gtk.ButtonsType.OK, parent=self)
             d.set_markup("<b><big>" +
                          _("Error reporting is enabled") +
                          "</big></b>")
@@ -2155,7 +2155,7 @@ of file.
         self.setup_extra_hotkeys()
 
         def updates_callback(ver):
-            gobject.idle_add(self._updates, ver)
+            GObject.idle_add(self._updates, ver)
 
         if not CONF.get_bool("skip_update_check", "state"):
             reporting.check_for_updates(updates_callback)

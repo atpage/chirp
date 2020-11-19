@@ -18,8 +18,8 @@ import threading
 import logging
 import os
 
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import GObject
 
 from chirp import platform, directory, detect, chirp_common
 from chirp.ui import miscwidgets, cloneprog, inputdialog, common, config
@@ -43,9 +43,9 @@ class CloneSettings:
                 port=self.port)
 
 
-class CloneSettingsDialog(gtk.Dialog):
+class CloneSettingsDialog(Gtk.Dialog):
     def __make_field(self, label, widget):
-        l = gtk.Label(label)
+        l = Gtk.Label(label=label)
         self.__table.attach(l, 0, 1, self.__row, self.__row+1)
         self.__table.attach(widget, 1, 2, self.__row, self.__row+1)
         self.__row += 1
@@ -90,8 +90,8 @@ class CloneSettingsDialog(gtk.Dialog):
             conf.set("last_vendor", sorted(vendors.keys())[0])
 
         last_vendor = conf.get("last_vendor")
-        if last_vendor not in vendors.keys():
-            last_vendor = vendors.keys()[0]
+        if last_vendor not in list(vendors.keys()):
+            last_vendor = list(vendors.keys())[0]
 
         v = miscwidgets.make_choice(sorted(vendors.keys()), False, last_vendor)
 
@@ -122,7 +122,7 @@ class CloneSettingsDialog(gtk.Dialog):
         return v
 
     def __make_ui(self, settings):
-        self.__table = gtk.Table(3, 2)
+        self.__table = Gtk.Table(3, 2)
         self.__table.set_row_spacings(3)
         self.__table.set_col_spacings(10)
         self.__row = 0
@@ -147,22 +147,22 @@ class CloneSettingsDialog(gtk.Dialog):
         self.vbox.pack_start(self.__table, 1, 1, 1)
 
     def __init__(self, settings=None, parent=None, title=_("Radio")):
-        buttons = (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                   gtk.STOCK_OK, gtk.RESPONSE_OK)
-        gtk.Dialog.__init__(self, title,
+        buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                   Gtk.STOCK_OK, Gtk.ResponseType.OK)
+        GObject.GObject.__init__(self, title,
                             parent=parent,
-                            flags=gtk.DIALOG_MODAL)
+                            flags=Gtk.DialogFlags.MODAL)
         self.__make_ui(settings)
-        self.__cancel_button = self.add_button(gtk.STOCK_CANCEL,
-                                               gtk.RESPONSE_CANCEL)
-        self.__okay_button = self.add_button(gtk.STOCK_OK,
-                                             gtk.RESPONSE_OK)
+        self.__cancel_button = self.add_button(Gtk.STOCK_CANCEL,
+                                               Gtk.ResponseType.CANCEL)
+        self.__okay_button = self.add_button(Gtk.STOCK_OK,
+                                             Gtk.ResponseType.OK)
         self.__okay_button.grab_default()
         self.__okay_button.grab_focus()
 
     def run(self):
-        r = gtk.Dialog.run(self)
-        if r != gtk.RESPONSE_OK:
+        r = Gtk.Dialog.run(self)
+        if r != Gtk.ResponseType.OK:
             return None
 
         vendor = self.__vend.get_active_text()
@@ -183,7 +183,7 @@ class CloneSettingsDialog(gtk.Dialog):
                 d.destroy()
                 return None
         else:
-            for rclass in directory.DRV_TO_RADIO.values():
+            for rclass in list(directory.DRV_TO_RADIO.values()):
                 if rclass.MODEL == model:
                     cs.radio_class = rclass
                     break
@@ -226,7 +226,7 @@ class CloneCancelledException(Exception):
 
 class CloneThread(threading.Thread):
     def __status(self, status):
-        gobject.idle_add(self.__progw.status, status)
+        GObject.idle_add(self.__progw.status, status)
 
     def __init__(self, radio, direction, cb=None, parent=None):
         threading.Thread.__init__(self)
@@ -245,7 +245,7 @@ class CloneThread(threading.Thread):
     def run(self):
         LOG.debug("Clone thread started")
 
-        gobject.idle_add(self.__progw.show)
+        GObject.idle_add(self.__progw.show)
 
         self.__radio.status_fn = self.__status
 
@@ -261,7 +261,7 @@ class CloneThread(threading.Thread):
             LOG.error("Clone failed: {error}".format(error=e))
             emsg = e
 
-        gobject.idle_add(self.__progw.hide)
+        GObject.idle_add(self.__progw.hide)
 
         # NB: Compulsory close of the radio's serial connection
         self.__radio.pipe.close()
@@ -269,10 +269,10 @@ class CloneThread(threading.Thread):
         LOG.debug("Clone thread ended")
 
         if self.__cback and not self.__cancelled:
-            gobject.idle_add(self.__cback, self.__radio, emsg)
+            GObject.idle_add(self.__cback, self.__radio, emsg)
 
 
 if __name__ == "__main__":
     d = CloneSettingsDialog("/dev/ttyUSB0")
     r = d.run()
-    print r
+    print(r)

@@ -14,8 +14,8 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-import gtk
-import gobject
+from gi.repository import Gtk
+from gi.repository import GObject
 import logging
 
 from chirp import chirp_common, directory
@@ -26,18 +26,18 @@ from chirp.ui import inputdialog, reporting, settingsedit, radiobrowser, config
 LOG = logging.getLogger(__name__)
 
 
-class EditorSet(gtk.VBox):
+class EditorSet(Gtk.VBox):
     __gsignals__ = {
-        "want-close": (gobject.SIGNAL_RUN_LAST, gobject.TYPE_NONE, ()),
-        "status": (gobject.SIGNAL_RUN_LAST,
-                   gobject.TYPE_NONE,
-                   (gobject.TYPE_STRING,)),
-        "usermsg": (gobject.SIGNAL_RUN_LAST,
-                    gobject.TYPE_NONE,
-                    (gobject.TYPE_STRING,)),
-        "editor-selected": (gobject.SIGNAL_RUN_LAST,
-                            gobject.TYPE_NONE,
-                            (gobject.TYPE_STRING,)),
+        "want-close": (GObject.SignalFlags.RUN_LAST, None, ()),
+        "status": (GObject.SignalFlags.RUN_LAST,
+                   None,
+                   (GObject.TYPE_STRING,)),
+        "usermsg": (GObject.SignalFlags.RUN_LAST,
+                    None,
+                    (GObject.TYPE_STRING,)),
+        "editor-selected": (GObject.SignalFlags.RUN_LAST,
+                            None,
+                            (GObject.TYPE_STRING,)),
         }
 
     def _make_device_mapping_editors(self, device, devrthread, index):
@@ -50,7 +50,7 @@ class EditorSet(gtk.VBox):
             label = mapping_model.get_name()
             if self.rf.has_sub_devices:
                 label += "(%s)" % device.VARIANT
-            lab = gtk.Label(label)
+            lab = Gtk.Label(label=label)
             self.tabs.append_page(members.root, lab)
             self.editors["mapping_members%i%i" % (index, sub_index)] = members
 
@@ -59,7 +59,7 @@ class EditorSet(gtk.VBox):
             label = "%s Names" % basename
             if self.rf.has_sub_devices:
                 label += " (%s)" % device.VARIANT
-            lab = gtk.Label(label)
+            lab = Gtk.Label(label=label)
             self.tabs.append_page(names.root, lab)
             self.editors["mapping_names%i%i" % (index, sub_index)] = names
 
@@ -88,7 +88,7 @@ class EditorSet(gtk.VBox):
         else:
             label = _("Memories")
             rf = self.rf
-        lab = gtk.Label(label)
+        lab = Gtk.Label(label=label)
         self.tabs.append_page(memories.root, lab)
         memories.root.show()
         self.editors["memedit%i" % index] = memories
@@ -97,7 +97,7 @@ class EditorSet(gtk.VBox):
 
         if isinstance(device, chirp_common.IcomDstarSupport):
             editor = dstaredit.DStarEditor(devrthread)
-            self.tabs.append_page(editor.root, gtk.Label(_("D-STAR")))
+            self.tabs.append_page(editor.root, Gtk.Label(label=_("D-STAR")))
             editor.root.show()
             editor.connect("changed", self.dstar_changed, memories)
             editor.connect("changed", self.editor_changed)
@@ -105,7 +105,7 @@ class EditorSet(gtk.VBox):
 
     def __init__(self, source, parent_window=None,
                  filename=None, tempname=None):
-        gtk.VBox.__init__(self, True, 0)
+        GObject.GObject.__init__(self, True, 0)
 
         self.parent_window = parent_window
 
@@ -124,9 +124,9 @@ class EditorSet(gtk.VBox):
 
         rthread.connect("status", lambda e, m: self.emit("status", m))
 
-        self.tabs = gtk.Notebook()
+        self.tabs = Gtk.Notebook()
         self.tabs.connect("switch-page", self.tab_selected)
-        self.tabs.set_tab_pos(gtk.POS_LEFT)
+        self.tabs.set_tab_pos(Gtk.PositionType.LEFT)
 
         self.editors = {}
 
@@ -146,7 +146,7 @@ class EditorSet(gtk.VBox):
 
         if self.rf.has_settings:
             editor = settingsedit.SettingsEditor(rthread)
-            self.tabs.append_page(editor.root, gtk.Label(_("Settings")))
+            self.tabs.append_page(editor.root, Gtk.Label(label=_("Settings")))
             editor.root.show()
             editor.connect("changed", self.editor_changed)
             self.editors["settings"] = editor
@@ -155,12 +155,12 @@ class EditorSet(gtk.VBox):
         if (hasattr(self.rthread.radio, '_memobj') and
                 conf.get_bool("developer", "state")):
             editor = radiobrowser.RadioBrowser(self.rthread)
-            lab = gtk.Label(_("Browser"))
+            lab = Gtk.Label(label=_("Browser"))
             self.tabs.append_page(editor.root, lab)
             editor.connect("changed", self.editor_changed)
             self.editors["browser"] = editor
 
-        self.pack_start(self.tabs)
+        self.pack_start(self.tabs, True, True, 0)
         self.tabs.show()
 
         self.label = self.text_label = None
@@ -172,17 +172,17 @@ class EditorSet(gtk.VBox):
         self.update_tab()
 
     def make_label(self):
-        self.label = gtk.HBox(False, 0)
+        self.label = Gtk.HBox(False, 0)
 
-        self.text_label = gtk.Label("")
+        self.text_label = Gtk.Label(label="")
         self.text_label.show()
         self.label.pack_start(self.text_label, 1, 1, 1)
 
-        button = gtk.Button()
-        button.set_relief(gtk.RELIEF_NONE)
+        button = Gtk.Button()
+        button.set_relief(Gtk.ReliefStyle.NONE)
         button.set_focus_on_click(False)
 
-        icon = gtk.image_new_from_stock(gtk.STOCK_CLOSE, gtk.ICON_SIZE_MENU)
+        icon = Gtk.Image.new_from_stock(Gtk.STOCK_CLOSE, Gtk.IconSize.MENU)
         icon.show()
         button.add(icon)
 
@@ -233,7 +233,7 @@ class EditorSet(gtk.VBox):
         if not isinstance(self.radio, chirp_common.LiveRadio):
             self.modified = True
             self.update_tab()
-        for editor in self.editors.values():
+        for editor in list(self.editors.values()):
             if editor != target_editor:
                 editor.other_editor_changed(target_editor)
 
@@ -256,7 +256,7 @@ class EditorSet(gtk.VBox):
         dialog = dlgclass(src_radio, dst_rthread.radio, self.parent_window)
         r = dialog.run()
         dialog.hide()
-        if r != gtk.RESPONSE_OK:
+        if r != Gtk.ResponseType.OK:
             dst_rthread._qunlock()
             return
 
@@ -267,7 +267,7 @@ class EditorSet(gtk.VBox):
         if count > 0:
             self.editor_changed()
             current_editor = self.get_current_editor()
-            gobject.idle_add(current_editor.prefill)
+            GObject.idle_add(current_editor.prefill)
 
         return count
 
@@ -282,7 +282,7 @@ class EditorSet(gtk.VBox):
         r = d.run()
         chosen = d.choice.get_active_text()
         d.destroy()
-        if r == gtk.RESPONSE_CANCEL:
+        if r == Gtk.ResponseType.CANCEL:
             raise Exception(_("Cancelled"))
         for d in devices:
             if d.VARIANT == chosen:
@@ -393,7 +393,7 @@ class EditorSet(gtk.VBox):
         mem.freq = 146010000
 
         def cb(*args):
-            gobject.idle_add(self.editors["memedit0"].prefill)
+            GObject.idle_add(self.editors["memedit0"].prefill)
 
         job = common.RadioJob(cb, "set_memory", mem)
         job.set_desc(_("Priming memory"))
@@ -401,7 +401,7 @@ class EditorSet(gtk.VBox):
 
     def tab_selected(self, notebook, foo, pagenum):
         widget = notebook.get_nth_page(pagenum)
-        for k, v in self.editors.items():
+        for k, v in list(self.editors.items()):
             if v and v.root == widget:
                 v.focus()
                 self.emit("editor-selected", k)
@@ -409,19 +409,19 @@ class EditorSet(gtk.VBox):
                 v.unfocus()
 
     def set_read_only(self, read_only=True):
-        for editor in self.editors.values():
+        for editor in list(self.editors.values()):
             editor and editor.set_read_only(read_only)
 
     def get_read_only(self):
         return self.editors["memedit0"].get_read_only()
 
     def prepare_close(self):
-        for editor in self.editors.values():
+        for editor in list(self.editors.values()):
             editor and editor.prepare_close()
 
     def get_current_editor(self):
         tabs = self.tabs
-        for lab, e in self.editors.items():
+        for lab, e in list(self.editors.items()):
             if e and tabs.page_num(e.root) == tabs.get_current_page():
                 return e
         raise Exception("No editor selected?")

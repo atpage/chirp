@@ -491,7 +491,7 @@ class VX2Radio(yaesu_clone.YaesuCloneModeRadio):
                 RadioSettingValueBoolean(_settings.dcsrev))
         basic.append(rs)
 
-        options = map(str, range(0, 12+1))
+        options = list(map(str, list(range(0, 12+1))))
         rs = RadioSetting(
                 "dimmer", "Dimmer",
                 RadioSettingValueList(options, options[_settings.dimmer]))
@@ -572,13 +572,13 @@ class VX2Radio(yaesu_clone.YaesuCloneModeRadio):
                 RadioSettingValueList(options, options[_settings.mwmode]))
         basic.append(rs)
 
-        options = map(str, range(0, 15+1))
+        options = list(map(str, list(range(0, 15+1))))
         rs = RadioSetting(
                 "nfm_sql", "NFM Sql",
                 RadioSettingValueList(options, options[_settings.nfm_sql]))
         basic.append(rs)
 
-        options = map(str, range(0, 8+1))
+        options = list(map(str, list(range(0, 8+1))))
         rs = RadioSetting(
                 "wfm_sql", "WFM Sql",
                 RadioSettingValueList(options, options[_settings.wfm_sql]))
@@ -602,7 +602,7 @@ class VX2Radio(yaesu_clone.YaesuCloneModeRadio):
                 RadioSettingValueList(options, options[_settings.resume]))
         basic.append(rs)
 
-        options = ["off"] + map(str, range(1, 9+1))
+        options = ["off"] + list(map(str, list(range(1, 9+1))))
         rs = RadioSetting(
                 "rfsql", "RF Sql",
                 RadioSettingValueList(options, options[_settings.rfsql]))

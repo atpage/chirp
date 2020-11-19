@@ -240,7 +240,7 @@ class IC2300Radio(icf.IcomCloneModeRadio):
 
         # Transmit timeout
         opt = ['Disabled', '1 minute'] + \
-              [s + ' minutes' for s in map(str, range(2, 31))]
+              [s + ' minutes' for s in map(str, list(range(2, 31)))]
         rs = RadioSetting("tx_timeout", "Transmit timeout (min)",
                           RadioSettingValueList(opt, opt[
                               _settings.tx_timeout
@@ -299,7 +299,7 @@ class IC2300Radio(icf.IcomCloneModeRadio):
         basic.append(rs)
 
         # Scan pause timer
-        opt = [s + ' seconds' for s in map(str, range(2, 22, 2))] + ['Hold']
+        opt = [s + ' seconds' for s in map(str, list(range(2, 22, 2)))] + ['Hold']
         rs = RadioSetting("scan_pause_timer", "Scan pause timer",
                           RadioSettingValueList(
                               opt, opt[_settings.scan_pause_timer]))
@@ -307,7 +307,7 @@ class IC2300Radio(icf.IcomCloneModeRadio):
 
         # Scan Resume Timer
         opt = ['Immediate'] + \
-              [s + ' seconds' for s in map(str, range(1, 6))] + ['Hold']
+              [s + ' seconds' for s in map(str, list(range(1, 6)))] + ['Hold']
         rs = RadioSetting("scan_resume_timer", "Scan resume timer",
                           RadioSettingValueList(
                               opt, opt[_settings.scan_resume_timer]))

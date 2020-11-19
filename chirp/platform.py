@@ -130,21 +130,21 @@ class Platform:
 
     def gui_open_file(self, start_dir=None, types=[]):
         """Prompt the user to pick a file to open"""
-        import gtk
+        from gi.repository import Gtk
 
         if not start_dir:
             start_dir = self._last_dir
 
-        dlg = gtk.FileChooserDialog("Select a file to open",
+        dlg = Gtk.FileChooserDialog("Select a file to open",
                                     None,
-                                    gtk.FILE_CHOOSER_ACTION_OPEN,
-                                    (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                     gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+                                    Gtk.FileChooserAction.OPEN,
+                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                     Gtk.STOCK_OPEN, Gtk.ResponseType.OK))
         if start_dir and os.path.isdir(start_dir):
             dlg.set_current_folder(start_dir)
 
         for desc, spec in types:
-            ff = gtk.FileFilter()
+            ff = Gtk.FileFilter()
             ff.set_name(desc)
             ff.add_pattern(spec)
             dlg.add_filter(ff)
@@ -153,7 +153,7 @@ class Platform:
         fname = dlg.get_filename()
         dlg.destroy()
 
-        if res == gtk.RESPONSE_OK:
+        if res == Gtk.ResponseType.OK:
             self._last_dir = os.path.dirname(fname)
             return fname
         else:
@@ -161,16 +161,16 @@ class Platform:
 
     def gui_save_file(self, start_dir=None, default_name=None, types=[]):
         """Prompt the user to pick a filename to save"""
-        import gtk
+        from gi.repository import Gtk
 
         if not start_dir:
             start_dir = self._last_dir
 
-        dlg = gtk.FileChooserDialog("Save file as",
+        dlg = Gtk.FileChooserDialog("Save file as",
                                     None,
-                                    gtk.FILE_CHOOSER_ACTION_SAVE,
-                                    (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                     gtk.STOCK_SAVE, gtk.RESPONSE_OK))
+                                    Gtk.FileChooserAction.SAVE,
+                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                     Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
         if start_dir and os.path.isdir(start_dir):
             dlg.set_current_folder(start_dir)
 
@@ -179,7 +179,7 @@ class Platform:
 
         extensions = {}
         for desc, ext in types:
-            ff = gtk.FileFilter()
+            ff = Gtk.FileFilter()
             ff.set_name(desc)
             ff.add_pattern("*.%s" % ext)
             extensions[desc] = ext
@@ -194,7 +194,7 @@ class Platform:
 
         dlg.destroy()
 
-        if res == gtk.RESPONSE_OK:
+        if res == Gtk.ResponseType.OK:
             self._last_dir = os.path.dirname(fname)
             return fname
         else:
@@ -202,16 +202,16 @@ class Platform:
 
     def gui_select_dir(self, start_dir=None):
         """Prompt the user to pick a directory"""
-        import gtk
+        from gi.repository import Gtk
 
         if not start_dir:
             start_dir = self._last_dir
 
-        dlg = gtk.FileChooserDialog("Choose folder",
+        dlg = Gtk.FileChooserDialog("Choose folder",
                                     None,
-                                    gtk.FILE_CHOOSER_ACTION_SELECT_FOLDER,
-                                    (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
-                                     gtk.STOCK_SAVE, gtk.RESPONSE_OK))
+                                    Gtk.FileChooserAction.SELECT_FOLDER,
+                                    (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
+                                     Gtk.STOCK_SAVE, Gtk.ResponseType.OK))
         if start_dir and os.path.isdir(start_dir):
             dlg.set_current_folder(start_dir)
 
@@ -219,7 +219,7 @@ class Platform:
         fname = dlg.get_filename()
         dlg.destroy()
 
-        if res == gtk.RESPONSE_OK and os.path.isdir(fname):
+        if res == Gtk.ResponseType.OK and os.path.isdir(fname):
             self._last_dir = fname
             return fname
         else:
@@ -236,7 +236,7 @@ class Platform:
 
         if we_are_frozen():
             # Win32, find the directory of the executable
-            return os.path.dirname(unicode(sys.executable,
+            return os.path.dirname(str(sys.executable,
                                            sys.getfilesystemencoding()))
         else:
             # UNIX: Find the parent directory of this module
@@ -476,16 +476,16 @@ def get_platform(basepath=None):
 def _do_test():
     __pform = get_platform()
 
-    print "Config dir: %s" % __pform.config_dir()
-    print "Default dir: %s" % __pform.default_dir()
-    print "Log file (foo): %s" % __pform.log_file("foo")
-    print "Serial ports: %s" % __pform.list_serial_ports()
-    print "OS Version: %s" % __pform.os_version_string()
+    print("Config dir: %s" % __pform.config_dir())
+    print("Default dir: %s" % __pform.default_dir())
+    print("Log file (foo): %s" % __pform.log_file("foo"))
+    print("Serial ports: %s" % __pform.list_serial_ports())
+    print("OS Version: %s" % __pform.os_version_string())
     # __pform.open_text_file("d-rats.py")
 
     # print "Open file: %s" % __pform.gui_open_file()
     # print "Save file: %s" % __pform.gui_save_file(default_name="Foo.txt")
-    print "Open folder: %s" % __pform.gui_select_dir("/tmp")
+    print("Open folder: %s" % __pform.gui_select_dir("/tmp"))
 
 if __name__ == "__main__":
     _do_test()

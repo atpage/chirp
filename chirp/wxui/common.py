@@ -109,11 +109,11 @@ class ChirpSettingGrid(wx.Panel):
 
         self._choices = {}
 
-        for name, element in self._group.items():
+        for name, element in list(self._group.items()):
             if not isinstance(element, settings.RadioSetting):
                 LOG.debug('Skipping nested group %s' % element)
                 continue
-            for i in element.keys():
+            for i in list(element.keys()):
                 value = element[i]
                 if isinstance(value, settings.RadioSettingValueInteger):
                     editor = self._get_editor_int(element, value)
@@ -164,7 +164,7 @@ class ChirpSettingGrid(wx.Panel):
         current = choices.index(str(value))
         return wx.propgrid.EnumProperty(setting.get_shortname(),
                                         setting.get_name(),
-                                        choices, range(len(choices)),
+                                        choices, list(range(len(choices))),
                                         current)
 
     def _get_editor_bool(self, setting, value):

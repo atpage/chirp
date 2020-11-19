@@ -412,9 +412,9 @@ def do_upload(radio):
 
         bptr = 0
 
-        memory_addrs = range(MEMORY_ADDRESS_RANGE[0],
+        memory_addrs = list(range(MEMORY_ADDRESS_RANGE[0],
                              MEMORY_ADDRESS_RANGE[1] + MEMORY_RW_BLOCK_SIZE,
-                             MEMORY_RW_BLOCK_SIZE)
+                             MEMORY_RW_BLOCK_SIZE))
 
         # status info for the UI
         status = chirp_common.Status()

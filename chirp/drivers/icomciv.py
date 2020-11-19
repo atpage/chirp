@@ -615,7 +615,7 @@ class IcomCIVRadio(icf.IcomLiveRadio):
         mode = mem.mode
         if self._unified_modes:
             lookup = [
-                k for k, v in self._UNIFIED_MODES.items() if v == mode]
+                k for k, v in list(self._UNIFIED_MODES.items()) if v == mode]
             if lookup:
                 mode = lookup[0]
                 memobj.filter = 2
@@ -817,18 +817,18 @@ class Icom910Radio(IcomCIVRadio):
         "3b": 105,
         "C":  106,
     }
-    _SPECIAL_CHANNELS_REV = {v: k for k, v in _SPECIAL_CHANNELS.items()}
+    _SPECIAL_CHANNELS_REV = {v: k for k, v in list(_SPECIAL_CHANNELS.items())}
 
     _SPECIAL_BANKS = {
         "2m":   1,
         "70cm": 2,
         "23cm": 3,
     }
-    _SPECIAL_BANKS_REV = {v: k for k, v in _SPECIAL_BANKS.items()}
+    _SPECIAL_BANKS_REV = {v: k for k, v in list(_SPECIAL_BANKS.items())}
 
     def _get_special_names(self, band):
         return sorted([band + "-" + key
-                       for key in self._SPECIAL_CHANNELS.keys()])
+                       for key in list(self._SPECIAL_CHANNELS.keys())])
 
     def _is_special(self, number):
         return number >= 1000 or isinstance(number, str)
@@ -913,7 +913,7 @@ def probe_model(ser):
     f = Frame()
     f.set_command(0x19, 0x00)
 
-    for model, controller in CIV_MODELS.keys():
+    for model, controller in list(CIV_MODELS.keys()):
         f.send(model, controller, ser)
         try:
             f.read(ser)

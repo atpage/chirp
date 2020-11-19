@@ -179,11 +179,11 @@ STARTUP_MODES = ['Text', 'Clock']
 VOLUMES = OrderedDict([(str(x), x) for x in range(0, 30)])
 VOLUMES.update({'Selectable': 0x30,
                 'Current': 0xFF})
-VOLUMES_REV = {v: k for k, v in VOLUMES.items()}
+VOLUMES_REV = {v: k for k, v in list(VOLUMES.items())}
 
 MIN_VOL_PRESET = {'Preset': 0x30,
                   'Lowest Limit': 0x31}
-MIN_VOL_PRESET_REV = {v: k for k, v in MIN_VOL_PRESET.items()}
+MIN_VOL_PRESET_REV = {v: k for k, v in list(MIN_VOL_PRESET.items())}
 
 SUBLCD = ['Zone Number', 'CH/GID Number', 'OSD List Number']
 CLOCKFMT = ['12H', '24H']
@@ -904,11 +904,11 @@ class KenwoodTKx180Radio(chirp_common.CloneModeRadio):
                    'alert_tone': 'Alert Tone',
                    'sidetone': 'Sidetone',
                    'locator_tone': 'Locator Tone'}
-        for value, name in volumes.items():
+        for value, name in list(volumes.items()):
             setting = getattr(settings, value)
             volume = RadioSetting('settings.%s' % value, name,
                                   RadioSettingValueList(
-                                      VOLUMES.keys(),
+                                      list(VOLUMES.keys()),
                                       VOLUMES_REV.get(int(setting), 0)))
             volume.set_apply_callback(apply_volume, value)
             common2.append(volume)
@@ -920,7 +920,7 @@ class KenwoodTKx180Radio(chirp_common.CloneModeRadio):
                   'hi_volume': 'High Volume Level (Fixed Volume)',
                   'min_volume': 'Minimum Audio Volume',
                   'max_volume': 'Maximum Audio Volume'}
-        for value, name in levels.items():
+        for value, name in list(levels.items()):
             setting = getattr(settings, value)
             if 'Audio' in name:
                 minimum = 0
@@ -955,7 +955,7 @@ class KenwoodTKx180Radio(chirp_common.CloneModeRadio):
         _volpreset = int(settings.min_vol_preset)
         volpreset = RadioSetting(
             'mvp', 'Minimum Volume Type',
-            RadioSettingValueList(MIN_VOL_PRESET.keys(),
+            RadioSettingValueList(list(MIN_VOL_PRESET.keys()),
                                   MIN_VOL_PRESET_REV[_volpreset]))
         volpreset.set_apply_callback(apply_mvp)
         if not self.is_portable and 'mvp' in ONLY_MOBILE_SETTINGS:

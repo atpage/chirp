@@ -1,6 +1,7 @@
-import gtk
-import gobject
-import pango
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
+from gi.repository import Pango
 import re
 import os
 import logging
@@ -84,7 +85,7 @@ def bitwise_type(classname):
     return classname.split("DataElement")[0]
 
 
-class FixedEntry(gtk.Entry):
+class FixedEntry(Gtk.Entry):
     def __init__(self, *args, **kwargs):
         super(FixedEntry, self).__init__(*args, **kwargs)
 
@@ -96,7 +97,7 @@ class FixedEntry(gtk.Entry):
             LOG.warn("Unsupported browser_fontsize %i. Using 10." % fontsize)
             fontsize = 11
 
-        fontdesc = pango.FontDescription("Courier bold %i" % fontsize)
+        fontdesc = Pango.FontDescription("Courier bold %i" % fontsize)
         self.modify_font(fontdesc)
 
 
@@ -107,16 +108,16 @@ class IntegerEntry(FixedEntry):
             value = value[2:]
         value = value.replace("0", "")
         if not value:
-            self.modify_text(gtk.STATE_NORMAL, None)
+            self.modify_text(Gtk.StateType.NORMAL, None)
         else:
-            self.modify_text(gtk.STATE_NORMAL, gtk.gdk.color_parse('red'))
+            self.modify_text(Gtk.StateType.NORMAL, Gdk.color_parse('red'))
 
     def __init__(self, *args, **kwargs):
         super(IntegerEntry, self).__init__(*args, **kwargs)
         self.connect("changed", self._colorize)
 
 
-class BitwiseEditor(gtk.HBox):
+class BitwiseEditor(Gtk.HBox):
     def __init__(self, element):
         super(BitwiseEditor, self).__init__(False, 3)
         self._element = element
@@ -150,7 +151,7 @@ class IntegerEditor(BitwiseEditor):
                    ('Dec', 10, '{:d}'),
                    ('Bin', 2, '{:0%ib}' % self._element.size())]
         for name, base, format_spec in formats:
-            lab = gtk.Label(name)
+            lab = Gtk.Label(label=name)
             self.pack_start(lab, 0, 0, 0)
             lab.show()
             int(self._element)
@@ -175,7 +176,7 @@ class BCDArrayEditor(BitwiseEditor):
         hexent.set_text(value)
 
     def _build_ui(self):
-        lab = gtk.Label("Dec")
+        lab = Gtk.Label(label="Dec")
         lab.show()
         self.pack_start(lab, 0, 0, 0)
         ent = FixedEntry()
@@ -183,7 +184,7 @@ class BCDArrayEditor(BitwiseEditor):
         ent.show()
         self.pack_start(ent, 1, 1, 1)
 
-        lab = gtk.Label("Hex")
+        lab = Gtk.Label(label="Hex")
         lab.show()
         self.pack_start(lab, 0, 0, 0)
 
@@ -217,32 +218,32 @@ class OtherEditor(BitwiseEditor):
                 bitwise_type(classname(self._element[0])),
                 len(self._element))
 
-        l = gtk.Label(name)
+        l = Gtk.Label(label=name)
         l.show()
         self.pack_start(l, 1, 1, 1)
 
 
 class RadioBrowser(common.Editor):
     def _build_ui(self):
-        self._display = gtk.Table(20, 2)
+        self._display = Gtk.Table(20, 2)
 
-        self._store = gtk.TreeStore(gobject.TYPE_STRING, gobject.TYPE_PYOBJECT)
-        self._tree = gtk.TreeView(self._store)
+        self._store = Gtk.TreeStore(GObject.TYPE_STRING, GObject.TYPE_PYOBJECT)
+        self._tree = Gtk.TreeView(self._store)
 
-        rend = gtk.CellRendererText()
-        tvc = gtk.TreeViewColumn('Element', rend, text=0)
+        rend = Gtk.CellRendererText()
+        tvc = Gtk.TreeViewColumn('Element', rend, text=0)
         self._tree.append_column(tvc)
         self._tree.connect('button_press_event', self._tree_click)
 
-        self.root = gtk.HPaned()
+        self.root = Gtk.HPaned()
         self.root.set_position(200)
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add(self._tree)
         sw.show()
         self.root.add1(sw)
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add_with_viewport(self._display)
         sw.show()
         self.root.add2(sw)
@@ -254,7 +255,7 @@ class RadioBrowser(common.Editor):
         iter = self._store.append(parent, (name, obj))
 
         if isinstance(obj, bitwise.structDataElement):
-            for name, item in obj.items():
+            for name, item in list(obj.items()):
                 if isinstance(item, bitwise.structDataElement):
                     self._fill(name, item, iter)
                 elif isinstance(item, bitwise.arrayDataElement):
@@ -274,7 +275,7 @@ class RadioBrowser(common.Editor):
 
         def pack(widget, pos):
             self._display.attach(widget, pos, pos + 1, index[0], index[0] + 1,
-                                 xoptions=gtk.FILL, yoptions=0)
+                                 xoptions=Gtk.AttachOptions.FILL, yoptions=0)
 
         def next_row():
             index[0] += 1
@@ -289,14 +290,14 @@ class RadioBrowser(common.Editor):
 
         self._display.foreach(abandon)
 
-        for name, item in obj.items():
+        for name, item in list(obj.items()):
             if item.size() % 8 == 0:
                 name = '<b>%s</b> <small>(%s %i bytes)</small>' % (
                     name, bitwise_type(classname(item)), item.size() / 8)
             else:
                 name = '<b>%s</b> <small>(%s %i bits)</small>' % (
                     name, bitwise_type(classname(item)), item.size())
-            l = gtk.Label(name + "   ")
+            l = Gtk.Label(label=name + "   ")
             l.set_use_markup(True)
             l.show()
             pack(l, 0)
@@ -342,9 +343,9 @@ if __name__ == "__main__":
     class Foo:
         radio = r
 
-    w = gtk.Window()
+    w = Gtk.Window()
     b = RadioBrowser(Foo)
     w.set_default_size(1024, 768)
     w.add(b.root)
     w.show()
-    gtk.main()
+    Gtk.main()

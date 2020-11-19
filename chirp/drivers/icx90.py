@@ -17,7 +17,7 @@
 
 import logging
 
-import icf
+from . import icf
 import struct
 from chirp import chirp_common, bitwise, errors, directory
 from chirp.memmap import MemoryMap
@@ -174,7 +174,7 @@ DUPLEX = ["", "-", "+", ""]
 DTCS_POLARITY = ["NN", "NR", "RN", "RR"]
 TONE_MODE = ["", "Tone", "TSQL", "DTCS"]
 TUNE_STEP = [5.0, 6.25, 8.33, 9.0, 10.0, 12.5, 15.0, 20.0, 25.0, 30.0, 50.0, 100.0, 200.0]
-TUNE_STEP_STR = list(map(lambda x: str(x), TUNE_STEP))
+TUNE_STEP_STR = list([str(x) for x in TUNE_STEP])
 MODE = ["FM", "WFM", "AM"]
 TV_MODE = ["WFM", "AM"]
 
@@ -879,7 +879,7 @@ def reorder_banks(icx90, preserve_position, preserve_unknown, banks_templ):
                 else:
                     bank_pos = banks_cnt[bank]
                     banks_cnt[bank] += 1
-                print("%s\t-> %s, %02d" % (mem.name, BANK_INDEX[bank], bank_pos))
+                print(("%s\t-> %s, %02d" % (mem.name, BANK_INDEX[bank], bank_pos)))
             # explictly set non empty channel as visible
             icx90.memobj.banks[mi].invisible_channel = 0
         if bank >= BANKS or bank_pos >= BANK_NUM:

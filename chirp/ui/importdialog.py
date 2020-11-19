@@ -13,9 +13,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import gtk
-import gobject
-import pango
+from gi.repository import Gtk
+from gi.repository import Gdk
+from gi.repository import GObject
+from gi.repository import Pango
 import logging
 
 from chirp import errors, chirp_common, import_logic
@@ -25,39 +26,39 @@ from chirp.ui import common
 LOG = logging.getLogger(__name__)
 
 
-class WaitWindow(gtk.Window):
+class WaitWindow(Gtk.Window):
     def __init__(self, msg, parent=None):
-        gtk.Window.__init__(self)
+        GObject.GObject.__init__(self)
         self.set_title("Please Wait")
-        self.set_type_hint(gtk.gdk.WINDOW_TYPE_HINT_DIALOG)
+        self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
         if parent:
             self.set_transient_for(parent)
-            self.set_position(gtk.WIN_POS_CENTER_ON_PARENT)
+            self.set_position(Gtk.WindowPosition.CENTER_ON_PARENT)
         else:
-            self.set_position(gtk.WIN_POS_CENTER)
+            self.set_position(Gtk.WindowPosition.CENTER)
 
-        vbox = gtk.VBox(False, 2)
+        vbox = Gtk.VBox(False, 2)
 
-        l = gtk.Label(msg)
+        l = Gtk.Label(label=msg)
         l.show()
-        vbox.pack_start(l)
+        vbox.pack_start(l, True, True, 0)
 
-        self.prog = gtk.ProgressBar()
+        self.prog = Gtk.ProgressBar()
         self.prog.show()
-        vbox.pack_start(self.prog)
+        vbox.pack_start(self.prog, True, True, 0)
 
         vbox.show()
         self.add(vbox)
 
     def grind(self):
-        while gtk.events_pending():
-            gtk.main_iteration_do(False)
+        while Gtk.events_pending():
+            Gtk.main_iteration(False)
 
         self.prog.pulse()
 
     def set(self, fraction):
-        while gtk.events_pending():
-            gtk.main_iteration_do(False)
+        while Gtk.events_pending():
+            Gtk.main_iteration(False)
 
         self.prog.set_fraction(fraction)
 
@@ -73,10 +74,10 @@ class ImportMemoryBankJob(common.RadioJob):
         import_logic.import_bank(radio, self.__src_radio,
                                  self.__dst_mem, self.__src_mem)
         if self.cb:
-            gobject.idle_add(self.cb, *self.cb_args)
+            GObject.idle_add(self.cb, *self.cb_args)
 
 
-class ImportDialog(gtk.Dialog):
+class ImportDialog(Gtk.Dialog):
 
     def _check_for_dupe(self, location):
         iter = self.__store.get_iter_first()
@@ -92,7 +93,7 @@ class ImportDialog(gtk.Dialog):
         iter = self.__store.get_iter(path)
         imp, nloc = self.__store.get(iter, self.col_import, self.col_nloc)
         if not imp and self._check_for_dupe(nloc):
-            d = gtk.MessageDialog(parent=self, buttons=gtk.BUTTONS_OK)
+            d = Gtk.MessageDialog(parent=self, buttons=Gtk.ButtonsType.OK)
             d.set_property("text",
                            _("Location {number} is already being imported. "
                              "Choose another value for 'New Location' "
@@ -109,13 +110,13 @@ class ImportDialog(gtk.Dialog):
         rend.set_property("text", "%i" % newloc)
         if newloc in self.used_list and imp:
             rend.set_property("foreground", "goldenrod")
-            rend.set_property("weight", pango.WEIGHT_BOLD)
+            rend.set_property("weight", Pango.Weight.BOLD)
         elif newloc < lo or newloc > hi:
             rend.set_property("foreground", "red")
-            rend.set_property("weight", pango.WEIGHT_BOLD)
+            rend.set_property("weight", Pango.Weight.BOLD)
         else:
             rend.set_property("foreground", "black")
-            rend.set_property("weight", pango.WEIGHT_NORMAL)
+            rend.set_property("weight", Pango.Weight.NORMAL)
 
     def _edited(self, rend, path, new, col):
         iter = self.__store.get_iter(path)
@@ -133,7 +134,7 @@ class ImportDialog(gtk.Dialog):
                 return
 
             if self._check_for_dupe(val):
-                d = gtk.MessageDialog(parent=self, buttons=gtk.BUTTONS_OK)
+                d = Gtk.MessageDialog(parent=self, buttons=Gtk.ButtonsType.OK)
                 d.set_property("text",
                                _("Location {number} is already being "
                                  "imported").format(number=val))
@@ -279,9 +280,9 @@ class ImportDialog(gtk.Dialog):
             job.set_desc(_("Importing bank information"))
             dst_rthread._qsubmit(job, 0)
 
-        if error_messages.keys():
+        if list(error_messages.keys()):
             msg = _("Error importing memories:") + "\r\n"
-            for num, msgs in error_messages.items():
+            for num, msgs in list(error_messages.items()):
                 msg += "%s: %s" % (num, ",".join(msgs))
             common.show_error(msg)
 
@@ -290,52 +291,54 @@ class ImportDialog(gtk.Dialog):
     def make_view(self):
         editable = [self.col_nloc, self.col_name, self.col_comm]
 
-        self.__store = gtk.ListStore(gobject.TYPE_BOOLEAN,  # Import
-                                     gobject.TYPE_INT,      # Source loc
-                                     gobject.TYPE_INT,      # Destination loc
-                                     gobject.TYPE_STRING,   # Name
-                                     gobject.TYPE_STRING,   # Frequency
-                                     gobject.TYPE_STRING,   # Comment
-                                     gobject.TYPE_BOOLEAN,
-                                     gobject.TYPE_STRING)
-        self.__view = gtk.TreeView(self.__store)
+        self.__store = Gtk.ListStore(GObject.TYPE_BOOLEAN,  # Import
+                                     GObject.TYPE_INT,      # Source loc
+                                     GObject.TYPE_INT,      # Destination loc
+                                     GObject.TYPE_STRING,   # Name
+                                     GObject.TYPE_STRING,   # Frequency
+                                     GObject.TYPE_STRING,   # Comment
+                                     GObject.TYPE_BOOLEAN,
+                                     GObject.TYPE_STRING)
+        self.__view = Gtk.TreeView(self.__store)
         self.__view.show()
 
-        for k in self.caps.keys():
+        tips = Gtk.Tooltips()
+
+        for k in list(self.caps.keys()):
             t = self.types[k]
 
-            if t == gobject.TYPE_BOOLEAN:
-                rend = gtk.CellRendererToggle()
+            if t == GObject.TYPE_BOOLEAN:
+                rend = Gtk.CellRendererToggle()
                 rend.connect("toggled", self._toggle, k)
-                column = gtk.TreeViewColumn(self.caps[k], rend,
+                column = Gtk.TreeViewColumn(self.caps[k], rend,
                                             active=k,
                                             sensitive=self.col_okay,
                                             activatable=self.col_okay)
             else:
-                rend = gtk.CellRendererText()
+                rend = Gtk.CellRendererText()
                 if k in editable:
                     rend.set_property("editable", True)
                     rend.connect("edited", self._edited, k)
-                column = gtk.TreeViewColumn(self.caps[k], rend,
+                column = Gtk.TreeViewColumn(self.caps[k], rend,
                                             text=k,
                                             sensitive=self.col_okay)
 
             if k == self.col_nloc:
                 column.set_cell_data_func(rend, self._render, k)
 
-            if k in self.tips.keys():
+            if k in list(self.tips.keys()):
                 LOG.debug("Doing %s" % k)
-                lab = gtk.Label(self.caps[k])
+                lab = Gtk.Label(label=self.caps[k])
                 column.set_widget(lab)
-                lab.set_tooltip_text(self.tips[k])
+                tips.set_tip(lab, self.tips[k])
                 lab.show()
             column.set_sort_column_id(k)
             self.__view.append_column(column)
 
         self.__view.set_tooltip_column(self.col_tmsg)
 
-        sw = gtk.ScrolledWindow()
-        sw.set_policy(gtk.POLICY_AUTOMATIC, gtk.POLICY_AUTOMATIC)
+        sw = Gtk.ScrolledWindow()
+        sw.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC)
         sw.add(self.__view)
         sw.show()
 
@@ -388,28 +391,27 @@ class ImportDialog(gtk.Dialog):
             iter = self.__store.iter_next(iter)
 
     def make_select(self):
-        hbox = gtk.HBox(True, 2)
+        hbox = Gtk.HBox(True, 2)
 
-        all = gtk.Button(_("All"))
+        all = Gtk.Button(_("All"))
         all.connect("clicked", self.__select_all, True)
         all.set_size_request(50, 25)
         all.show()
         hbox.pack_start(all, 0, 0, 0)
 
-        none = gtk.Button(_("None"))
+        none = Gtk.Button(_("None"))
         none.connect("clicked", self.__select_all, False)
         none.set_size_request(50, 25)
         none.show()
         hbox.pack_start(none, 0, 0, 0)
 
-        inv = gtk.Button(_("Inverse"))
+        inv = Gtk.Button(_("Inverse"))
         inv.connect("clicked", self.__select_all, None)
         inv.set_size_request(50, 25)
         inv.show()
         hbox.pack_start(inv, 0, 0, 0)
 
-        frame = gtk.Frame()
-        frame.set_label("Select")
+        frame = Gtk.Frame(_("Select"))
         frame.show()
         frame.add(hbox)
         hbox.show()
@@ -417,58 +419,57 @@ class ImportDialog(gtk.Dialog):
         return frame
 
     def make_adjust(self):
-        hbox = gtk.HBox(True, 2)
+        hbox = Gtk.HBox(True, 2)
 
-        incr = gtk.Button("+100")
+        incr = Gtk.Button("+100")
         incr.connect("clicked", self.__incrnew, 100)
         incr.set_size_request(50, 25)
         incr.show()
         hbox.pack_start(incr, 0, 0, 0)
 
-        incr = gtk.Button("+10")
+        incr = Gtk.Button("+10")
         incr.connect("clicked", self.__incrnew, 10)
         incr.set_size_request(50, 25)
         incr.show()
         hbox.pack_start(incr, 0, 0, 0)
 
-        incr = gtk.Button("+1")
+        incr = Gtk.Button("+1")
         incr.connect("clicked", self.__incrnew, 1)
         incr.set_size_request(50, 25)
         incr.show()
         hbox.pack_start(incr, 0, 0, 0)
 
-        decr = gtk.Button("-1")
+        decr = Gtk.Button("-1")
         decr.connect("clicked", self.__incrnew, -1)
         decr.set_size_request(50, 25)
         decr.show()
         hbox.pack_start(decr, 0, 0, 0)
 
-        decr = gtk.Button("-10")
+        decr = Gtk.Button("-10")
         decr.connect("clicked", self.__incrnew, -10)
         decr.set_size_request(50, 25)
         decr.show()
         hbox.pack_start(decr, 0, 0, 0)
 
-        decr = gtk.Button("-100")
+        decr = Gtk.Button("-100")
         decr.connect("clicked", self.__incrnew, -100)
         decr.set_size_request(50, 25)
         decr.show()
         hbox.pack_start(decr, 0, 0, 0)
 
-        auto = gtk.Button(_("Auto"))
+        auto = Gtk.Button(_("Auto"))
         auto.connect("clicked", self.__autonew)
         auto.set_size_request(50, 25)
         auto.show()
         hbox.pack_start(auto, 0, 0, 0)
 
-        revr = gtk.Button(_("Reverse"))
+        revr = Gtk.Button(_("Reverse"))
         revr.connect("clicked", self.__revrnew)
         revr.set_size_request(50, 25)
         revr.show()
         hbox.pack_start(revr, 0, 0, 0)
 
-        frame = gtk.Frame()
-        frame.set_label("Adjust New Location")
+        frame = Gtk.Frame(_("Adjust New Location"))
         frame.show()
         frame.add(hbox)
         hbox.show()
@@ -476,15 +477,15 @@ class ImportDialog(gtk.Dialog):
         return frame
 
     def make_options(self):
-        hbox = gtk.HBox(True, 2)
+        hbox = Gtk.HBox(True, 2)
 
-        confirm = gtk.CheckButton(_("Confirm overwrites"))
+        confirm = Gtk.CheckButton(_("Confirm overwrites"))
         confirm.connect("toggled", __set_confirm)
         confirm.show()
 
         hbox.pack_start(confirm, 0, 0, 0)
 
-        frame = gtk.Frame(_("Options"))
+        frame = Gtk.Frame(_("Options"))
         frame.add(hbox)
         frame.show()
         hbox.show()
@@ -492,7 +493,7 @@ class ImportDialog(gtk.Dialog):
         return frame
 
     def make_controls(self):
-        hbox = gtk.HBox(False, 2)
+        hbox = Gtk.HBox(False, 2)
 
         hbox.pack_start(self.make_select(), 0, 0, 0)
         hbox.pack_start(self.make_adjust(), 0, 0, 0)
@@ -578,9 +579,9 @@ class ImportDialog(gtk.Dialog):
     ACTION = _("Import")
 
     def __init__(self, src_radio, dst_radio, parent=None):
-        gtk.Dialog.__init__(self,
-                            buttons=(gtk.STOCK_OK, gtk.RESPONSE_OK,
-                                     gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL),
+        GObject.GObject.__init__(self,
+                            buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK,
+                                     Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL),
                             title=self.TITLE,
                             parent=parent)
 
@@ -608,14 +609,14 @@ class ImportDialog(gtk.Dialog):
             }
 
         self.types = {
-            self.col_import:  gobject.TYPE_BOOLEAN,
-            self.col_oloc:    gobject.TYPE_INT,
-            self.col_nloc:    gobject.TYPE_INT,
-            self.col_name:    gobject.TYPE_STRING,
-            self.col_freq:    gobject.TYPE_STRING,
-            self.col_comm:    gobject.TYPE_STRING,
-            self.col_okay:    gobject.TYPE_BOOLEAN,
-            self.col_tmsg:    gobject.TYPE_STRING,
+            self.col_import:  GObject.TYPE_BOOLEAN,
+            self.col_oloc:    GObject.TYPE_INT,
+            self.col_nloc:    GObject.TYPE_INT,
+            self.col_name:    GObject.TYPE_STRING,
+            self.col_freq:    GObject.TYPE_STRING,
+            self.col_comm:    GObject.TYPE_STRING,
+            self.col_okay:    GObject.TYPE_BOOLEAN,
+            self.col_tmsg:    GObject.TYPE_STRING,
             }
 
         self.src_radio = src_radio
@@ -651,4 +652,4 @@ if __name__ == "__main__":
     d = ImportDialog(radio)
     d.run()
 
-    print d.get_import_list()
+    print(d.get_import_list())

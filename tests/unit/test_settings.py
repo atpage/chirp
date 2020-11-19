@@ -91,14 +91,14 @@ class TestSettingContainers(base.BaseTest):
         group = settings.RadioSettingGroup("foo", "Foo Group", s1)
         self.assertEqual(group.get_name(), "foo")
         self.assertEqual(group.get_shortname(), "Foo Group")
-        self.assertEqual(group.values(), [s1])
-        self.assertEqual(group.keys(), ["s1"])
+        self.assertEqual(list(group.values()), [s1])
+        self.assertEqual(list(group.keys()), ["s1"])
         group.append(s2)
-        self.assertEqual(group.items(), [("s1", s1), ("s2", s2)])
+        self.assertEqual(list(group.items()), [("s1", s1), ("s2", s2)])
         self.assertEqual(group["s1"], s1)
         group["s3"] = s3
-        self.assertEqual(group.values(), [s1, s2, s3])
-        self.assertEqual(group.keys(), ["s1", "s2", "s3"])
+        self.assertEqual(list(group.values()), [s1, s2, s3])
+        self.assertEqual(list(group.keys()), ["s1", "s2", "s3"])
         self.assertEqual([x for x in group], [s1, s2, s3])
 
         def set_dupe():
