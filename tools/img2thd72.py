@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # coding=utf-8
 # ex: set tabstop=4 expandtab shiftwidth=4 softtabstop=4:
 #
@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
     buf = thd72bitmap(ifname, invert)
     imgfname = ifname + '\xff' * (48-len(ifname))
-    of = file(ofname, "rb+")
+    of = open(ofname, "rb+")
     of.seek(tagpos)
     of.write('\x01')
     of.seek(imgpos)

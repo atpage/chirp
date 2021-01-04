@@ -1,0 +1,997 @@
+diff --git a/chirp/bandplan.py b/chirp/bandplan.py
+index 97f2425..19d70a3 100644
+--- a/chirp/bandplan.py
++++ b/chirp/bandplan.py
+@@ -34,7 +34,7 @@ class Band(object):
+                 for tone in tones:
+                     assert tone in chirp_common.TONES, (
+                         "tone %s not one of %s" % (tone, chirp_common.TONES))
+-        except AssertionError, e:
++        except AssertionError as e:
+             raise ValueError("%s %s: %s" % (name, limits, e))
+ 
+         self.name = name
+diff --git a/chirp/chirp_common.py b/chirp/chirp_common.py
+index 4f64865..d6d8280 100644
+--- a/chirp/chirp_common.py
++++ b/chirp/chirp_common.py
+@@ -976,7 +976,7 @@ class RadioFeatures:
+                     msg = ValidationError("Frequency requires %.2fkHz step" %
+                                           required_step(mem.freq))
+                     msgs.append(msg)
+-            except errors.InvalidDataError, e:
++            except errors.InvalidDataError as e:
+                 msgs.append(str(e))
+ 
+         if self.valid_characters:
+diff --git a/chirp/detect.py b/chirp/detect.py
+index b0c0fc3..065834a 100644
+--- a/chirp/detect.py
++++ b/chirp/detect.py
+@@ -50,7 +50,7 @@ def _detect_icom_radio(ser):
+         ser.baudrate = 9600
+         md = icf.get_model_data(DetectorRadio(ser))
+         return _icom_model_data_to_rclass(md)
+-    except errors.RadioError, e:
++    except errors.RadioError as e:
+         LOG.error("_detect_icom_radio: %s", e)
+ 
+     # ICOM IC-91/92 Live-mode radios @ 4800/38400 baud
+diff --git a/chirp/drivers/btech.py b/chirp/drivers/btech.py
+index 54c8649..9fd2297 100644
+--- a/chirp/drivers/btech.py
++++ b/chirp/drivers/btech.py
+@@ -421,7 +421,7 @@ def _start_clone_mode(radio, status):
+ 
+     except errors.RadioError:
+         raise
+-    except Exception, e:
++    except Exception as e:
+         raise errors.RadioError("Error sending Magic to radio:\n%s" % e)
+ 
+ 
+@@ -789,7 +789,7 @@ class BTechMobileCommon(chirp_common.CloneModeRadio,
+             _upload(self)
+         except errors.RadioError:
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Error: %s" % e)
+ 
+     def get_raw_memory(self, number):
+@@ -2916,7 +2916,7 @@ class BTechMobileCommon(chirp_common.CloneModeRadio,
+                     elif element.value.get_mutable():
+                         LOG.debug("Setting %s = %s" % (setting, element.value))
+                         setattr(obj, setting, element.value)
+-                except Exception, e:
++                except Exception as e:
+                     LOG.debug(element.get_name())
+                     raise
+ 
+diff --git a/chirp/drivers/ft7800.py b/chirp/drivers/ft7800.py
+index 1a95bb3..9fafb36 100644
+--- a/chirp/drivers/ft7800.py
++++ b/chirp/drivers/ft7800.py
+@@ -321,7 +321,7 @@ class FTx800Radio(yaesu_clone.YaesuCloneModeRadio):
+             self._mmap = _download(self)
+         except errors.RadioError:
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to communicate with radio: %s" % e)
+         LOG.info("Download finished in %i seconds" % (time.time() - start))
+         self.check_checksums()
+@@ -337,7 +337,7 @@ class FTx800Radio(yaesu_clone.YaesuCloneModeRadio):
+             _upload(self)
+         except errors.RadioError:
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to communicate with radio: %s" % e)
+         LOG.info("Upload finished in %i seconds" % (time.time() - start))
+ 
+@@ -766,7 +766,7 @@ class FT7800Radio(FTx800Radio):
+                 oldval = getattr(_settings, setting)
+                 LOG.debug("Setting %s(%s) <= %s" % (setting, oldval, newval))
+                 setattr(_settings, setting, newval)
+-            except Exception, e:
++            except Exception as e:
+                 LOG.debug(element.get_name())
+                 raise
+ 
+diff --git a/chirp/drivers/ft817.py b/chirp/drivers/ft817.py
+index f34169f..8ed29d6 100644
+--- a/chirp/drivers/ft817.py
++++ b/chirp/drivers/ft817.py
+@@ -413,7 +413,7 @@ class FT817Radio(yaesu_clone.YaesuCloneModeRadio):
+             self._mmap = self._clone_in()
+         except errors.RadioError:
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to communicate with radio: %s" % e)
+         self.process_mmap()
+ 
+@@ -422,7 +422,7 @@ class FT817Radio(yaesu_clone.YaesuCloneModeRadio):
+             self._clone_out()
+         except errors.RadioError:
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to communicate with radio: %s" % e)
+ 
+     def process_mmap(self):
+diff --git a/chirp/drivers/generic_csv.py b/chirp/drivers/generic_csv.py
+index e7c3c93..4471261 100644
+--- a/chirp/drivers/generic_csv.py
++++ b/chirp/drivers/generic_csv.py
+@@ -160,9 +160,9 @@ class CSVRadio(chirp_common.FileBackedRadio, chirp_common.IcomDstarSupport):
+                     val = typ(val)
+                 if hasattr(mem, attr):
+                     setattr(mem, attr, val)
+-            except OmittedHeaderError, e:
++            except OmittedHeaderError as e:
+                 pass
+-            except Exception, e:
++            except Exception as e:
+                 raise Exception("[%s] %s" % (attr, e))
+ 
+         return self._clean(headers, line, mem)
+@@ -203,7 +203,7 @@ class CSVRadio(chirp_common.FileBackedRadio, chirp_common.IcomDstarSupport):
+                 mem = self._parse_csv_data_line(header, line)
+                 if mem.number is None:
+                     raise Exception("Invalid Location field" % lineno)
+-            except Exception, e:
++            except Exception as e:
+                 LOG.error("Line %i: %s", lineno, e)
+                 self.errors.append("Line %i: %s" % (lineno, e))
+                 continue
+diff --git a/chirp/drivers/generic_xml.py b/chirp/drivers/generic_xml.py
+index adb993d..8b00687 100644
+--- a/chirp/drivers/generic_xml.py
++++ b/chirp/drivers/generic_xml.py
+@@ -29,7 +29,7 @@ def validate_doc(doc):
+     try:
+         ctx = libxml2.schemaNewParserCtxt(path)
+         schema = ctx.schemaParse()
+-    except libxml2.parserError, e:
++    except libxml2.parserError as e:
+         LOG.error("Unable to load schema: %s" % e)
+         LOG.error("Path: %s" % path)
+         raise errors.RadioError("Unable to load schema")
+diff --git a/chirp/drivers/h777.py b/chirp/drivers/h777.py
+index 29aac9a..872f574 100644
+--- a/chirp/drivers/h777.py
++++ b/chirp/drivers/h777.py
+@@ -575,7 +575,7 @@ class H777Radio(chirp_common.CloneModeRadio):
+                     else:
+                         LOG.debug("Setting %s = %s" % (setting, element.value))
+                         setattr(obj, setting, element.value)
+-                except Exception, e:
++                except Exception as e:
+                     LOG.debug(element.get_name())
+                     raise
+ 
+diff --git a/chirp/drivers/ic2730.py b/chirp/drivers/ic2730.py
+index 541746b..85326ee 100644
+--- a/chirp/drivers/ic2730.py
++++ b/chirp/drivers/ic2730.py
+@@ -1354,6 +1354,6 @@ class IC2730Radio(icf.IcomRawCloneModeRadio):
+                     elif element.value.get_mutable():
+                         LOG.debug("Setting %s = %s" % (setting, element.value))
+                         setattr(obj, setting, element.value)
+-                except Exception, e:
++                except Exception as e:
+                     LOG.debug(element.get_name())
+                     raise
+diff --git a/chirp/drivers/ic9x.py b/chirp/drivers/ic9x.py
+index 37568eb..b75055e 100644
+--- a/chirp/drivers/ic9x.py
++++ b/chirp/drivers/ic9x.py
+@@ -181,7 +181,7 @@ class IC9xRadio(icf.IcomLiveRadio):
+                 LOG.debug("Done: %s" % mem)
+             except errors.InvalidMemoryLocation:
+                 pass
+-            except errors.InvalidDataError, e:
++            except errors.InvalidDataError as e:
+                 LOG.error("Error talking to radio: %s" % e)
+                 break
+ 
+diff --git a/chirp/drivers/ic9x_ll.py b/chirp/drivers/ic9x_ll.py
+index a6a2e14..d645ecf 100644
+--- a/chirp/drivers/ic9x_ll.py
++++ b/chirp/drivers/ic9x_ll.py
+@@ -60,7 +60,7 @@ def _ic9x_parse_frames(buf):
+         try:
+             start = buf.index("\xfe\xfe")
+             end = buf[start:].index("\xfd") + start + 1
+-        except Exception, e:
++        except Exception as e:
+             LOG.error("No trailing bit")
+             break
+ 
+@@ -71,7 +71,7 @@ def _ic9x_parse_frames(buf):
+             frame = IC92Frame()
+             frame.from_raw(framedata[2:-1])
+             frames.append(frame)
+-        except errors.InvalidDataError, e:
++        except errors.InvalidDataError as e:
+             LOG.error("Broken frame: %s" % e)
+ 
+         # LOG.debug("Parsed %i frames" % len(frames))
+diff --git a/chirp/drivers/icf.py b/chirp/drivers/icf.py
+index 8d25274..5ec7416 100644
+--- a/chirp/drivers/icf.py
++++ b/chirp/drivers/icf.py
+@@ -109,7 +109,7 @@ class RadioStream:
+                     frames.append(frame)
+ 
+                 self.data = rest
+-            except errors.InvalidDataError, e:
++            except errors.InvalidDataError as e:
+                 LOG.error("Failed to parse frame (cmd=%i): %s" % (cmd, e))
+                 return []
+ 
+@@ -314,7 +314,7 @@ def clone_from_radio(radio):
+     """Do a full clone out of the radio's memory"""
+     try:
+         return _clone_from_radio(radio)
+-    except Exception, e:
++    except Exception as e:
+         raise errors.RadioError("Failed to communicate with the radio: %s" % e)
+ 
+ 
+@@ -405,7 +405,7 @@ def clone_to_radio(radio):
+     """Initiate a full memory clone out to @radio"""
+     try:
+         return _clone_to_radio(radio)
+-    except Exception, e:
++    except Exception as e:
+         logging.exception("Failed to communicate with the radio")
+         raise errors.RadioError("Failed to communicate with the radio: %s" % e)
+ 
+@@ -450,7 +450,7 @@ def convert_data_line(line):
+             val = int("%s%s" % (data[i], data[i+1]), 16)
+             i += 2
+             _mmap += struct.pack("B", val)
+-        except ValueError, e:
++        except ValueError as e:
+             LOG.debug("Failed to parse byte: %s" % e)
+             break
+ 
+@@ -642,7 +642,7 @@ class IcomCloneModeRadio(chirp_common.CloneModeRadio):
+                 val = int("%s%s" % (bcddata[i], bcddata[i+1]), 16)
+                 i += 2
+                 data += struct.pack("B", val)
+-            except ValueError, e:
++            except ValueError as e:
+                 LOG.error("Failed to parse byte: %s" % e)
+                 break
+ 
+diff --git a/chirp/drivers/icq7.py b/chirp/drivers/icq7.py
+index 45bd122..a748a82 100644
+--- a/chirp/drivers/icq7.py
++++ b/chirp/drivers/icq7.py
+@@ -344,6 +344,6 @@ class ICQ7Radio(icf.IcomCloneModeRadio):
+                     else:
+                         LOG.debug("Setting %s = %s" % (setting, element.value))
+                         setattr(obj, setting, element.value)
+-                except Exception, e:
++                except Exception as e:
+                     LOG.debug(element.get_name())
+                     raise
+diff --git a/chirp/drivers/icv86.py b/chirp/drivers/icv86.py
+index 1ab1536..a63befb 100644
+--- a/chirp/drivers/icv86.py
++++ b/chirp/drivers/icv86.py
+@@ -205,7 +205,7 @@ class ICV86Radio(icf.IcomCloneModeRadio):
+                     setting = element.get_name()
+                     LOG.debug("Setting %s = %s" % (setting, element.value))
+                     setattr(_settings, setting, element.value)
+-            except Exception, e:
++            except Exception as e:
+                 LOG.debug(element.get_name())
+                 raise
+ 
+diff --git a/chirp/drivers/icx90.py b/chirp/drivers/icx90.py
+index 36bbfc1..6e250dc 100644
+--- a/chirp/drivers/icx90.py
++++ b/chirp/drivers/icx90.py
+@@ -596,7 +596,7 @@ class ICx90Radio(icf.IcomCloneModeRadio):
+                 except AttributeError as e:
+                     LOG.error("Setting %s is not in the memory map: %s" %
+                               (element.get_name(), e))
+-            except Exception, e:
++            except Exception as e:
+                 LOG.debug(element.get_name())
+                 raise
+ 
+diff --git a/chirp/drivers/kenwood_hmk.py b/chirp/drivers/kenwood_hmk.py
+index bf3d5db..d9d41a2 100644
+--- a/chirp/drivers/kenwood_hmk.py
++++ b/chirp/drivers/kenwood_hmk.py
+@@ -114,7 +114,7 @@ class HMKRadio(generic_csv.CSVRadio):
+                 mem = self._parse_csv_data_line(header, line)
+                 if mem.number is None:
+                     raise Exception("Invalid Location field" % lineno)
+-            except Exception, e:
++            except Exception as e:
+                 LOG.error("Line %i: %s" % (lineno, e))
+                 self.errors.append("Line %i: %s" % (lineno, e))
+                 continue
+diff --git a/chirp/drivers/kenwood_itm.py b/chirp/drivers/kenwood_itm.py
+index ef5caff..dd7fc24 100644
+--- a/chirp/drivers/kenwood_itm.py
++++ b/chirp/drivers/kenwood_itm.py
+@@ -118,7 +118,7 @@ class ITMRadio(generic_csv.CSVRadio):
+                 mem = self._parse_csv_data_line(header, line)
+                 if mem.number is None:
+                     raise Exception("Invalid Location field" % lineno)
+-            except Exception, e:
++            except Exception as e:
+                 LOG.error("Line %i: %s" % (lineno, e))
+                 self.errors.append("Line %i: %s" % (lineno, e))
+                 continue
+diff --git a/chirp/drivers/th350.py b/chirp/drivers/th350.py
+index 3994f28..b30e682 100644
+--- a/chirp/drivers/th350.py
++++ b/chirp/drivers/th350.py
+@@ -303,7 +303,7 @@ class Th350Radio(BaofengUVB5):
+             self._mmap = do_download(self)
+         except errors.RadioError:
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to communicate with radio: %s" % e)
+         self.process_mmap()
+ 
+@@ -312,7 +312,7 @@ class Th350Radio(BaofengUVB5):
+             do_upload(self)
+         except errors.RadioError:
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to communicate with radio: %s" % e)
+ 
+     def process_mmap(self):
+diff --git a/chirp/drivers/tk8102.py b/chirp/drivers/tk8102.py
+index cd4a84c..79ee6fc 100644
+--- a/chirp/drivers/tk8102.py
++++ b/chirp/drivers/tk8102.py
+@@ -188,7 +188,7 @@ class KenwoodTKx102Radio(chirp_common.CloneModeRadio):
+         except errors.RadioError:
+             self.pipe.write("\x45")
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to download from radio: %s" % e)
+         self.process_mmap()
+ 
+@@ -201,7 +201,7 @@ class KenwoodTKx102Radio(chirp_common.CloneModeRadio):
+         except errors.RadioError:
+             self.pipe.write("\x45")
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to upload to radio: %s" % e)
+ 
+     def get_raw_memory(self, number):
+diff --git a/chirp/drivers/uv5r.py b/chirp/drivers/uv5r.py
+index 4ce127e..8a9b83a 100644
+--- a/chirp/drivers/uv5r.py
++++ b/chirp/drivers/uv5r.py
+@@ -510,7 +510,7 @@ def _ident_radio(radio):
+         try:
+             data = _do_ident(radio, magic)
+             return data
+-        except errors.RadioError, e:
++        except errors.RadioError as e:
+             LOG.error("uv5r._ident_radio: %s", e)
+             error = e
+             time.sleep(2)
+@@ -810,7 +810,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio):
+             self._mmap = _do_download(self)
+         except errors.RadioError:
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to communicate with radio: %s" % e)
+         self.process_mmap()
+ 
+@@ -819,7 +819,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio):
+             _do_upload(self)
+         except errors.RadioError:
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to communicate with radio: %s" % e)
+ 
+     def get_raw_memory(self, number):
+@@ -1709,7 +1709,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio):
+                     elif element.value.get_mutable():
+                         LOG.debug("Setting %s = %s" % (setting, element.value))
+                         setattr(obj, setting, element.value)
+-                except Exception, e:
++                except Exception as e:
+                     LOG.debug(element.get_name())
+                     raise
+ 
+@@ -1723,7 +1723,7 @@ class BaofengUV5R(chirp_common.CloneModeRadio):
+                     value = int(val.get_value() * 10)
+                 LOG.debug("Setting fm_presets = %s" % (value))
+                 self._memobj.fm_presets = value
+-            except Exception, e:
++            except Exception as e:
+                 LOG.debug(element.get_name())
+                 raise
+ 
+diff --git a/chirp/drivers/uvb5.py b/chirp/drivers/uvb5.py
+index 161c970..55f051f 100644
+--- a/chirp/drivers/uvb5.py
++++ b/chirp/drivers/uvb5.py
+@@ -328,7 +328,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
+             self._mmap = do_download(self)
+         except errors.RadioError:
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to communicate with radio: %s" % e)
+         self.process_mmap()
+ 
+@@ -337,7 +337,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
+             do_upload(self)
+         except errors.RadioError:
+             raise
+-        except Exception, e:
++        except Exception as e:
+             raise errors.RadioError("Failed to communicate with radio: %s" % e)
+ 
+     def process_mmap(self):
+@@ -770,7 +770,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
+                     else:
+                         LOG.debug("Setting %s = %s" % (setting, element.value))
+                         setattr(obj, setting, element.value)
+-                except Exception, e:
++                except Exception as e:
+                     LOG.debug(element.get_name())
+                     raise
+ 
+@@ -786,7 +786,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
+                 LOG.debug("Setting fm_presets[%1i] = %s" % (index, value))
+                 setting = self._memobj.fm_presets
+                 setting[index] = value
+-            except Exception, e:
++            except Exception as e:
+                 LOG.debug(element.get_name())
+                 raise
+ 
+diff --git a/chirp/drivers/vx2.py b/chirp/drivers/vx2.py
+index dfec883..dbd039c 100644
+--- a/chirp/drivers/vx2.py
++++ b/chirp/drivers/vx2.py
+@@ -746,6 +746,6 @@ class VX2Radio(yaesu_clone.YaesuCloneModeRadio):
+                     newval = self._encode_chars(newval, 6)
+                 LOG.debug("Setting %s(%s) <= %s" % (setting, oldval, newval))
+                 setattr(_settings, setting, newval)
+-            except Exception, e:
++            except Exception as e:
+                 LOG.debug(element.get_name())
+                 raise
+diff --git a/chirp/drivers/vx3.py b/chirp/drivers/vx3.py
+index 31cd991..cefc46e 100644
+--- a/chirp/drivers/vx3.py
++++ b/chirp/drivers/vx3.py
+@@ -973,6 +973,6 @@ class VX3Radio(yaesu_clone.YaesuCloneModeRadio):
+                     newval = self._encode_chars(newval, 6)
+                 LOG.debug("Setting %s(%s) <= %s" % (setting, oldval, newval))
+                 setattr(_settings, setting, newval)
+-            except Exception, e:
++            except Exception as e:
+                 LOG.debug(element.get_name())
+                 raise
+diff --git a/chirp/drivers/vx8.py b/chirp/drivers/vx8.py
+index 56620a1..d5da2f6 100644
+--- a/chirp/drivers/vx8.py
++++ b/chirp/drivers/vx8.py
+@@ -1439,7 +1439,7 @@ class VX8Radio(yaesu_clone.YaesuCloneModeRadio):
+                 except AttributeError as e:
+                     LOG.error("Setting %s is not in the memory map: %s" %
+                               (element.get_name(), e))
+-            except Exception, e:
++            except Exception as e:
+                 LOG.debug(element.get_name())
+                 raise
+ 
+diff --git a/chirp/drivers/yaesu_clone.py b/chirp/drivers/yaesu_clone.py
+index 6efa003..3c04ae5 100644
+--- a/chirp/drivers/yaesu_clone.py
++++ b/chirp/drivers/yaesu_clone.py
+@@ -106,7 +106,7 @@ def __clone_in(radio):
+ def _clone_in(radio):
+     try:
+         return __clone_in(radio)
+-    except Exception, e:
++    except Exception as e:
+         raise errors.RadioError("Failed to communicate with the radio: %s" % e)
+ 
+ 
+@@ -166,7 +166,7 @@ def __clone_out(radio):
+ def _clone_out(radio):
+     try:
+         return __clone_out(radio)
+-    except Exception, e:
++    except Exception as e:
+         raise errors.RadioError("Failed to communicate with the radio: %s" % e)
+ 
+ 
+diff --git a/chirp/platform.py b/chirp/platform.py
+index 9b2922b..9a35697 100644
+--- a/chirp/platform.py
++++ b/chirp/platform.py
+@@ -45,7 +45,7 @@ def win32_comports_bruteforce():
+             ports.append((portname, "Unknown", "Serial"))
+             win32file.CloseHandle(port)
+             port = None
+-        except Exception, e:
++        except Exception as e:
+             pass
+ 
+     return ports
+@@ -374,7 +374,7 @@ class Win32Platform(Platform):
+     def list_serial_ports(self):
+         try:
+             ports = list(comports())
+-        except Exception, e:
++        except Exception as e:
+             if comports != win32_comports_bruteforce:
+                 LOG.error("Failed to detect win32 serial ports: %s" % e)
+                 ports = win32_comports_bruteforce()
+@@ -391,7 +391,7 @@ class Win32Platform(Platform):
+ 
+         try:
+             fname, _, _ = win32gui.GetOpenFileNameW(Filter=typestrs)
+-        except Exception, e:
++        except Exception as e:
+             LOG.error("Failed to get filename: %s" % e)
+             return None
+ 
+@@ -422,7 +422,7 @@ class Win32Platform(Platform):
+                                                     CustomFilter=custom,
+                                                     DefExt=def_ext,
+                                                     Filter=typestrs)
+-        except Exception, e:
++        except Exception as e:
+             LOG.error("Failed to get filename: %s" % e)
+             return None
+ 
+@@ -434,7 +434,7 @@ class Win32Platform(Platform):
+         try:
+             pidl, _, _ = shell.SHBrowseForFolder()
+             fname = shell.SHGetPathFromIDList(pidl)
+-        except Exception, e:
++        except Exception as e:
+             LOG.error("Failed to get directory: %s" % e)
+             return None
+ 
+diff --git a/chirp/ui/clone.py b/chirp/ui/clone.py
+index 8832c99..5792560 100644
+--- a/chirp/ui/clone.py
++++ b/chirp/ui/clone.py
+@@ -177,7 +177,7 @@ class CloneSettingsDialog(gtk.Dialog):
+                     raise Exception(
+                         _("Unable to detect radio on {port}").format(
+                             port=cs.port))
+-            except Exception, e:
++            except Exception as e:
+                 d = inputdialog.ExceptionDialog(e)
+                 d.run()
+                 d.destroy()
+@@ -256,7 +256,7 @@ class CloneThread(threading.Thread):
+                 self.__radio.sync_in()
+ 
+             emsg = None
+-        except Exception, e:
++        except Exception as e:
+             common.log_exception()
+             LOG.error("Clone failed: {error}".format(error=e))
+             emsg = e
+diff --git a/chirp/ui/common.py b/chirp/ui/common.py
+index dc611b3..a6b90ee 100644
+--- a/chirp/ui/common.py
++++ b/chirp/ui/common.py
+@@ -114,9 +114,9 @@ class RadioJob:
+                                         str(self.kwargs)))
+             DBG(self.desc)
+             result = func(*self.args, **self.kwargs)
+-        except errors.InvalidMemoryLocation, e:
++        except errors.InvalidMemoryLocation as e:
+             result = e
+-        except Exception, e:
++        except Exception as e:
+             LOG.error("Exception running RadioJob: %s" % e)
+             log_exception()
+             LOG.error("Job Args:   %s" % str(self.args))
+@@ -134,7 +134,7 @@ class RadioJob:
+ 
+         try:
+             func = getattr(self.target, self.func)
+-        except AttributeError, e:
++        except AttributeError as e:
+             LOG.error("No such radio function `%s' in %s" %
+                       (self.func, self.target))
+             return
+diff --git a/chirp/ui/editorset.py b/chirp/ui/editorset.py
+index d1a26c8..80c691c 100644
+--- a/chirp/ui/editorset.py
++++ b/chirp/ui/editorset.py
+@@ -300,7 +300,7 @@ class EditorSet(gtk.VBox):
+             common.show_error("Memory editor must be selected before import")
+         try:
+             src_radio = directory.get_radio_by_image(filen)
+-        except Exception, e:
++        except Exception as e:
+             common.show_error(e)
+             return
+ 
+@@ -314,7 +314,7 @@ class EditorSet(gtk.VBox):
+             try:
+                 src_radio.status_fn = status
+                 src_radio.do_fetch()
+-            except Exception, e:
++            except Exception as e:
+                 common.show_error(e)
+                 ww.hide()
+                 return
+@@ -323,7 +323,7 @@ class EditorSet(gtk.VBox):
+         try:
+             if src_radio.get_features().has_sub_devices:
+                 src_radio = self.choose_sub_device(src_radio)
+-        except Exception, e:
++        except Exception as e:
+             common.show_error(e)
+             return
+ 
+@@ -339,7 +339,7 @@ class EditorSet(gtk.VBox):
+                                            src_radio,
+                                            self.rthread)
+             reporting.report_model_usage(src_radio, "importsrc", True)
+-        except Exception, e:
++        except Exception as e:
+             common.log_exception()
+             common.show_error(_("There was an error during "
+                                 "import: {error}").format(error=e))
+@@ -352,7 +352,7 @@ class EditorSet(gtk.VBox):
+                 dst_radio = generic_xml.XMLRadio(filen)
+             else:
+                 raise Exception(_("Unsupported file type"))
+-        except Exception, e:
++        except Exception as e:
+             common.log_exception()
+             common.show_error(e)
+             return
+@@ -365,7 +365,7 @@ class EditorSet(gtk.VBox):
+             count = self._do_import_locked(importdialog.ExportDialog,
+                                            self.rthread.radio,
+                                            dst_rthread)
+-        except Exception, e:
++        except Exception as e:
+             common.log_exception()
+             common.show_error(_("There was an error during "
+                                 "export: {error}").format(error=e),
+@@ -380,7 +380,7 @@ class EditorSet(gtk.VBox):
+ 
+         try:
+             dst_radio.save(filename=filen)
+-        except Exception, e:
++        except Exception as e:
+             common.log_exception()
+             common.show_error(_("There was an error during "
+                                 "export: {error}").format(error=e),
+diff --git a/chirp/ui/importdialog.py b/chirp/ui/importdialog.py
+index 751e50a..f8fa121 100644
+--- a/chirp/ui/importdialog.py
++++ b/chirp/ui/importdialog.py
+@@ -265,7 +265,7 @@ class ImportDialog(gtk.Dialog):
+                                               {"number":  new,
+                                                "name":    name,
+                                                "comment": comm})
+-            except import_logic.ImportError, e:
++            except import_logic.ImportError as e:
+                 LOG.error("Import error: %s", e)
+                 error_messages[new] = str(e)
+                 continue
+@@ -518,7 +518,7 @@ class ImportDialog(gtk.Dialog):
+         except errors.InvalidMemoryLocation:
+             LOG.error("Location %i empty or at limit of destination radio" %
+                       number)
+-        except errors.InvalidDataError, e:
++        except errors.InvalidDataError as e:
+             LOG.error("Got error from radio, assuming %i beyond limits: %s" %
+                       (number, e))
+ 
+@@ -529,9 +529,9 @@ class ImportDialog(gtk.Dialog):
+                 self.ww.set(float(i) / end)
+             try:
+                 mem = self.src_radio.get_memory(i)
+-            except errors.InvalidMemoryLocation, e:
++            except errors.InvalidMemoryLocation as e:
+                 continue
+-            except Exception, e:
++            except Exception as e:
+                 self.__store.append(row=(False,
+                                          i,
+                                          i,
+diff --git a/chirp/ui/mainapp.py b/chirp/ui/mainapp.py
+index 0e89d98..2bc8a5c 100644
+--- a/chirp/ui/mainapp.py
++++ b/chirp/ui/mainapp.py
+@@ -45,7 +45,7 @@ if __name__ == "__main__":
+ 
+ try:
+     import serial
+-except ImportError, e:
++except ImportError as e:
+     common.log_exception()
+     common.show_error("\nThe Pyserial module is not installed!")
+ 
+@@ -374,7 +374,7 @@ of file.
+                 if not radio:
+                     return
+                 LOG.debug("Manually selected %s" % radio)
+-            except Exception, e:
++            except Exception as e:
+                 common.log_exception()
+                 common.show_error(os.path.basename(fname) + ": " + str(e))
+                 return
+@@ -384,7 +384,7 @@ of file.
+             eset = editorset.EditorSet(radio, self,
+                                        filename=fname,
+                                        tempname=tempname)
+-        except Exception, e:
++        except Exception as e:
+             common.log_exception()
+             common.show_error(
+                 _("There was an error opening {fname}: {error}").format(
+@@ -491,7 +491,7 @@ of file.
+ 
+         try:
+             eset.save(fname)
+-        except Exception, e:
++        except Exception as e:
+             d = inputdialog.ExceptionDialog(e)
+             d.run()
+             d.destroy()
+@@ -584,7 +584,7 @@ of file.
+             try:
+                 shutil.copy(fn, stock_dir)
+                 LOG.debug("Copying %s -> %s" % (fn, stock_dir))
+-            except Exception, e:
++            except Exception as e:
+                 LOG.error("Unable to copy %s to %s: %s" % (fn, stock_dir, e))
+                 return False
+         return True
+@@ -594,7 +594,7 @@ of file.
+         if not os.path.isdir(stock_dir):
+             try:
+                 os.mkdir(stock_dir)
+-            except Exception, e:
++            except Exception as e:
+                 LOG.error("Unable to create directory: %s" % stock_dir)
+                 return
+         if not self.copy_shipped_stock_configs(stock_dir):
+@@ -740,7 +740,7 @@ of file.
+                                 rtscts=rclass.HARDWARE_FLOW,
+                                 timeout=0.25)
+             ser.flushInput()
+-        except serial.SerialException, e:
++        except serial.SerialException as e:
+             d = inputdialog.ExceptionDialog(e)
+             d.run()
+             d.destroy()
+@@ -786,7 +786,7 @@ of file.
+                                 rtscts=radio.HARDWARE_FLOW,
+                                 timeout=0.25)
+             ser.flushInput()
+-        except serial.SerialException, e:
++        except serial.SerialException as e:
+             d = inputdialog.ExceptionDialog(e)
+             d.run()
+             d.destroy()
+@@ -920,7 +920,7 @@ of file.
+                 radio = dmrmarc.DMRMARCRadio(None)
+                 radio.set_params(city, state, country)
+                 self.do_open_live(radio, read_only=True)
+-            except errors.RadioError, e:
++            except errors.RadioError as e:
+                 common.show_error(e)
+ 
+         self.window.set_cursor(None)
+@@ -1055,11 +1055,11 @@ of file.
+                                             ("query=%s\n" % query) +
+                                             ("\n") +
+                                             ("\n".join(radio.errors)))
+-        except errors.InvalidDataError, e:
++        except errors.InvalidDataError as e:
+             common.show_error(str(e))
+             self.window.set_cursor(None)
+             return
+-        except Exception, e:
++        except Exception as e:
+             common.log_exception()
+ 
+         reporting.report_model_usage(radio, "import", True)
+@@ -1161,11 +1161,11 @@ of file.
+                                             ("query=%s\n" % query) +
+                                             ("\n") +
+                                             ("\n".join(radio.errors)))
+-        except errors.InvalidDataError, e:
++        except errors.InvalidDataError as e:
+             common.show_error(str(e))
+             self.window.set_cursor(None)
+             return
+-        except Exception, e:
++        except Exception as e:
+             common.log_exception()
+ 
+         reporting.report_model_usage(radio, "import", True)
+@@ -1249,7 +1249,7 @@ of file.
+ 
+         try:
+             radio = PRRadio(filename)
+-        except Exception, e:
++        except Exception as e:
+             common.show_error(str(e))
+             return
+ 
+@@ -1388,7 +1388,7 @@ of file.
+                 radio = radioreference.RadioReferenceRadio(None)
+                 radio.set_params(zipcode, username, passwd)
+                 self.do_open_live(radio, read_only=True)
+-            except errors.RadioError, e:
++            except errors.RadioError as e:
+                 common.show_error(e)
+ 
+         self.window.set_cursor(None)
+@@ -1631,7 +1631,7 @@ of file.
+             # See this for why:
+             # http://stackoverflow.com/questions/2904274/globals-and-locals-in-python-exec
+             exec(pyc, globals(), globals())
+-        except Exception, e:
++        except Exception as e:
+             common.log_exception()
+             common.show_error("Unable to load module: %s" % e)
+ 
+diff --git a/chirp/ui/memdetail.py b/chirp/ui/memdetail.py
+index d58ecde..ae763e2 100644
+--- a/chirp/ui/memdetail.py
++++ b/chirp/ui/memdetail.py
+@@ -61,24 +61,24 @@ class ValueEditor:
+ 
+         try:
+             newval = self._get_value()
+-        except ValueError, e:
++        except ValueError as e:
+             self._errfn(self._name, str(e))
+             return str(e)
+ 
+         if self._name.startswith("extra_"):
+             try:
+                 self._memory.extra[self._name.split("_", 1)[1]].value = newval
+-            except settings.InternalError, e:
++            except settings.InternalError as e:
+                 self._errfn(self._name, str(e))
+                 return str(e)
+         else:
+             try:
+                 setattr(self._memory, self._name, newval)
+-            except chirp_common.ImmutableValueError, e:
++            except chirp_common.ImmutableValueError as e:
+                 if getattr(self._memory, self._name) != self._get_value():
+                     self._errfn(self._name, str(e))
+                     return str(e)
+-            except ValueError, e:
++            except ValueError as e:
+                 self._errfn(self._name, str(e))
+                 return str(e)
+ 
+diff --git a/chirp/ui/memedit.py b/chirp/ui/memedit.py
+index beb05fb..df674d5 100644
+--- a/chirp/ui/memedit.py
++++ b/chirp/ui/memedit.py
+@@ -178,7 +178,7 @@ class MemoryEditor(common.Editor):
+ 
+         try:
+             new = chirp_common.parse_freq(new)
+-        except ValueError, e:
++        except ValueError as e:
+             LOG.error("chirp_common.parse_freq error: %s", e)
+             new = None
+ 
+@@ -972,7 +972,7 @@ class MemoryEditor(common.Editor):
+                 for i in col_order:
+                     if i not in default_col_order:
+                         raise Exception()
+-        except Exception, e:
++        except Exception as e:
+             LOG.error("column order setting: %s", e)
+             col_order = default_col_order
+ 
+diff --git a/chirp/ui/miscwidgets.py b/chirp/ui/miscwidgets.py
+index 768cfb6..0dc4497 100644
+--- a/chirp/ui/miscwidgets.py
++++ b/chirp/ui/miscwidgets.py
+@@ -130,7 +130,7 @@ class KeyedListWidget(gtk.HBox):
+         try:
+             (store, iter) = self.__view.get_selection().get_selected()
+             return store.get(iter, 0)[0]
+-        except Exception, e:
++        except Exception as e:
+             LOG.error("Unable to find selected: %s" % e)
+             return None
+ 
+@@ -300,7 +300,7 @@ class ListWidget(gtk.HBox):
+         try:
+             (lst, iter) = self._view.get_selection().get_selected()
+             lst.remove(iter)
+-        except Exception, e:
++        except Exception as e:
+             LOG.error("Unable to remove selected: %s" % e)
+ 
+     def get_selected(self, take_default=False):
+@@ -322,7 +322,7 @@ class ListWidget(gtk.HBox):
+                 target = lst.get_iter(pos-1)
+             elif delta < 0:
+                 target = lst.get_iter(pos+1)
+-        except Exception, e:
++        except Exception as e:
+             return False
+ 
+         if target:
+@@ -588,7 +588,7 @@ class LatLonEntry(gtk.Entry):
+             except:
+                 try:
+                     return self.parse_dms(string)
+-                except Exception, e:
++                except Exception as e:
+                     LOG.error("DMS: %s" % e)
+ 
+         raise Exception("Invalid format")
+diff --git a/chirp/ui/reporting.py b/chirp/ui/reporting.py
+index 6908e10..ad52be9 100644
+--- a/chirp/ui/reporting.py
++++ b/chirp/ui/reporting.py
+@@ -132,7 +132,7 @@ class ReportThread(threading.Thread):
+     def _run(self):
+         try:
+             return self.__func(*self.__args)
+-        except Exception, e:
++        except Exception as e:
+             LOG.debug("Failed to report: %s" % e)
+             return False
+ 
+diff --git a/chirp/ui/settingsedit.py b/chirp/ui/settingsedit.py
+index 10e9808..c4a712f 100644
+--- a/chirp/ui/settingsedit.py
++++ b/chirp/ui/settingsedit.py
+@@ -109,7 +109,7 @@ class SettingsEditor(common.Editor):
+     def _save_setting(self, widget, value):
+         try:
+             self._do_save_setting(widget, value)
+-        except settings.InvalidValueError, e:
++        except settings.InvalidValueError as e:
+             common.show_error(_("Invalid setting value: %s") % e)
+ 
+     def _build_ui_tab(self, group):
+diff --git a/chirp/ui/shiftdialog.py b/chirp/ui/shiftdialog.py
+index b975dbf..98fdca1 100644
+--- a/chirp/ui/shiftdialog.py
++++ b/chirp/ui/shiftdialog.py
+@@ -136,7 +136,7 @@ class ShiftDialog(gtk.Dialog):
+ 
+         try:
+             count = func(newhole, *args)
+-        except errors.InvalidMemoryLocation, e:
++        except errors.InvalidMemoryLocation as e:
+             self.status(str(e), 0)
+             self.finished()
+             return

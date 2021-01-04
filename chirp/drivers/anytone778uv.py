@@ -1,4 +1,5 @@
 # Copyright 2020 Joe Milbourn <joe@milbourn.org.uk>
+# Copyright 2020 Jim Unroe <rock.unroe@gmail.com>
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -40,6 +41,10 @@
 
 from chirp import chirp_common, directory, memmap, errors, util
 from chirp import bitwise
+from chirp.settings import RadioSettingGroup, RadioSetting, \
+    RadioSettingValueBoolean, RadioSettingValueList, \
+    RadioSettingValueString, RadioSettingValueInteger, \
+    RadioSettingValueFloat, RadioSettings, InvalidValueError
 
 import struct
 import time
@@ -110,24 +115,138 @@ struct {
   u8 occupied_bitfield[32];
   u8 scan_enabled_bitfield[32];
 } memory_status;
+
+#seekto 0x1980;
+struct {
+  char line[7];           // starting display
+} starting_display;
+
+#seekto 0x1990;
+struct {
+  u8 code[16];            // DTMF Encode M1-M16
+} pttid[16];
+
+#seekto 0x1A90;
+struct {
+  u8 pttIdStart[16];      // 0x1A90 ptt id starting
+  u8 pttIdEnd[16];        // 0x1AA0 ptt id ending
+  u8 remoteStun[16];      // 0x1AB0 remotely stun
+  u8 remoteKill[16];      // 0x1AC0 remotely kill
+  u8 intervalChar;        // 0x1AD0 dtmf interval character
+  u8 groupCode;           // 0x1AD1 group code
+  u8 unk1ad2:6,           // 0x1AD2
+     decodingResponse:2;  //        decoding response
+  u8 pretime;             // 0x1AD3 pretime
+  u8 firstDigitTime;      // 0x1AD4 first digit time
+  u8 autoResetTime;       // 0x1AD5 auto reset time
+  u8 selfID[3];           // 0x1AD6 dtmf self id
+  u8 unk1ad9:7,           // 0x1AD9
+     sideTone:1;          //        side tone
+  u8 timeLapse;           // 0x1ADA time-lapse after encode
+  u8 pauseTime;           // 0x1ADB ptt id pause time
+} dtmf;
+
+#seekto 0x3200;
+struct {
+  u8 unk3200:5,           // 0x3200
+     beepVolume:3;        //        beep volume
+  u8 unk3201:4,           // 0x3201
+     frequencyStep:4;     //        frequency step
+  u8 unk3202:6,           // 0x3202
+     displayMode:2;       // display mode
+  u8 unk0x3203;
+  u8 unk3204:4,           // 0x3204
+     squelchLevelA:4;     //        squelch level a
+  u8 unk3205:4,           // 0x3205
+     squelchLevelB:4;     //        squelch level b
+  u8 unk3206:2,           // 0x3206
+     speakerVol:6;        //        speaker volume
+  u8 unk3207:7,           // 0x3207
+     powerOnPasswd:1;     //        power-on password
+  u8 unk3208:6,           // 0x3208
+     scanType:2;          //        scan type
+  u8 unk3209:6,           // 0x3209
+     scanRecoveryT:2;     //        scan recovery time
+  u8 unk320a:7,           // 0x320A
+     autoPowerOn:1;       //        auto power on
+  u8 unk320b:7,           // 0x320B
+     main:1;              //        main
+  u8 unk320c:7,           // 0x320C
+     dualWatch:1;         //        dual watch (rx way select)
+  u8 unk320d:5,           // 0x320D
+     backlightBr:3;       //        backlight brightness
+  u8 unk320e:3,           // 0x320E
+     timeOutTimer:5;      //        time out timer
+  u8 unk320f:6,           // 0x320F
+     autoPowerOff:2;      //        auto power off
+  u8 unk3210:6,           // 0x3210
+     tbstFrequency:2;     //        tbst frequency
+  u8 unk3211:7,           // 0x3211
+     screenDir:1;         //        screen direction
+  u8 unk3212:2,           // 0x3212
+     micKeyBrite:6;       //        hand mic key brightness
+  u8 unk3213:6,           // 0x3213
+     speakerSwitch:2;     //        speaker switch
+  u8 keyPA;               // 0x3214 key pa
+  u8 keyPB;               // 0x3215 key pb
+  u8 keyPC;               // 0x3216 key pc
+  u8 keyPD;               // 0x3217 key pd
+  u8 unk3218:5,           // 0x3218
+     steType:3;           //        ste type
+  u8 unk3219:6,           // 0x3219
+     steFrequency:2;      //        ste frequency
+  u8 unk321a:5,           // 0x321A
+     dtmfTxTime:3;        //        dtmf transmitting time
+  u8 unk_bit7_6:2,        // 0x321B
+     monKeyFunction:1,    //        mon key function
+     channelLocked:1,     //        channel locked
+     saveChParameter:1,   //        save channel parameter
+     powerOnReset:1,      //        power on reset
+     trfEnable:1,         //        trf enable
+     knobMode:1;          //        knob mode
+} settings;
+
+#seekto 0x3240;
+struct {
+  char digits[6];         // password
+} password;
+
+#seekto 0x3250;
+struct {
+  u8 keyMode1P1;          // 0x3250 key mode 1 p1
+  u8 keyMode1P2;          // 0x3251 key mode 1 p2
+  u8 keyMode1P3;          // 0x3252 key mode 1 p3
+  u8 keyMode1P4;          // 0x3253 key mode 1 p4
+  u8 keyMode1P5;          // 0x3254 key mode 1 p5
+  u8 keyMode1P6;          // 0x3255 key mode 1 p6
+  u8 keyMode2P1;          // 0x3256 key mode 2 p1
+  u8 keyMode2P2;          // 0x3257 key mode 2 p2
+  u8 keyMode2P3;          // 0x3258 key mode 2 p3
+  u8 keyMode2P4;          // 0x3259 key mode 2 p4
+  u8 keyMode2P5;          // 0x325A key mode 2 p5
+  u8 keyMode2P6;          // 0x325B key mode 2 p6
+} pfkeys;
+
 #seekto 0x3260;
 struct {
-  u8 vfoa_current_channel; // 0
-  u8 unknown1;
+  u8 mrChanA;             // 0x3260 mr channel a
+  u8 unknown1_0:7,        // 0x3261
+     vfomrA:1;            //        vfo/mr mode a
   u8 unknown2;
   u8 unknown3;
   u8 unknown4;
   u8 unknown5;
   u8 unknown6;
-  u8 scan_channel;        // 7
-  u8 unknown8_0:4,     // 8
+  u8 mrChanB;             // 0x3267 mr channel b
+  u8 unknown8_0:4,        // 0x3268
      scan_active:1,
-     unknown8_1:3;
+     unknown8_1:2,
+     vfomrB:1;            //        vfo/mr mode b
   u8 unknown9;
   u8 unknowna;
   u8 unknownb;
   u8 unknownc;
-  u8 bandlimit;       // d
+  u8 bandlimit;           // 0x326D mode
   u8 unknownd;
   u8 unknowne;
   u8 unknownf;
@@ -203,7 +322,7 @@ CHARSET_ASCII_PLUS = chirp_common.CHARSET_UPPER_NUMERIC + '- '
 # Band limits as defined by the band byte in ver_response, defined in Hz, for
 # VHF and UHF, used for RX and TX.
 BAND_LIMITS = {0x00: [(144000000, 148000000), (430000000, 440000000)],
-               0x01: [(134000000, 174000000), (400000000, 490000000)],
+               0x01: [(136000000, 174000000), (400000000, 490000000)],
                0x02: [(144000000, 146000000), (430000000, 440000000)]}
 
 
@@ -525,7 +644,7 @@ class AnyTone778UVBase(chirp_common.CloneModeRadio,
     def get_features(self):
         rf = chirp_common.RadioFeatures()
         rf.has_bank = False
-        rf.has_settings = False
+        rf.has_settings = True
         rf.can_odd_split = True
         rf.has_name = True
         rf.has_offset = True
@@ -739,6 +858,12 @@ class AnyTone778UVBase(chirp_common.CloneModeRadio,
                 if rxcode == txcode:
                     mem.tmode = 'DTCS'
                     mem.rx_dtcs = rxcode
+                    # #8327 Not sure this is the correct interpretation of
+                    # DevelopersToneModes, but it seems to make it work round
+                    # tripping with the anytone software.  DTM implies that we
+                    # might not need to set mem.dtcs, but if we do it only DTCS
+                    # rx works (as if we were Cross:None->DTCS).
+                    mem.dtcs = rxcode
                 else:
                     mem.tmode = 'Cross'
                     mem.cross_mode = 'DTCS->DTCS'
@@ -757,6 +882,11 @@ class AnyTone778UVBase(chirp_common.CloneModeRadio,
             else:
                 LOG.error('%s: Unhandled tmode enabled = %d.' % (
                     mem.name, enabled))
+
+                # Can get here if e.g. TONE_EN_RXCODE is set and tsql isn't
+                # In that case should we perhaps store the tone and code values
+                # if they're present and then setup tmode and cross_mode as
+                # appropriate later?
 
             # set the dtcs polarity
             dtcs_pol_bit_to_str = {0: 'N', 1: 'R'}
@@ -927,6 +1057,601 @@ class AnyTone778UVBase(chirp_common.CloneModeRadio,
             _mem.unknown9 = 0x00
             _mem.unknown10 = 0x00
 
+    def get_settings(self):
+        """Translate the MEM_FORMAT structs into setstuf in the UI"""
+        _settings = self._memobj.settings
+        _radio_settings = self._memobj.radio_settings
+        _password = self._memobj.password
+        _pfkeys = self._memobj.pfkeys
+        _dtmf = self._memobj.dtmf
+
+        # Function Setup
+        function = RadioSettingGroup("function", "Function Setup")
+        group = RadioSettings(function)
+
+        # MODE SET
+        # Channel Locked
+        rs = RadioSettingValueBoolean(_settings.channelLocked)
+        rset = RadioSetting("settings.channelLocked", "Channel locked", rs)
+        function.append(rset)
+
+        # Menu 3 - Display Mode
+        options = ["Frequency", "Channel", "Name"]
+        rs = RadioSettingValueList(options, options[_settings.displayMode])
+        rset = RadioSetting("settings.displayMode", "Display Mode", rs)
+        function.append(rset)
+
+        # VFO/MR A
+        options = ["MR", "VFO"]
+        rs = RadioSettingValueList(options, options[_radio_settings.vfomrA])
+        rset = RadioSetting("radio_settings.vfomrA", "VFO/MR mode A", rs)
+        function.append(rset)
+
+        # MR Channel A
+        options = ["%s" % x for x in range(1, 201)]
+        rs = RadioSettingValueList(options, options[_radio_settings.mrChanA])
+        rset = RadioSetting("radio_settings.mrChanA", "MR channel A", rs)
+        function.append(rset)
+
+        # VFO/MR B
+        options = ["MR", "VFO"]
+        rs = RadioSettingValueList(options, options[_radio_settings.vfomrB])
+        rset = RadioSetting("radio_settings.vfomrB", "VFO/MR mode B", rs)
+        function.append(rset)
+
+        # MR Channel B
+        options = ["%s" % x for x in range(1, 201)]
+        rs = RadioSettingValueList(options, options[_radio_settings.mrChanB])
+        rset = RadioSetting("radio_settings.mrChanB", "MR channel B", rs)
+        function.append(rset)
+
+        # DISPLAY SET
+        # Starting Display
+        name = ""
+        for i in range(7):  # 0 - 7
+            name += chr(self._memobj.starting_display.line[i])
+        name = name.upper().rstrip()  # remove trailing spaces
+
+        rs = RadioSettingValueString(0, 7, name)
+        rs.set_charset(chirp_common.CHARSET_ALPHANUMERIC)
+        rset = RadioSetting("starting_display.line", "Starting display", rs)
+        function.append(rset)
+
+        # Menu 11 - Backlight Brightness
+        options = ["%s" % x for x in range(1, 4)]
+        rs = RadioSettingValueList(options, options[_settings.backlightBr - 1])
+        rset = RadioSetting("settings.backlightBr", "Backlight brightness", rs)
+        function.append(rset)
+
+        # Menu 15 - Screen Direction
+        options = ["Positive", "Inverted"]
+        rs = RadioSettingValueList(options, options[_settings.screenDir])
+        rset = RadioSetting("settings.screenDir", "Screen direction", rs)
+        function.append(rset)
+
+        # Hand Mic Key Brightness
+        options = ["%s" % x for x in range(1, 32)]
+        rs = RadioSettingValueList(options, options[_settings.micKeyBrite - 1])
+        rset = RadioSetting("settings.micKeyBrite",
+                            "Hand mic key brightness", rs)
+        function.append(rset)
+
+        # VOL SET
+        # Menu 1 - Beep Volume
+        options = ["OFF"] + ["%s" % x for x in range(1, 6)]
+        rs = RadioSettingValueList(options, options[_settings.beepVolume])
+        rset = RadioSetting("settings.beepVolume", "Beep volume", rs)
+        function.append(rset)
+
+        # Menu 5 - Volume level Setup
+        options = ["%s" % x for x in range(1, 37)]
+        rs = RadioSettingValueList(options, options[_settings.speakerVol - 1])
+        rset = RadioSetting("settings.speakerVol", "Speaker volume", rs)
+        function.append(rset)
+
+        # Menu 16 - Speaker Switch
+        options = ["Host on | Hand mic off", "Host on | Hand mic on",
+                   "Host off | Hand mic on"]
+        rs = RadioSettingValueList(options, options[_settings.speakerSwitch])
+        rset = RadioSetting("settings.speakerSwitch", "Speaker switch", rs)
+        function.append(rset)
+
+        # STE SET
+        # STE Frequency
+        options = ["Off", "55.2 Hz", "259.2 Hz"]
+        rs = RadioSettingValueList(options, options[_settings.steFrequency])
+        rset = RadioSetting("settings.steFrequency", "STE frequency", rs)
+        function.append(rset)
+
+        # STE Type
+        options = ["Off", "Silent", "120 degrees", "180 degrees",
+                   "240 degrees"]
+        rs = RadioSettingValueList(options, options[_settings.steType])
+        rset = RadioSetting("settings.steType", "STE type", rs)
+        function.append(rset)
+
+        # ON/OFF SET
+        # Power-on Password
+        rs = RadioSettingValueBoolean(_settings.powerOnPasswd)
+        rset = RadioSetting("settings.powerOnPasswd", "Power-on Password", rs)
+        function.append(rset)
+
+        # Password
+        def _char_to_str(chrx):
+            """ Remove ff pads from char array """
+            #  chrx is char array
+            str1 = ""
+            for sx in chrx:
+                if int(sx) > 31 and int(sx) < 127:
+                    str1 += chr(sx)
+            return str1
+
+        def _pswd_vfy(setting, obj, atrb):
+            """ Verify password is 1-6 chars, numbers 1-5 """
+            str1 = str(setting.value).strip()   # initial
+            str2 = [c for c in str1 if c in '0123456789']    # valid chars
+            if str1 != str2:
+                # Two lines due to python 73 char limit
+                sx = "Bad characters in Password"
+                raise errors.RadioError(sx)
+            str2 = str1.ljust(6, chr(00))      # pad to 6 with 00's
+            setattr(obj, atrb, str2)
+            return
+
+        sx = _char_to_str(_password.digits).strip()
+        rx = RadioSettingValueString(0, 6, sx)
+        sx = "Password (numerals 0-9)"
+        rset = RadioSetting("password.digits", sx, rx)
+        rset.set_apply_callback(_pswd_vfy, _password, "digits")
+        function.append(rset)
+
+        # Menu 9 - Auto Power On
+        rs = RadioSettingValueBoolean(_settings.autoPowerOn)
+        rset = RadioSetting("settings.autoPowerOn", "Auto power on", rs)
+        function.append(rset)
+
+        # Menu 13 - Auto Power Off
+        options = ["Off", "30 minutes", "60 minutes", "120 minutes"]
+        rs = RadioSettingValueList(options, options[_settings.autoPowerOff])
+        rset = RadioSetting("settings.autoPowerOff", "Auto power off", rs)
+        function.append(rset)
+
+        # Power On Reset Enable
+        rs = RadioSettingValueBoolean(_settings.powerOnReset)
+        rset = RadioSetting("settings.powerOnReset", "Power on reset", rs)
+        function.append(rset)
+
+        # FUNCTION SET
+        # Menu 4 - Squelch Level A
+        options = ["OFF"] + ["%s" % x for x in range(1, 10)]
+        rs = RadioSettingValueList(options, options[_settings.squelchLevelA])
+        rset = RadioSetting("settings.squelchLevelA", "Squelch level A", rs)
+        function.append(rset)
+
+        # Squelch Level B
+        options = ["OFF"] + ["%s" % x for x in range(1, 10)]
+        rs = RadioSettingValueList(options, options[_settings.squelchLevelB])
+        rset = RadioSetting("settings.squelchLevelB", "Squelch level B", rs)
+        function.append(rset)
+
+        # Menu 7 - Scan Type
+        options = ["Time operated (TO)", "Carrier operated (CO)",
+                   "Search (SE)"]
+        rs = RadioSettingValueList(options, options[_settings.scanType])
+        rset = RadioSetting("settings.scanType", "Scan mode", rs)
+        function.append(rset)
+
+        # Menu 8 - Scan Recovery Time
+        options = ["%s seconds" % x for x in range(5, 20, 5)]
+        rs = RadioSettingValueList(options, options[_settings.scanRecoveryT])
+        rset = RadioSetting("settings.scanRecoveryT", "Scan recovery time", rs)
+        function.append(rset)
+
+        # Main
+        options = ["A", "B"]
+        rs = RadioSettingValueList(options, options[_settings.main])
+        rset = RadioSetting("settings.main", "Main", rs)
+        function.append(rset)
+
+        # Menu 10 - Dual Watch (RX Way Select)
+        rs = RadioSettingValueBoolean(_settings.dualWatch)
+        rset = RadioSetting("settings.dualWatch", "Dual watch", rs)
+        function.append(rset)
+
+        # Menu 12 - Time Out Timer
+        options = ["OFF"] + ["%s minutes" % x for x in range(1, 31)]
+        rs = RadioSettingValueList(options, options[_settings.timeOutTimer])
+        rset = RadioSetting("settings.timeOutTimer", "Time out timer", rs)
+        function.append(rset)
+
+        # TBST Frequency
+        options = ["1000 Hz", "1450 Hz", "1750 Hz", "2100 Hz"]
+        rs = RadioSettingValueList(options, options[_settings.tbstFrequency])
+        rset = RadioSetting("settings.tbstFrequency", "TBST frequency", rs)
+        function.append(rset)
+
+        # Save Channel Perameter
+        rs = RadioSettingValueBoolean(_settings.saveChParameter)
+        rset = RadioSetting("settings.saveChParameter",
+                            "Save channel parameter", rs)
+        function.append(rset)
+
+        # MON Key Function
+        options = ["Squelch off momentary", "Squelch off"]
+        rs = RadioSettingValueList(options, options[_settings.monKeyFunction])
+        rset = RadioSetting("settings.monKeyFunction", "MON key function", rs)
+        function.append(rset)
+
+        # Frequency Step
+        options = ["2.5 KHz", "5 KHz", "6.25 KHz", "10 KHz", "12.5 KHz",
+                   "20 KHz", "25 KHz", "30 KHz", "50 KHz"]
+        rs = RadioSettingValueList(options, options[_settings.frequencyStep])
+        rset = RadioSetting("settings.frequencyStep", "Frequency step", rs)
+        function.append(rset)
+
+        # Knob Mode
+        options = ["Volume", "Channel"]
+        rs = RadioSettingValueList(options, options[_settings.knobMode])
+        rset = RadioSetting("settings.knobMode", "Knob mode", rs)
+        function.append(rset)
+
+        # TRF Enable
+        rs = RadioSettingValueBoolean(_settings.trfEnable)
+        rset = RadioSetting("settings.trfEnable", "TRF enable", rs)
+        function.append(rset)
+
+        # Key Assignment
+        pfkeys = RadioSettingGroup("pfkeys", "Key Assignment")
+        group.append(pfkeys)
+
+        options = ["A/B", "V/M", "SQL", "VOL", "POW", "CDT", "REV", "SCN",
+                   "CAL", "TALK", "BND", "SFT", "MON", "DIR", "TRF", "RDW",
+                   "NULL"]
+
+        # Key Mode 1
+        # P1
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode1P1 - 1])
+        rset = RadioSetting("pfkeys.keyMode1P1",
+                            "Key mode 1 P1", rs)
+        pfkeys.append(rset)
+
+        # P2
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode1P2 - 1])
+        rset = RadioSetting("pfkeys.keyMode1P2",
+                            "Key mode 1 P2", rs)
+        pfkeys.append(rset)
+
+        # P3
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode1P3 - 1])
+        rset = RadioSetting("pfkeys.keyMode1P3",
+                            "Key mode 1 P3", rs)
+        pfkeys.append(rset)
+
+        # P4
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode1P4 - 1])
+        rset = RadioSetting("pfkeys.keyMode1P4",
+                            "Key mode 1 P4", rs)
+        pfkeys.append(rset)
+
+        # P5
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode1P5 - 1])
+        rset = RadioSetting("pfkeys.keyMode1P5",
+                            "Key mode 1 P5", rs)
+        pfkeys.append(rset)
+
+        # P6
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode1P6 - 1])
+        rset = RadioSetting("pfkeys.keyMode1P6",
+                            "Key mode 1 P6", rs)
+        pfkeys.append(rset)
+
+        # Key Mode 2
+        # P1
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode2P1 - 1])
+        rset = RadioSetting("pfkeys.keyMode2P1",
+                            "Key mode 2 P1", rs)
+        pfkeys.append(rset)
+
+        # P2
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode2P2 - 1])
+        rset = RadioSetting("pfkeys.keyMode2P2",
+                            "Key mode 2 P2", rs)
+        pfkeys.append(rset)
+
+        # P3
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode2P3 - 1])
+        rset = RadioSetting("pfkeys.keyMode2P3",
+                            "Key mode 2 P3", rs)
+        pfkeys.append(rset)
+
+        # P4
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode2P4 - 1])
+        rset = RadioSetting("pfkeys.keyMode2P4",
+                            "Key mode 2 P4", rs)
+        pfkeys.append(rset)
+
+        # P5
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode2P5 - 1])
+        rset = RadioSetting("pfkeys.keyMode2P5",
+                            "Key mode 2 P5", rs)
+        pfkeys.append(rset)
+
+        # P6
+        rs = RadioSettingValueList(options, options[_pfkeys.keyMode2P6 - 1])
+        rset = RadioSetting("pfkeys.keyMode2P6",
+                            "Key mode 2 P6", rs)
+        pfkeys.append(rset)
+
+        options = ["V/M", "SQL", "VOL", "POW", "CDT", "REV", "SCN", "CAL",
+                   "TALK", "BND", "SFT", "MON", "DIR", "TRF", "RDW"]
+
+        # PA
+        rs = RadioSettingValueList(options, options[_settings.keyPA - 2])
+        rset = RadioSetting("settings.keyPA",
+                            "Key PA", rs)
+        pfkeys.append(rset)
+
+        # PB
+        rs = RadioSettingValueList(options, options[_settings.keyPB - 2])
+        rset = RadioSetting("settings.keyPB",
+                            "Key PB", rs)
+        pfkeys.append(rset)
+
+        # PC
+        rs = RadioSettingValueList(options, options[_settings.keyPC - 2])
+        rset = RadioSetting("settings.keyPC",
+                            "Key PC", rs)
+        pfkeys.append(rset)
+
+        # PD
+        rs = RadioSettingValueList(options, options[_settings.keyPD - 2])
+        rset = RadioSetting("settings.keyPD",
+                            "Key PD", rs)
+        pfkeys.append(rset)
+
+        # DTMF
+        dtmf = RadioSettingGroup("dtmf", "DTMF")
+        group.append(dtmf)
+
+        # DTMF Transmitting Time
+        options = ["50 milliseconds", "100 milliseconds", "200 milliseconds",
+                   "300 milliseconds", "500 milliseconds"]
+        rs = RadioSettingValueList(options, options[_settings.dtmfTxTime])
+        rset = RadioSetting("settings.dtmfTxTime",
+                            "DTMF transmitting time", rs)
+        dtmf.append(rset)
+
+        # DTMF Self ID
+
+        # DTMF Interval Character
+        IC_CHOICES = ["A", "B", "C", "D", "*", "#"]
+        IC_VALUES = [0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]
+
+        def apply_ic_listvalue(setting, obj):
+            LOG.debug("Setting value: " + str(setting.value) + " from list")
+            val = str(setting.value)
+            index = IC_CHOICES.index(val)
+            val = IC_VALUES[index]
+            obj.set_value(val)
+
+        if _dtmf.intervalChar in IC_VALUES:
+            idx = IC_VALUES.index(_dtmf.intervalChar)
+        else:
+            idx = IC_VALUES.index(0x0E)
+        rs = RadioSetting("dtmf.intervalChar", "DTMF interval character",
+                          RadioSettingValueList(IC_CHOICES,
+                                                IC_CHOICES[idx]))
+        rs.set_apply_callback(apply_ic_listvalue, _dtmf.intervalChar)
+        dtmf.append(rs)
+
+        # Group Code
+        GC_CHOICES = ["Off", "A", "B", "C", "D", "*", "#"]
+        GC_VALUES = [0xFF, 0x0A, 0x0B, 0x0C, 0x0D, 0x0E, 0x0F]
+
+        def apply_gc_listvalue(setting, obj):
+            LOG.debug("Setting value: " + str(setting.value) + " from list")
+            val = str(setting.value)
+            index = GC_CHOICES.index(val)
+            val = GC_VALUES[index]
+            obj.set_value(val)
+
+        if _dtmf.groupCode in GC_VALUES:
+            idx = GC_VALUES.index(_dtmf.groupCode)
+        else:
+            idx = GC_VALUES.index(0x0A)
+        rs = RadioSetting("dtmf.groupCode", "DTMF interval character",
+                          RadioSettingValueList(GC_CHOICES,
+                                                GC_CHOICES[idx]))
+        rs.set_apply_callback(apply_gc_listvalue, _dtmf.groupCode)
+        dtmf.append(rs)
+
+        # Decoding Response
+        options = ["None", "Beep tone", "Beep tone & respond"]
+        rs = RadioSettingValueList(options, options[_dtmf.decodingResponse])
+        rset = RadioSetting("dtmf.decodingResponse", "Decoding response", rs)
+        dtmf.append(rset)
+
+        # First Digit Time
+        options = ["%s" % x for x in range(0, 2510, 10)]
+        rs = RadioSettingValueList(options, options[_dtmf.firstDigitTime])
+        rset = RadioSetting("dtmf.firstDigitTime", "First Digit Time(ms)", rs)
+        dtmf.append(rset)
+
+        # First Digit Time
+        options = ["%s" % x for x in range(10, 2510, 10)]
+        rs = RadioSettingValueList(options, options[_dtmf.pretime - 1])
+        rset = RadioSetting("dtmf.pretime", "Pretime(ms)", rs)
+        dtmf.append(rset)
+
+        # Auto Reset Time
+        options = ["%s" % x for x in range(0, 25100, 100)]
+        rs = RadioSettingValueList(options, options[_dtmf.autoResetTime])
+        rset = RadioSetting("dtmf.autoResetTime", "Auto Reset time(ms)", rs)
+        dtmf.append(rset)
+
+        # Time-Lapse After Encode
+        options = ["%s" % x for x in range(10, 2510, 10)]
+        rs = RadioSettingValueList(options, options[_dtmf.timeLapse - 1])
+        rset = RadioSetting("dtmf.timeLapse",
+                            "Time-lapse after encode(ms)", rs)
+        dtmf.append(rset)
+
+        # PTT ID Pause Time
+        options = ["Off", "-", "-", "-", "-"] + [
+                   "%s" % x for x in range(5, 76)]
+        rs = RadioSettingValueList(options, options[_dtmf.pauseTime])
+        rset = RadioSetting("dtmf.pauseTime", "PTT ID pause time(s)", rs)
+        dtmf.append(rset)
+
+        # Side Tone
+        rs = RadioSettingValueBoolean(_dtmf.sideTone)
+        rset = RadioSetting("dtmf.sideTone", "Side tone", rs)
+        dtmf.append(rset)
+
+        # PTT ID Starting
+        DTMF_CHARS = "0123456789ABCD*# "
+        _codeobj = _dtmf.pttIdStart
+        _code = "".join([DTMF_CHARS[x] for x in _codeobj if int(x) < 0x1F])
+        val = RadioSettingValueString(0, 16, _code, False)
+        val.set_charset(DTMF_CHARS)
+        rs = RadioSetting("dtmf.pttIdStart", "PTT ID starting", val)
+
+        def apply_code(setting, obj):
+            code = []
+            for j in range(0, 16):
+                try:
+                    code.append(DTMF_CHARS.index(str(setting.value)[j]))
+                except IndexError:
+                    code.append(0xFF)
+            obj.pttIdStart = code
+        rs.set_apply_callback(apply_code, _dtmf)
+        dtmf.append(rs)
+
+        # PTT ID Ending
+        _codeobj = _dtmf.pttIdEnd
+        _code = "".join([DTMF_CHARS[x] for x in _codeobj if int(x) < 0x1F])
+        val = RadioSettingValueString(0, 16, _code, False)
+        val.set_charset(DTMF_CHARS)
+        rs = RadioSetting("dtmf.pttIdEnd", "PTT ID ending", val)
+
+        def apply_code(setting, obj):
+            code = []
+            for j in range(0, 16):
+                try:
+                    code.append(DTMF_CHARS.index(str(setting.value)[j]))
+                except IndexError:
+                    code.append(0xFF)
+            obj.pttIdEnd = code
+        rs.set_apply_callback(apply_code, _dtmf)
+        dtmf.append(rs)
+
+        # Remotely Kill
+        _codeobj = _dtmf.remoteKill
+        _code = "".join([DTMF_CHARS[x] for x in _codeobj if int(x) < 0x1F])
+        val = RadioSettingValueString(0, 16, _code, False)
+        val.set_charset(DTMF_CHARS)
+        rs = RadioSetting("dtmf.remoteKill", "Remotely kill", val)
+
+        def apply_code(setting, obj):
+            code = []
+            for j in range(0, 16):
+                try:
+                    code.append(DTMF_CHARS.index(str(setting.value)[j]))
+                except IndexError:
+                    code.append(0xFF)
+            obj.remoteKill = code
+        rs.set_apply_callback(apply_code, _dtmf)
+        dtmf.append(rs)
+
+        # Remotely Stun
+        _codeobj = _dtmf.remoteStun
+        _code = "".join([DTMF_CHARS[x] for x in _codeobj if int(x) < 0x1F])
+        val = RadioSettingValueString(0, 16, _code, False)
+        val.set_charset(DTMF_CHARS)
+        rs = RadioSetting("dtmf.remoteStun", "Remotely stun", val)
+
+        def apply_code(setting, obj):
+            code = []
+            for j in range(0, 16):
+                try:
+                    code.append(DTMF_CHARS.index(str(setting.value)[j]))
+                except IndexError:
+                    code.append(0xFF)
+            obj.remoteStun = code
+        rs.set_apply_callback(apply_code, _dtmf)
+        dtmf.append(rs)
+
+        # DTMF Encode
+        # M1 - M16
+        for i in range(0, 16):
+            _codeobj = self._memobj.pttid[i].code
+            _code = "".join([DTMF_CHARS[x] for x in _codeobj if int(x) < 0x1F])
+            val = RadioSettingValueString(0, 16, _code, False)
+            val.set_charset(DTMF_CHARS)
+            rs = RadioSetting("pttid/%i.code" % i,
+                              "DTMF encode M%i" % (i + 1), val)
+
+            def apply_code(setting, obj):
+                code = []
+                for j in range(0, 16):
+                    try:
+                        code.append(DTMF_CHARS.index(str(setting.value)[j]))
+                    except IndexError:
+                        code.append(0xFF)
+                obj.code = code
+            rs.set_apply_callback(apply_code, self._memobj.pttid[i])
+            dtmf.append(rs)
+
+        return group
+
+    def set_settings(self, settings):
+        _settings = self._memobj.settings
+        _mem = self._memobj
+        for element in settings:
+            if not isinstance(element, RadioSetting):
+                self.set_settings(element)
+                continue
+            else:
+                try:
+                    name = element.get_name()
+                    if "." in name:
+                        bits = name.split(".")
+                        obj = self._memobj
+                        for bit in bits[:-1]:
+                            if "/" in bit:
+                                bit, index = bit.split("/", 1)
+                                index = int(index)
+                                obj = getattr(obj, bit)[index]
+                            else:
+                                obj = getattr(obj, bit)
+                        setting = bits[-1]
+                    else:
+                        obj = _settings
+                        setting = element.get_name()
+
+                    if element.has_apply_callback():
+                        LOG.debug("Using apply callback")
+                        element.run_apply_callback()
+                    elif setting == "timeLapse":
+                        setattr(obj, setting, int(element.value) + 1)
+                    elif setting == "pretime":
+                        setattr(obj, setting, int(element.value) + 1)
+                    elif setting == "backlightBr":
+                        setattr(obj, setting, int(element.value) + 1)
+                    elif setting == "micKeyBrite":
+                        setattr(obj, setting, int(element.value) + 1)
+                    elif setting == "speakerVol":
+                        setattr(obj, setting, int(element.value) + 1)
+                    elif "keyMode" in setting:
+                        setattr(obj, setting, int(element.value) + 1)
+                    elif "keyP" in setting:
+                        setattr(obj, setting, int(element.value) + 2)
+                    elif element.value.get_mutable():
+                        LOG.debug("Setting %s = %s" % (setting, element.value))
+                        setattr(obj, setting, element.value)
+                except Exception as e:
+                    LOG.debug(element.get_name())
+                    raise
 
 if has_future:
     @directory.register
@@ -960,3 +1685,11 @@ if has_future:
         # Allowed radio types is a dict keyed by model of a list of version
         # strings
         ALLOWED_RADIO_TYPES = {'DBR2500': ['V100']}
+
+    @directory.register
+    class YedroYCM04vus(AnyTone778UVBase):
+        VENDOR = "Yedro"
+        MODEL = "YC-M04VUS"
+        # Allowed radio types is a dict keyed by model of a list of version
+        # strings
+        ALLOWED_RADIO_TYPES = {'YCM04UV': ['V100']}

@@ -256,7 +256,7 @@ def do_download(radio):
      # UI progress
     status = chirp_common.Status()
     status.cur = 0
-    status.max = MEM_SIZE / BLOCK_SIZE
+    status.max = MEM_SIZE // BLOCK_SIZE
     status.msg = "Cloning from radio..."
     radio.status_fn(status)
 
@@ -283,7 +283,7 @@ def do_upload(radio):
      # UI progress
     status = chirp_common.Status()
     status.cur = 0
-    status.max = MEM_SIZE / BLOCK_SIZE
+    status.max = MEM_SIZE // BLOCK_SIZE
     status.msg = "Cloning to radio..."
     radio.status_fn(status)
     count = 0

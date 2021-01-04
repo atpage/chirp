@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GObject
 from gi.repository import GObject
 import logging
 
@@ -62,13 +62,13 @@ class CallsignEditor(Gtk.HBox):
         return sw
 
     def __init__(self, first_fixed=False, width=8):
-        GObject.GObject.__init__(self, False, 2)
+        Gtk.HBox.__init__(self, False, 2)
 
         self.first_fixed = first_fixed
 
         self.listw = None
 
-        self.pack_start(self.make_list(width), 1, 1, 1)
+        self.pack_start(self.make_list(width, True, True, 0), 1, 1, 1)
 
     def set_callsigns(self, calls):
         if self.first_fixed:

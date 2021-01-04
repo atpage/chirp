@@ -16,10 +16,15 @@
 
 import threading
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GObject
 from gi.repository import Pango
+from gi.repository.GObject import TYPE_INT, \
+    TYPE_DOUBLE as TYPE_FLOAT, \
+    TYPE_STRING, \
+    TYPE_BOOLEAN, \
+    TYPE_PYOBJECT, \
+    TYPE_INT64
 from gi.repository import GObject
-
 import pickle
 import os
 import logging
@@ -29,6 +34,7 @@ from chirp.ui import bandplans
 from chirp import chirp_common, errors, directory, import_logic
 
 LOG = logging.getLogger(__name__)
+
 
 if __name__ == "__main__":
     import sys
@@ -50,7 +56,7 @@ def handle_ed(_, iter, new, store, col):
 
 class ValueErrorDialog(Gtk.MessageDialog):
     def __init__(self, exception, **args):
-        GObject.GObject.__init__(self, buttons=Gtk.ButtonsType.OK, **args)
+        Gtk.MessageDialog.__init__(self, buttons=Gtk.ButtonsType.OK, **args)
         self.set_property("text", _("Invalid value for this field"))
         self.format_secondary_text(str(exception))
 
@@ -64,26 +70,26 @@ def iter_prev(store, iter):
 
 class MemoryEditor(common.Editor):
     cols = [
-        (_("Loc"),            GObject.TYPE_INT,      Gtk.CellRendererText,),
-        (_("Frequency"),      GObject.TYPE_INT64,    Gtk.CellRendererText,),
-        (_("Name"),           GObject.TYPE_STRING,   Gtk.CellRendererText,),
-        (_("Tone Mode"),      GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
-        (_("Tone"),           GObject.TYPE_DOUBLE,    Gtk.CellRendererCombo,),
-        (_("ToneSql"),        GObject.TYPE_DOUBLE,    Gtk.CellRendererCombo,),
-        (_("DTCS Code"),      GObject.TYPE_INT,      Gtk.CellRendererCombo,),
-        (_("DTCS Rx Code"),   GObject.TYPE_INT,      Gtk.CellRendererCombo,),
-        (_("DTCS Pol"),       GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
-        (_("Cross Mode"),     GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
-        (_("Duplex"),         GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
-        (_("Offset"),         GObject.TYPE_INT64,    Gtk.CellRendererText,),
-        (_("Mode"),           GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
-        (_("Power"),          GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
-        (_("Tune Step"),      GObject.TYPE_DOUBLE,    Gtk.CellRendererCombo,),
-        (_("Skip"),           GObject.TYPE_STRING,   Gtk.CellRendererCombo,),
-        (_("Comment"),        GObject.TYPE_STRING,   Gtk.CellRendererText,),
-        ("_filled",           GObject.TYPE_BOOLEAN,  None,),
-        ("_hide_cols",        GObject.TYPE_PYOBJECT, None,),
-        ("_extd",             GObject.TYPE_STRING,   None,),
+        (_("Loc"),            TYPE_INT,      Gtk.CellRendererText,),
+        (_("Frequency"),      TYPE_INT64,    Gtk.CellRendererText,),
+        (_("Name"),           TYPE_STRING,   Gtk.CellRendererText,),
+        (_("Tone Mode"),      TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Tone"),           TYPE_FLOAT,    Gtk.CellRendererCombo,),
+        (_("ToneSql"),        TYPE_FLOAT,    Gtk.CellRendererCombo,),
+        (_("DTCS Code"),      TYPE_INT,      Gtk.CellRendererCombo,),
+        (_("DTCS Rx Code"),   TYPE_INT,      Gtk.CellRendererCombo,),
+        (_("DTCS Pol"),       TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Cross Mode"),     TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Duplex"),         TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Offset"),         TYPE_INT64,    Gtk.CellRendererText,),
+        (_("Mode"),           TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Power"),          TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Tune Step"),      TYPE_FLOAT,    Gtk.CellRendererCombo,),
+        (_("Skip"),           TYPE_STRING,   Gtk.CellRendererCombo,),
+        (_("Comment"),        TYPE_STRING,   Gtk.CellRendererText,),
+        ("_filled",           TYPE_BOOLEAN,  None,),
+        ("_hide_cols",        TYPE_PYOBJECT, None,),
+        ("_extd",             TYPE_STRING,   None,),
         ]
 
     defaults = {
@@ -357,13 +363,13 @@ class MemoryEditor(common.Editor):
             LOG.error("Bad value for {col}: {val}".format(col=cap, val=new))
             return
 
-        if self.store.get_column_type(colnum) == GObject.TYPE_INT:
+        if self.store.get_column_type(colnum) == TYPE_INT:
             new = int(new)
-        elif self.store.get_column_type(colnum) == GObject.TYPE_DOUBLE:
+        elif self.store.get_column_type(colnum) == TYPE_FLOAT:
             new = float(new)
-        elif self.store.get_column_type(colnum) == GObject.TYPE_BOOLEAN:
+        elif self.store.get_column_type(colnum) == TYPE_BOOLEAN:
             new = bool(new)
-        elif self.store.get_column_type(colnum) == GObject.TYPE_STRING:
+        elif self.store.get_column_type(colnum) == TYPE_STRING:
             if new == "(None)":
                 new = ""
 
@@ -985,7 +991,7 @@ class MemoryEditor(common.Editor):
             rend.connect('editing-canceled', self.cell_editing_stopped)
             rend.connect('edited', self.cell_editing_stopped)
 
-            if _type == GObject.TYPE_BOOLEAN:
+            if _type == TYPE_BOOLEAN:
                 # rend.set_property("activatable", True)
                 # rend.connect("toggled", handle_toggle, self.store, i)
                 col = Gtk.TreeViewColumn(_cap, rend, active=i,
@@ -994,7 +1000,7 @@ class MemoryEditor(common.Editor):
                 if isinstance(self.choices[_cap], Gtk.ListStore):
                     choices = self.choices[_cap]
                 else:
-                    choices = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
+                    choices = Gtk.ListStore(TYPE_STRING, TYPE_STRING)
                     for choice in self.choices[_cap]:
                         choices.append([choice, self._render(i, choice)])
                 rend.set_property("model", choices)
@@ -1585,21 +1591,21 @@ class DstarMemoryEditor(MemoryEditor):
         # I think self.cols is "static" or "unbound" or something else
         # like that and += modifies the type, not self (how bizarre)
         self.cols = list(self.cols)
-        new_cols = [("URCALL", GObject.TYPE_STRING, Gtk.CellRendererCombo),
-                    ("RPT1CALL", GObject.TYPE_STRING, Gtk.CellRendererCombo),
-                    ("RPT2CALL", GObject.TYPE_STRING, Gtk.CellRendererCombo),
-                    ("Digital Code", GObject.TYPE_INT, Gtk.CellRendererText),
+        new_cols = [("URCALL", TYPE_STRING, Gtk.CellRendererCombo),
+                    ("RPT1CALL", TYPE_STRING, Gtk.CellRendererCombo),
+                    ("RPT2CALL", TYPE_STRING, Gtk.CellRendererCombo),
+                    ("Digital Code", TYPE_INT, Gtk.CellRendererText),
                     ]
         for col in new_cols:
-            index = self.cols.index(("_filled", GObject.TYPE_BOOLEAN, None))
+            index = self.cols.index(("_filled", TYPE_BOOLEAN, None))
             self.cols.insert(index, col)
 
         self.choices = dict(self.choices)
         self.defaults = dict(self.defaults)
 
-        self.choices["URCALL"] = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
-        self.choices["RPT1CALL"] = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
-        self.choices["RPT2CALL"] = Gtk.ListStore(GObject.TYPE_STRING, GObject.TYPE_STRING)
+        self.choices["URCALL"] = Gtk.ListStore(TYPE_STRING, TYPE_STRING)
+        self.choices["RPT1CALL"] = Gtk.ListStore(TYPE_STRING, TYPE_STRING)
+        self.choices["RPT2CALL"] = Gtk.ListStore(TYPE_STRING, TYPE_STRING)
 
         self.defaults["URCALL"] = ""
         self.defaults["RPT1CALL"] = ""

@@ -70,6 +70,7 @@
 ./chirp/drivers/leixen.py
 ./chirp/drivers/puxing.py
 ./chirp/drivers/radioddity_r2.py
+./chirp/drivers/retevis_rt22.py
 ./chirp/drivers/rfinder.py
 ./chirp/drivers/template.py
 ./chirp/drivers/th350.py
@@ -77,6 +78,7 @@
 ./chirp/drivers/th_uv3r.py
 ./chirp/drivers/th_uv3r25.py
 ./chirp/drivers/th_uv8000.py
+./chirp/drivers/th_uv88.py
 ./chirp/drivers/th_uvf8d.py
 ./chirp/drivers/thd72.py
 ./chirp/drivers/thuv1f.py

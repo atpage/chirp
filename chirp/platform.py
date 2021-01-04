@@ -130,7 +130,7 @@ class Platform:
 
     def gui_open_file(self, start_dir=None, types=[]):
         """Prompt the user to pick a file to open"""
-        from gi.repository import Gtk
+        from gi.repository import Gtk, Gdk, GObject
 
         if not start_dir:
             start_dir = self._last_dir
@@ -161,7 +161,7 @@ class Platform:
 
     def gui_save_file(self, start_dir=None, default_name=None, types=[]):
         """Prompt the user to pick a filename to save"""
-        from gi.repository import Gtk
+        from gi.repository import Gtk, Gdk, GObject
 
         if not start_dir:
             start_dir = self._last_dir
@@ -202,7 +202,7 @@ class Platform:
 
     def gui_select_dir(self, start_dir=None):
         """Prompt the user to pick a directory"""
-        from gi.repository import Gtk
+        from gi.repository import Gtk, Gdk, GObject
 
         if not start_dir:
             start_dir = self._last_dir
@@ -330,7 +330,7 @@ class UnixPlatform(Platform):
 
     def os_version_string(self):
         try:
-            issue = file("/etc/issue.net", "r")
+            issue = open("/etc/issue.net", "r")
             ver = issue.read().strip().replace("\r", "").replace("\n", "")[:64]
             issue.close()
             ver = "%s - %s" % (os.uname()[0], ver)

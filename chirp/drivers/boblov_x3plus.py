@@ -136,7 +136,7 @@ class BoblovX3Plus(chirp_common.CloneModeRadio,
 
         LOG.debug('Boblov_x3plus: match_model: size matches')
 
-        if 'P310' in filedata[0x03D0:0x03D8]:
+        if 'P310'.encode() in filedata[0x03D0:0x03D8]:
             LOG.debug('Boblov_x3plus: match_model: radio ID matches')
             return True
 

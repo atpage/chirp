@@ -13,10 +13,12 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GObject
 from gi.repository import GObject
 import time
 import logging
+
+from gi.repository.GObject import TYPE_INT, TYPE_STRING, TYPE_BOOLEAN
 
 from chirp import chirp_common
 from chirp.ui import common, miscwidgets
@@ -86,9 +88,9 @@ class MappingNameEditor(common.Editor):
         self._model = model
         self._type = common.unpluralize(model.get_name())
 
-        types = [(GObject.GObject.TYPE_STRING, "key"),
-                 (GObject.GObject.TYPE_STRING, self._type),
-                 (GObject.GObject.TYPE_STRING, _("Name"))]
+        types = [(GObject.TYPE_STRING, "key"),
+                 (GObject.TYPE_STRING, self._type),
+                 (GObject.TYPE_STRING, _("Name"))]
 
         self.listw = miscwidgets.KeyedListWidget(types)
         self.listw.set_editable(1, True)
@@ -276,14 +278,14 @@ class MappingMembershipEditor(common.Editor):
         self._type = common.unpluralize(model.get_name())
 
         self._view_cols = [
-            (_("Loc"),       GObject.TYPE_INT,     Gtk.CellRendererText, ),
-            (_("Frequency"), GObject.TYPE_STRING,  Gtk.CellRendererText, ),
-            (_("Name"),      GObject.TYPE_STRING,  Gtk.CellRendererText, ),
-            (_("Index"),     GObject.TYPE_INT,     Gtk.CellRendererText, ),
+            (_("Loc"),       TYPE_INT,     Gtk.CellRendererText, ),
+            (_("Frequency"), TYPE_STRING,  Gtk.CellRendererText, ),
+            (_("Name"),      TYPE_STRING,  Gtk.CellRendererText, ),
+            (_("Index"),     TYPE_INT,     Gtk.CellRendererText, ),
             ]
 
         self._cols = [
-            ("_filled",      GObject.TYPE_BOOLEAN, None, ),
+            ("_filled",      TYPE_BOOLEAN, None, ),
             ] + self._view_cols
 
         self.C_FILLED = 0
@@ -299,7 +301,7 @@ class MappingMembershipEditor(common.Editor):
 
         for i in range(0, self._model.get_num_mappings()):
             label = "%s %i" % (self._type, (i+1))
-            cols.append((label, GObject.TYPE_BOOLEAN, Gtk.CellRendererToggle))
+            cols.append((label, TYPE_BOOLEAN, Gtk.CellRendererToggle))
 
         self._store = Gtk.ListStore(*tuple([y for x, y, z in cols]))
         self._view = Gtk.TreeView(self._store)
@@ -313,7 +315,7 @@ class MappingMembershipEditor(common.Editor):
                 colnum += 1
                 continue
             rend = rtype()
-            if dtype == GObject.TYPE_BOOLEAN:
+            if dtype == TYPE_BOOLEAN:
                 rend.set_property("activatable", True)
                 rend.connect("toggled", self._toggled_cb, colnum)
                 col = Gtk.TreeViewColumn(label, rend, active=colnum,

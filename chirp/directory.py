@@ -102,7 +102,7 @@ def icf_to_image(icf_file, img_file):
             pass  # Skip non-Icoms
 
     if img_data:
-        f = file(img_file, "wb")
+        f = open(img_file, "wb")
         f.write(img_data)
         f.close()
     else:
@@ -113,9 +113,9 @@ def icf_to_image(icf_file, img_file):
 def get_radio_by_image(image_file):
     """Attempt to get the radio class that owns @image_file"""
     if image_file.startswith("radioreference://"):
-        _, _, zipcode, username, password = image_file.split("/", 4)
+        _, _, zipcode, username, password, country = image_file.split("/", 5)
         rr = radioreference.RadioReferenceRadio(None)
-        rr.set_params(zipcode, username, password)
+        rr.set_params(zipcode, username, password, country)
         return rr
 
     if image_file.startswith("rfinder://"):
@@ -131,7 +131,7 @@ def get_radio_by_image(image_file):
         image_file = tempf
 
     if os.path.exists(image_file):
-        f = file(image_file, "rb")
+        f = open(image_file, "rb")
         filedata = f.read()
         f.close()
     else:

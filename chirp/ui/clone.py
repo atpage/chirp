@@ -18,7 +18,7 @@ import threading
 import logging
 import os
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GObject
 from gi.repository import GObject
 
 from chirp import platform, directory, detect, chirp_common
@@ -147,9 +147,7 @@ class CloneSettingsDialog(Gtk.Dialog):
         self.vbox.pack_start(self.__table, 1, 1, 1)
 
     def __init__(self, settings=None, parent=None, title=_("Radio")):
-        buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
-                   Gtk.STOCK_OK, Gtk.ResponseType.OK)
-        GObject.GObject.__init__(self, title,
+        Gtk.Dialog.__init__(self, title,
                             parent=parent,
                             flags=Gtk.DialogFlags.MODAL)
         self.__make_ui(settings)

@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GObject
 import os
 import logging
 
@@ -288,7 +288,7 @@ class MemoryDetailEditor(Gtk.Dialog):
 
     def __init__(self, features, memory, parent=None):
         self._memory = memory
-        GObject.GObject.__init__(self,
+        Gtk.Dialog.__init__(self,
                             title="Memory Properties",
                             flags=Gtk.DialogFlags.MODAL,
                             parent=parent,

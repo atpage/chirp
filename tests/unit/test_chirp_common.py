@@ -345,7 +345,7 @@ class TestImageMetadata(base.BaseTest):
         r._mmap = mock.Mock()
         r._mmap.get_packed.return_value = 'thisisrawdata'
         r.save_mmap(fn)
-        with file(fn) as f:
+        with open(fn) as f:
             filedata = f.read()
         os.remove(fn)
         data, metadata = chirp_common.FileBackedRadio._strip_metadata(filedata)
@@ -373,7 +373,7 @@ class TestImageMetadata(base.BaseTest):
         r._mmap = mock.Mock()
         r._mmap.get_packed.return_value = 'thisisrawdata'
         r.save_mmap(fn)
-        with file(fn) as f:
+        with open(fn) as f:
             filedata = f.read()
         os.remove(fn)
         data, metadata = chirp_common.FileBackedRadio._strip_metadata(filedata)

@@ -10,7 +10,7 @@ import chirp
 def staticify_chirp_module():
     import chirp
 
-    with file("chirp/__init__.py", "w") as init:
+    with open("chirp/__init__.py", "w") as init:
         print("CHIRP_VERSION = \"%s\"" % CHIRP_VERSION, file=init)
         print("__all__ = %s\n" % str(chirp.__all__), file=init)
 
@@ -20,7 +20,7 @@ def staticify_chirp_module():
 def staticify_drivers_module():
     import chirp.drivers
 
-    with file("chirp/drivers/__init__.py", "w") as init:
+    with open("chirp/drivers/__init__.py", "w") as init:
         print("__all__ = %s\n" % str(chirp.drivers.__all__), file=init)
 
     print("Set chirp/drivers/__init__.py::__all__ = %s" % str(
@@ -144,7 +144,7 @@ def nuke_manifest(*files):
     if not files:
         return
 
-    f = file("MANIFEST.in", "w")
+    f = open("MANIFEST.in", "w")
     for fn in files:
         print(fn, file=f)
     f.close()

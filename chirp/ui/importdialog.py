@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
-from gi.repository import Gdk
+from gi.repository import Gtk, Gdk, GObject
 from gi.repository import GObject
 from gi.repository import Pango
 import logging
@@ -579,7 +578,7 @@ class ImportDialog(Gtk.Dialog):
     ACTION = _("Import")
 
     def __init__(self, src_radio, dst_radio, parent=None):
-        GObject.GObject.__init__(self,
+        Gtk.Dialog.__init__(self,
                             buttons=(Gtk.STOCK_OK, Gtk.ResponseType.OK,
                                      Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL),
                             title=self.TITLE,

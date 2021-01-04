@@ -388,4 +388,4 @@ if __name__ == "__main__":
     # s.write("\r\r")
     # print get_id(s)
     data = download(s)
-    file(sys.argv[2], "wb").write(data)
+    open(sys.argv[2], "wb").write(data)

@@ -556,6 +556,13 @@ def _do_download(radio):
         # then append that model type to the end of the image so it can
         # be properly detected when loaded.
         append_model = True
+    elif "\x20" * 14 in radio_version:
+        # A radio UV-5R style radio that reports no firmware version has
+        # been detected.
+        # We are going to count on the user to make the right choice and
+        # then append that model type to the end of the image so it can
+        # be properly detected when loaded.
+        append_model = True
     elif not any(type in radio_version for type in radio._basetype):
         # This radio can't be properly detected by parsing its firmware
         # version.
@@ -1561,7 +1568,11 @@ class BaofengUV5R(chirp_common.CloneModeRadio):
 
         dtmf = RadioSettingGroup("dtmf", "DTMF Settings")
         group.append(dtmf)
-        dtmfchars = "0123456789 *#ABCD"
+
+        if str(self._memobj.firmware_msg.line1) == "HN5RV01":
+            dtmfchars = "0123456789ABCD*#"
+        else:
+            dtmfchars = "0123456789 *#ABCD"
 
         for i in range(0, 15):
             _codeobj = self._memobj.pttid[i].code
@@ -1582,10 +1593,12 @@ class BaofengUV5R(chirp_common.CloneModeRadio):
             rs.set_apply_callback(apply_code, self._memobj.pttid[i])
             dtmf.append(rs)
 
+        dtmfcharsani = "0123456789"
+
         _codeobj = self._memobj.ani.code
-        _code = "".join([dtmfchars[x] for x in _codeobj if int(x) < 0x1F])
+        _code = "".join([dtmfcharsani[x] for x in _codeobj if int(x) < 0x1F])
         val = RadioSettingValueString(0, 5, _code, False)
-        val.set_charset(dtmfchars)
+        val.set_charset(dtmfcharsani)
         rs = RadioSetting("ani.code", "ANI Code", val)
 
         def apply_code(setting, obj):

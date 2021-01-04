@@ -812,7 +812,7 @@ class KGUV9DPlusRadio(chirp_common.CloneModeRadio,
         TODO: there is a bunch of rubbish between 0x50 and 0x160
         that is still a known unknown
         """
-        return cls._file_ident in filedata[0x51:0x59].lower()
+        return cls._file_ident.encode() in filedata[0x51:0x59].lower()
 
     def _identify(self):
         """ Identify the radio

@@ -345,7 +345,7 @@ class KGUV8DRadio(chirp_common.CloneModeRadio,
 #
     @classmethod
     def match_model(cls, filedata, filename):
-        return cls._file_ident in filedata[0x400:0x408]
+        return cls._file_ident.encode() in filedata[0x400:0x408]
 
     def _identify(self):
         """Do the identification dance"""

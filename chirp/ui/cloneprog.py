@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
-from gi.repository import Gdk
+from gi.repository import Gtk, Gdk, GObject
 
 
 class CloneProg(Gtk.Window):
@@ -31,7 +30,7 @@ class CloneProg(Gtk.Window):
         else:
             cancel = None
 
-        GObject.GObject.__init__(self, **args)
+        Gtk.Window.__init__(self, **args)
 
         self.set_transient_for(parent)
         self.set_modal(True)

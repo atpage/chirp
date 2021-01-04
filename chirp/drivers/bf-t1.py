@@ -283,7 +283,7 @@ def _download(radio):
     _do_ident(radio, status)
 
     # reset the progress bar in the UI
-    status.max = MEM_SIZE / BLOCK_SIZE
+    status.max = MEM_SIZE // BLOCK_SIZE
     status.msg = "Cloning from radio..."
     status.cur = 0
     radio.status_fn(status)

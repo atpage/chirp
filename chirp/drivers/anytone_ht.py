@@ -943,7 +943,7 @@ class AnyToneTERMN8RRadio(chirp_common.CloneModeRadio,
 
     @classmethod
     def match_model(cls, filedata, filename):
-        return cls._file_ident in filedata[0x10:0x20]
+        return cls._file_ident.encode() in filedata[0x10:0x20]
 
 @directory.register
 class AnyToneOBLTR8RRadio(AnyToneTERMN8RRadio):

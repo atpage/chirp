@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
-from gi.repository import GObject
+from gi.repository import Gtk, Gdk, GObject
 import logging
 
 from .miscwidgets import make_choice
@@ -30,7 +29,7 @@ class TextInputDialog(Gtk.Dialog):
     def __init__(self, **args):
         buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                    Gtk.STOCK_OK, Gtk.ResponseType.OK)
-        GObject.GObject.__init__(self, buttons=buttons, **args)
+        Gtk.Dialog.__init__(self, buttons=buttons, **args)
 
         self.label = Gtk.Label()
         self.label.set_size_request(300, 100)
@@ -52,7 +51,7 @@ class ChoiceDialog(Gtk.Dialog):
     def __init__(self, choices, **args):
         buttons = (Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL,
                    Gtk.STOCK_OK, Gtk.ResponseType.OK)
-        GObject.GObject.__init__(self, buttons=buttons, **args)
+        Gtk.Dialog.__init__(self, buttons=buttons, **args)
 
         self.label = Gtk.Label()
         self.label.set_size_request(300, 100)
@@ -84,7 +83,7 @@ class EditableChoiceDialog(ChoiceDialog):
 
 class ExceptionDialog(Gtk.MessageDialog):
     def __init__(self, exception, **args):
-        GObject.GObject.__init__(self, buttons=Gtk.ButtonsType.OK,
+        Gtk.MessageDialog.__init__(self, buttons=Gtk.ButtonsType.OK,
                                    type=Gtk.MessageType.ERROR, **args)
         self.set_property("text", _("An error has occurred"))
         self.format_secondary_text(str(exception))
@@ -104,9 +103,8 @@ class FieldDialog(Gtk.Dialog):
                                  Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL)
 
         self.__fields = {}
+        Gtk.Dialog.__init__(self, **kwargs)
         self.set_default_response(Gtk.ResponseType.OK)
-
-        GObject.GObject.__init__(self, **kwargs)
 
     def response(self, _):
         LOG.debug("Blocking response")
@@ -136,7 +134,7 @@ class FieldDialog(Gtk.Dialog):
 
 class OverwriteDialog(Gtk.MessageDialog):
     def __init__(self, filename):
-        GObject.GObject.__init__(self,
+        Gtk.MessageDialog.__init__(self,
                             buttons=(_("Overwrite"), Gtk.ResponseType.OK,
                                      Gtk.STOCK_CANCEL, Gtk.ResponseType.CANCEL))
 

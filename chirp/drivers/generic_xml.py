@@ -118,7 +118,7 @@ class XMLRadio(chirp_common.FileBackedRadio, chirp_common.IcomDstarSupport):
         if filename:
             self._filename = filename
 
-        f = file(self._filename, "w")
+        f = open(self._filename, "w")
         f.write(self.doc.serialize(format=1))
         f.close()
 

@@ -144,12 +144,12 @@ a.show()
 if args.profile:
     import cProfile
     import pstats
-    from gi.repository import Gtk
+    from gi.repository import Gtk, Gdk, GObject
     cProfile.run("Gtk.main()", "chirpw.stats")
     p = pstats.Stats("chirpw.stats")
     p.sort_stats("cumulative").print_stats(10)
 else:
-    from gi.repository import Gtk
+    from gi.repository import Gtk, Gdk, GObject
     Gtk.main()
 
 if config._CONFIG:

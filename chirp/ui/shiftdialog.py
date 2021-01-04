@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GObject
 from gi.repository import GObject
 import threading
 import logging
@@ -26,7 +26,7 @@ LOG = logging.getLogger(__name__)
 
 class ShiftDialog(Gtk.Dialog):
     def __init__(self, rthread, parent=None):
-        GObject.GObject.__init__(self,
+        Gtk.Dialog.__init__(self,
                             title=_("Shift"),
                             buttons=(Gtk.STOCK_CLOSE, Gtk.ResponseType.OK))
 

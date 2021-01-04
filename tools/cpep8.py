@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #  cpep8.py - Check Python source files for PEP8 compliance.
 #
@@ -44,7 +44,7 @@ args = parser.parse_args()
 
 
 def file_to_lines(name):
-    fh = file(name, "r")
+    fh = open(name, "r")
     lines = fh.read().split("\n")
     lines.pop()
     fh.close()
@@ -64,9 +64,9 @@ if args.scan:
             if f.endswith('.py'):
                 manifest.append(filename)
                 continue
-            with file(filename, "r") as fh:
+            with open(filename, "r") as fh:
                 shebang = fh.readline()
-                if shebang.startswith("#!/usr/bin/env python"):
+                if shebang.startswith("#!/usr/bin/env python3"):
                     manifest.append(filename)
 else:
     manifest += file_to_lines(manifest_filename)
@@ -99,7 +99,7 @@ if args.update:
             bad.append(f)
         print("%s: %s" % (results.total_errors and "FAIL" or "PASS", f))
 
-    with file(blacklist_filename, "w") as fh:
+    with open(blacklist_filename, "w") as fh:
         print("""\
 # cpep8.blacklist: The list of files that do not meet PEP8 standards.
 # DO NOT ADD NEW FILES!!  Instead, fix the code to be compliant.
@@ -107,7 +107,7 @@ if args.update:
         print("\n".join(sorted(bad)), file=fh)
 
     if args.scan:
-        with file(manifest_filename, "w") as fh:
+        with open(manifest_filename, "w") as fh:
             print("\n".join(sorted(manifest)), file=fh)
     sys.exit(0)
 

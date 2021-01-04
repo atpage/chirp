@@ -13,6 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 from chirp import chirp_common, directory
 from chirp.drivers import generic_csv
 

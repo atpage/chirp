@@ -13,7 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GObject
 import logging
 from chirp import bandplan, bandplan_na, bandplan_au
 from chirp import bandplan_iaru_r1, bandplan_iaru_r2, bandplan_iaru_r3

@@ -7,6 +7,7 @@ import sys
 import codecs
 
 
+
 class keyword(str):
     pass
 

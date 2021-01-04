@@ -23,8 +23,7 @@ from glob import glob
 import shutil
 import time
 import logging
-from gi.repository import Gtk
-from gi.repository import Gdk
+from gi.repository import Gtk, Gdk, GObject
 from gi.repository import GObject
 import sys
 
@@ -167,7 +166,7 @@ class ChirpMain(Gtk.Window):
                        parent=self)
 
         label = Gtk.Label(label="")
-        label.set_markup("<b>-1</b> for either Mem # does a full-file hex " +
+        d.set_markup("<b>-1</b> for either Mem # does a full-file hex " +
                          "dump with diffs highlighted.\n" +
                          "<b>-2</b> for first Mem # shows " +
                          "<b>only</b> the diffs.")
@@ -896,9 +895,9 @@ of file.
         return False
 
     def do_dmrmarc(self, do_import):
-        self.window.set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
+        self.get_window().set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
         if not self.do_dmrmarc_prompt():
-            self.window.set_cursor(None)
+            self.get_window().set_cursor(None)
             return
 
         city = CONF.get("city", "dmrmarc")
@@ -907,9 +906,9 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        Gdk.window_process_all_updates()
+        Gdk.Window.process_all_updates()
         while Gtk.events_pending():
-            Gtk.main_iteration(False)
+            Gtk.main_iteration()
 
         if do_import:
             eset = self.get_current_editorset()
@@ -924,7 +923,7 @@ of file.
             except errors.RadioError as e:
                 common.show_error(e)
 
-        self.window.set_cursor(None)
+        self.get_window().set_cursor(None)
 
     def do_repeaterbook_political_prompt(self):
         if not CONF.get_bool("has_seen_credit", "repeaterbook"):
@@ -1003,9 +1002,9 @@ of file.
         return True
 
     def do_repeaterbook_political(self, do_import):
-        self.window.set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
+        self.get_window().set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
         if not self.do_repeaterbook_political_prompt():
-            self.window.set_cursor(None)
+            self.get_window().set_cursor(None)
             return
 
         try:
@@ -1036,16 +1035,16 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        Gdk.window_process_all_updates()
+        Gdk.Window.process_all_updates()
         while Gtk.events_pending():
-            Gtk.main_iteration(False)
+            Gtk.main_iteration()
 
         fn = tempfile.mktemp(".csv")
         filename, headers = urllib.request.urlretrieve(query, fn)
         if not os.path.exists(filename):
             LOG.error("Failed, headers were: %s", headers)
             common.show_error(_("RepeaterBook query failed"))
-            self.window.set_cursor(None)
+            self.get_window().set_cursor(None)
             return
 
         try:
@@ -1058,14 +1057,14 @@ of file.
                                             ("\n".join(radio.errors)))
         except errors.InvalidDataError as e:
             common.show_error(str(e))
-            self.window.set_cursor(None)
+            self.get_window().set_cursor(None)
             return
         except Exception as e:
             common.log_exception()
 
         reporting.report_model_usage(radio, "import", True)
 
-        self.window.set_cursor(None)
+        self.get_window().set_cursor(None)
         if do_import:
             eset = self.get_current_editorset()
             count = eset.do_import(filename)
@@ -1118,9 +1117,9 @@ of file.
         return False
 
     def do_repeaterbook_proximity(self, do_import):
-        self.window.set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
+        self.get_window().set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
         if not self.do_repeaterbook_proximity_prompt():
-            self.window.set_cursor(None)
+            self.get_window().set_cursor(None)
             return
 
         loc = CONF.get("location", "repeaterbook")
@@ -1142,16 +1141,16 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        Gdk.window_process_all_updates()
+        Gdk.Window.process_all_updates()
         while Gtk.events_pending():
-            Gtk.main_iteration(False)
+            Gtk.main_iteration()
 
         fn = tempfile.mktemp(".csv")
         filename, headers = urllib.request.urlretrieve(query, fn)
         if not os.path.exists(filename):
             LOG.error("Failed, headers were: %s", headers)
             common.show_error(_("RepeaterBook query failed"))
-            self.window.set_cursor(None)
+            self.get_window().set_cursor(None)
             return
 
         try:
@@ -1164,14 +1163,14 @@ of file.
                                             ("\n".join(radio.errors)))
         except errors.InvalidDataError as e:
             common.show_error(str(e))
-            self.window.set_cursor(None)
+            self.get_window().set_cursor(None)
             return
         except Exception as e:
             common.log_exception()
 
         reporting.report_model_usage(radio, "import", True)
 
-        self.window.set_cursor(None)
+        self.get_window().set_cursor(None)
         if do_import:
             eset = self.get_current_editorset()
             count = eset.do_import(filename)
@@ -1299,9 +1298,9 @@ of file.
         return False
 
     def do_rfinder(self, do_import):
-        self.window.set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
+        self.get_window().set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
         if not self.do_rfinder_prompt():
-            self.window.set_cursor(None)
+            self.get_window().set_cursor(None)
             return
 
         lat = CONF.get_float("Latitude", "rfinder")
@@ -1312,9 +1311,9 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        Gdk.window_process_all_updates()
+        Gdk.Window.process_all_updates()
         while Gtk.events_pending():
-            Gtk.main_iteration(False)
+            Gtk.main_iteration()
 
         if do_import:
             eset = self.get_current_editorset()
@@ -1327,7 +1326,7 @@ of file.
             radio.set_params((lat, lon), miles, email, passwd)
             self.do_open_live(radio, read_only=True)
 
-        self.window.set_cursor(None)
+        self.get_window().set_cursor(None)
 
     def do_radioreference_prompt(self):
         fields = {"1Username":  (Gtk.Entry(), lambda x: x),
@@ -1364,9 +1363,9 @@ of file.
         return False
 
     def do_radioreference(self, do_import):
-        self.window.set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
+        self.get_window().set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
         if not self.do_radioreference_prompt():
-            self.window.set_cursor(None)
+            self.get_window().set_cursor(None)
             return
 
         username = CONF.get("Username", "radioreference")
@@ -1375,24 +1374,154 @@ of file.
 
         # Do this in case the import process is going to take a while
         # to make sure we process events leading up to this
-        Gdk.window_process_all_updates()
+        Gdk.Window.process_all_updates()
         while Gtk.events_pending():
-            Gtk.main_iteration(False)
+            Gtk.main_iteration()
 
         if do_import:
             eset = self.get_current_editorset()
-            rrstr = "radioreference://%s/%s/%s" % (zipcode, username, passwd)
+            rrstr = "radioreference://%s/%s/%s/%s" % (zipcode, username,
+                                                      passwd, 'US')
             count = eset.do_import(rrstr)
         else:
             try:
                 from chirp import radioreference
                 radio = radioreference.RadioReferenceRadio(None)
-                radio.set_params(zipcode, username, passwd)
+                radio.set_params(zipcode, username, passwd, 'US')
                 self.do_open_live(radio, read_only=True)
             except errors.RadioError as e:
                 common.show_error(e)
 
-        self.window.set_cursor(None)
+        self.get_window().set_cursor(None)
+
+    def do_radioreference_promptcanada(self):
+        fields = {"1Username":  (Gtk.Entry(), lambda x: x),
+                  "2Password":  (Gtk.Entry(), lambda x: x)
+                  }
+
+        d = inputdialog.FieldDialog(title=_("RadioReference.com Query"),
+                                    parent=self)
+        for k in sorted(fields.keys()):
+            d.add_field(k[1:], fields[k][0])
+            fields[k][0].set_text(CONF.get(k[1:], "radioreference") or "")
+            fields[k][0].set_visibility(k != "2Password")
+
+        while d.run() == Gtk.ResponseType.OK:
+            valid = True
+            for k in sorted(fields.keys()):
+                widget, validator = fields[k]
+                try:
+                    if validator(widget.get_text()):
+                        CONF.set(k[1:], widget.get_text(), "radioreference")
+                        continue
+                except Exception:
+                    pass
+                common.show_error("Invalid value for %s" % k[1:])
+                valid = False
+                break
+
+            if valid:
+                d.destroy()
+                return True
+
+        d.destroy()
+        return False
+
+    def do_radioreference_promptcounty(self, username, passwd):
+        """gotta get the fkn province list (they do change sometimes)
+        and the absurd arbitrary county list
+        """
+        from chirp import radioreference
+        provincecounty = radioreference.RadioReferenceRadio(None)
+        provincecounty.set_params(None, username, passwd, None)
+        cancounties = provincecounty.do_getcanadacounties()
+        clist = cancounties[0]
+        provinces = cancounties[1]
+        default_prov = ""
+        default_county = ""
+        try:
+            code = int(CONF.get("province", "radioreference"))
+            for k, v in list(provinces.items()):
+                if code == v:
+                    default_prov = k
+                    break
+            code = int(CONF.get("county", "radioreference"))
+            for row in clist:
+                if code == row[2]:
+                    default_county = row[3]
+                    break
+        except:
+            pass
+        province = miscwidgets.make_choice(sorted(provinces.keys()),
+                                           False, default_prov)
+        counties = []
+        for x in clist:
+            if x[1] == default_prov:
+                counties.append(x[3])
+        county = miscwidgets.make_choice(counties, False, default_county)
+
+        def _changed(box, county):
+            selectedprov = provinces[box.get_active_text()]
+            county.get_model().clear()
+            for list_county in clist:
+                if list_county[0] == selectedprov:
+                    county.append_text(list_county[3])
+            county.set_active(0)
+        province.connect("changed", _changed, county)
+
+        d = inputdialog.FieldDialog(
+            title=_("RadioReference.com Province Query"), parent=self)
+        d.add_field("Province", province)
+        d.add_field("Region/City", county)
+        r = d.run()
+        d.destroy()
+        if r != Gtk.ResponseType.OK:
+            return False
+
+        code = provinces[province.get_active_text()]
+        for row in clist:  # this is absolutely not the right way to do this!
+            if row[3] == county.get_active_text():
+                county_id = row[2]
+        CONF.set("province", str(code), "radioreference")
+        CONF.set("county", str(county_id), "radioreference")
+
+        return True
+
+    def do_radioreferencecanada(self, do_import):
+        self.get_window().set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
+        if not self.do_radioreference_promptcanada():
+            self.get_window().set_cursor(None)
+            return
+        username = CONF.get("Username", "radioreference")
+        passwd = CONF.get("Password", "radioreference")
+
+        self.get_window().set_cursor(Gdk.Cursor.new(Gdk.CursorType.WATCH))
+        if not self.do_radioreference_promptcounty(username, passwd):
+            self.get_window().set_cursor(None)
+            return
+        county = CONF.get("County", "radioreference")
+
+        # Do this in case the import process is going to take a while
+        # to make sure we process events leading up to this
+        Gdk.Window.process_all_updates()
+        while Gtk.events_pending():
+            Gtk.main_iteration()
+
+        if do_import:
+            eset = self.get_current_editorset()
+            rrstr = "radioreference://%s/%s/%s/%s" % (county, username,
+                                                      passwd, 'CA')
+            count = eset.do_import(rrstr)
+        else:
+            try:
+                from chirp import radioreference
+                radio = radioreference.RadioReferenceRadio(None)
+                radio.set_params(county, username, passwd, 'CA')
+                self.do_open_live(radio, read_only=True)
+            except errors.RadioError as e:
+                common.show_error(e)
+
+        self.get_window().set_cursor(None)
 
     def do_export(self):
         types = [(_("CSV Files") + " (*.csv)", "csv"),
@@ -1428,13 +1557,12 @@ of file.
         d = Gtk.AboutDialog()
         d.set_transient_for(self)
         import sys
-        verinfo = "GTK %s\nPyGTK %s\nPython %s\n" % (
-            ".".join([str(x) for x in Gtk.gtk_version]),
-            ".".join([str(x) for x in Gtk.pygtk_version]),
+        verinfo = "GTK %s\nPython %s\n" % (
+            ".".join([str(x) for x in [Gtk.MAJOR_VERSION,Gtk.MINOR_VERSION,Gtk.MICRO_VERSION]]),
             sys.version.split()[0])
 
         # Set url hook to handle user activating a URL link in the about dialog
-        Gtk.about_dialog_set_url_hook(lambda dlg, url: webbrowser.open(url))
+        #Gtk.about_dialog_set_url_hook(lambda dlg, url: webbrowser.open(url))
 
         d.set_name("CHIRP")
         d.set_version(CHIRP_VERSION)
@@ -1625,7 +1753,7 @@ of file.
         self.modify_bg(Gtk.StateType.NORMAL, Gdk.Color('#ea6262'))
 
         try:
-            with file(filen) as module:
+            with open(filen) as module:
                 code = module.read()
             pyc = compile(code, filen, 'exec')
             # See this for why:
@@ -1662,6 +1790,8 @@ of file.
             self.do_rfinder(action[0] == "i")
         elif action in ["qradioreference", "iradioreference"]:
             self.do_radioreference(action[0] == "i")
+        elif action in ["qradioreferencecanada", "iradioreferencecanada"]:
+            self.do_radioreferencecanada(action[0] == "i")
         elif action == "export":
             self.do_export()
         elif action in ["qrbookpolitical", "irbookpolitical"]:
@@ -1758,7 +1888,10 @@ of file.
       <menuitem action="upload"/>
       <menu action="importsrc" name="importsrc">
         <menuitem action="idmrmarc"/>
-        <menuitem action="iradioreference"/>
+        <menu action="iradioref" name="iradioref">
+            <menuitem action="iradioreferencecanada"/>
+            <menuitem action="iradioreference"/>
+        </menu>
         <menu action="irbook" name="irbook">
             <menuitem action="irbookpolitical"/>
             <menuitem action="irbookproximity"/>
@@ -1768,7 +1901,10 @@ of file.
       </menu>
       <menu action="querysrc" name="querysrc">
         <menuitem action="qdmrmarc"/>
-        <menuitem action="qradioreference"/>
+        <menu action="qradioref" name="qradioref">
+            <menuitem action="qradioreferencecanada"/>
+            <menuitem action="qradioreference"/>
+        </menu>
         <menu action="qrbook" name="qrbook">
             <menuitem action="qrbookpolitical"/>
             <menuitem action="qrbookproximity"/>
@@ -1845,7 +1981,10 @@ of file.
             ('importsrc', None, _("Import from data source"),
              None, None, self.mh),
             ('idmrmarc', None, _("DMR-MARC Repeaters"), None, None, self.mh),
-            ('iradioreference', None, _("RadioReference.com"),
+            ('iradioref', None, _("RadioReference"), None, None, self.mh),
+            ('iradioreference', None, _("RadioReference.com US"),
+             None, None, self.mh),
+            ('iradioreferencecanada', None, _("RadioReference.com Canada"),
              None, None, self.mh),
             ('irfinder', None, _("RFinder"), None, None, self.mh),
             ('irbook', None, _("RepeaterBook"), None, None, self.mh),
@@ -1856,7 +1995,10 @@ of file.
             ('ipr', None, _("przemienniki.net"), None, None, self.mh),
             ('querysrc', None, _("Query data source"), None, None, self.mh),
             ('qdmrmarc', None, _("DMR-MARC Repeaters"), None, None, self.mh),
-            ('qradioreference', None, _("RadioReference.com"),
+            ('qradioref', None, _("RadioReference"), None, None, self.mh),
+            ('qradioreference', None, _("RadioReference.com US"),
+             None, None, self.mh),
+            ('qradioreferencecanada', None, _("RadioReference.com Canada"),
              None, None, self.mh),
             ('qrfinder', None, _("RFinder"), None, None, self.mh),
             ('qpr', None, _("przemienniki.net"), None, None, self.mh),
@@ -1945,12 +2087,12 @@ of file.
         box = Gtk.HBox(False, 2)
 
         self.sb_general = Gtk.Statusbar()
-        #self.sb_general.set_has_resize_grip(False)
+#        self.sb_general.set_has_resize_grip(False)
         self.sb_general.show()
         box.pack_start(self.sb_general, 1, 1, 1)
 
         self.sb_radio = Gtk.Statusbar()
-        #self.sb_radio.set_has_resize_grip(True)
+#        self.sb_radio.set_has_resize_grip(True)
         self.sb_radio.show()
         box.pack_start(self.sb_radio, 1, 1, 1)
 
@@ -2011,7 +2153,7 @@ of file.
         CONF.set_int("last_update_check", int(time.time()), "state")
         d = Gtk.MessageDialog(buttons=Gtk.ButtonsType.OK_CANCEL, parent=self,
                               type=Gtk.MessageType.INFO)
-        d.label.set_markup(
+        d.set_markup(
             _('A new version of CHIRP is available: ' +
               '{ver}. '.format(ver=version) +
               'It is recommended that you upgrade as soon as possible. '
@@ -2070,7 +2212,7 @@ of file.
         LOG.debug("Initialized MacOS support")
 
     def __init__(self, *args, **kwargs):
-        GObject.GObject.__init__(self, *args, **kwargs)
+        Gtk.Window.__init__(self, *args, **kwargs)
 
         def expose(window, event):
             allocation = window.get_allocation()

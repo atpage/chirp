@@ -13,8 +13,7 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from gi.repository import Gtk
-from gi.repository import Gdk
+from gi.repository import Gtk, Gdk, GObject
 from gi.repository import GObject
 from gi.repository import Pango
 
@@ -163,7 +162,7 @@ class KeyedListWidget(Gtk.HBox):
         return keys
 
     def __init__(self, columns):
-        GObject.GObject.__init__(self, True, 0)
+        Gtk.HBox.__init__(self, True, 0)
 
         self.columns = columns
 
@@ -463,7 +462,7 @@ class TreeWidget(ListWidget):
 
 class ProgressDialog(Gtk.Window):
     def __init__(self, title, parent=None):
-        GObject.GObject.__init__(self, Gtk.WindowType.TOPLEVEL)
+        Gtk.Window.__init__(self, Gtk.WindowType.TOPLEVEL)
         self.set_modal(True)
         self.set_type_hint(Gdk.WindowTypeHint.DIALOG)
         self.set_title(title)
@@ -505,7 +504,7 @@ class ProgressDialog(Gtk.Window):
 
 class LatLonEntry(Gtk.Entry):
     def __init__(self, *args):
-        GObject.GObject.__init__(self, *args)
+        Gtk.Entry.__init__(self, *args)
 
         self.connect("changed", self.format)
 
@@ -604,7 +603,7 @@ class LatLonEntry(Gtk.Entry):
 
 class YesNoDialog(Gtk.Dialog):
     def __init__(self, title="", parent=None, buttons=None):
-        GObject.GObject.__init__(self, title=title, parent=parent, buttons=buttons)
+        Gtk.Dialog.__init__(self, title=title, parent=parent, buttons=buttons)
 
         self._label = Gtk.Label(label="")
         self._label.show()
@@ -657,7 +656,7 @@ class FilenameBox(Gtk.HBox):
         self.emit("filename_changed")
 
     def __init__(self, find_dir=False, types=[]):
-        GObject.GObject.__init__(self, False, 0)
+        Gtk.HBox.__init__(self, False, 0)
 
         self.types = types
 

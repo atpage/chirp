@@ -14,7 +14,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import os
-from gi.repository import Gtk
+from gi.repository import Gtk, Gdk, GObject
 from gi.repository import GObject
 import logging
 
@@ -105,7 +105,7 @@ class EditorSet(Gtk.VBox):
 
     def __init__(self, source, parent_window=None,
                  filename=None, tempname=None):
-        GObject.GObject.__init__(self, True, 0)
+        Gtk.VBox.__init__(self, True, 0)
 
         self.parent_window = parent_window
 

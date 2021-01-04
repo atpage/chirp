@@ -33,7 +33,7 @@ class ChirpConfig:
 
     def save(self):
         cfg = os.path.join(self.__basepath, self.__name)
-        cfg_file = file(cfg, "w")
+        cfg_file = open(cfg, "w")
         self.__config.write(cfg_file)
         cfg_file.close()
 
