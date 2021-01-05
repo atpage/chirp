@@ -37,7 +37,7 @@ class TestBitwiseBaseIntTypes(BaseTest):
 
         obj.foo = 0
         self.assertEqual(int(obj.foo), 0)
-        self.assertEqual(data.get_packed(), ("\x00" * (obj.size() / 8)))
+        self.assertEqual(data.get_packed(), ("\x00" * (obj.size() // 8)))
 
         obj.foo = value
         self.assertEqual(int(obj.foo), value)

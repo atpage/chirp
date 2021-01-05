@@ -122,7 +122,7 @@ def int_to_bcd(bcd_array, value):
     """Convert an int like 1234 into bcdDataElements like "\x12\x34" """
     for i in reversed(list(range(0, len(bcd_array)))):
         bcd_array[i].set_value(value % 100)
-        value /= 100
+        value //= 100
 
 
 def get_string(char_array):
@@ -233,13 +233,13 @@ class arrayDataElement(DataElement):
     def __set_value_bbcd(self, value):
         for i in reversed(self.__items):
             twodigits = value % 100
-            value /= 100
+            value //= 100
             i.set_value(twodigits)
 
     def __set_value_lbcd(self, value):
         for i in self.__items:
             twodigits = value % 100
-            value /= 100
+            value //= 100
             i.set_value(twodigits)
 
     def __set_value_char(self, value):
@@ -309,8 +309,14 @@ class intDataElement(DataElement):
     def __mul__(self, val):
         return self.get_value() * val
 
-    def __div__(self, val):
+    # def __div__(self, val):
+    #     return self.get_value() / val
+
+    def __truediv__(self, val):
         return self.get_value() / val
+
+    def __floordiv__(self, val):
+        return self.get_value() // val
 
     def __add__(self, val):
         return self.get_value() + val
@@ -336,8 +342,14 @@ class intDataElement(DataElement):
     def __rmul__(self, val):
         return val * self.get_value()
 
-    def __rdiv__(self, val):
+    # def __rdiv__(self, val):
+    #     return val / self.get_value()
+
+    def __rtruediv__(self, val):
         return val / self.get_value()
+
+    def __rfloordiv__(self, val):
+        return val // self.get_value()
 
     def __rand__(self, val):
         return val & self.get_value()
@@ -369,8 +381,16 @@ class intDataElement(DataElement):
         self.set_value(self.get_value() * val)
         return self
 
-    def __idiv__(self, val):
+    # def __idiv__(self, val):
+    #     self.set_value(self.get_value() / val)
+    #     return self
+
+    def __itruediv__(self, val):
         self.set_value(self.get_value() / val)
+        return self
+
+    def __ifloordiv__(self, val):
+        self.set_value(self.get_value() // val)
         return self
 
     def __imod__(self, val):
@@ -638,7 +658,7 @@ class structDataElement(DataElement):
             s += "  %15s: %s%s" % (prop, repr(self._generators[prop]),
                                    os.linesep)
         s += "} %s (%i bytes at 0x%04X)%s" % (self._name,
-                                              self.size() / 8,
+                                              self.size() // 8,
                                               self._offset,
                                               os.linesep)
         return s
@@ -706,11 +726,11 @@ class structDataElement(DataElement):
         return size
 
     def get_raw(self):
-        size = self.size() / 8
+        size = self.size() // 8
         return self._data[self._offset:self._offset+size]
 
     def set_raw(self, buffer):
-        if len(buffer) != (self.size() / 8):
+        if len(buffer) != (self.size() // 8):
             raise ValueError("Struct size mismatch during set_raw()")
         self._data[self._offset] = buffer
 
@@ -755,7 +775,7 @@ class Processor:
         self._generators[name] = gen
 
     def do_bitfield(self, dtype, bitfield):
-        bytes = self._types[dtype](self._data, 0).size() / 8
+        bytes = self._types[dtype](self._data, 0).size() // 8
         bitsleft = bytes * 8
 
         for _bitdef, defn in bitfield:
@@ -812,7 +832,7 @@ class Processor:
                     self._offset += int((i+1) % 8 == 0)
                 else:
                     gen = self._types[dtype](self._data, self._offset)
-                    self._offset += (gen.size() / 8)
+                    self._offset += (gen.size() // 8)
                 res.append(gen)
 
             if count == 1:

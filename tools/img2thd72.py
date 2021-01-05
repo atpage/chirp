@@ -62,7 +62,7 @@ def display_thd72(buf):
     for y in range(48):
         line = ''
         for x in range(120):
-            byte = y/8*120 + x
+            byte = y//8*120 + x
             line += dots[(ord(buf[byte]) >> (y % 8)) & 0x01]
         lines.append(line)
     for l in lines:
@@ -121,7 +121,7 @@ if __name__ == "__main__":
         display_thd72(buf)
 
     blocks = [0, ]
-    blocks.append(imgpos/256)
-    blocks.append(1+imgpos/256)
-    blocks.append(2+imgpos/256)
+    blocks.append(imgpos//256)
+    blocks.append(1+imgpos//256)
+    blocks.append(2+imgpos//256)
     print("Modified block list:", blocks)

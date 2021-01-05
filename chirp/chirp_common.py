@@ -230,7 +230,7 @@ def parse_freq(freqstr):
 def format_freq(freq):
     """Format a frequency given in Hz as a string"""
 
-    return "%i.%06i" % (freq / 1000000, freq % 1000000)
+    return "%i.%06i" % (freq // 1000000, freq % 1000000)
 
 
 class ImmutableValueError(ValueError):
@@ -1316,7 +1316,7 @@ class Status:
     def __str__(self):
         try:
             pct = (self.cur / float(self.max)) * 100
-            nticks = int(pct) / 10
+            nticks = int(pct) // 10
             ticks = "=" * nticks
         except ValueError:
             pct = 0.0
@@ -1370,7 +1370,7 @@ def required_step(freq):
     else:
         raise errors.InvalidDataError("Unable to calculate the required " +
                                       "tuning step for %i.%5i" %
-                                      (freq / 1000000, freq % 1000000))
+                                      (freq // 1000000, freq % 1000000))
 
 
 def fix_rounded_step(freq):

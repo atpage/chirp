@@ -144,7 +144,7 @@ class IntegerEditor(BitwiseEditor):
         self._entries = []
         self._update = True
 
-        hexdigits = ((self._element.size() / 4) +
+        hexdigits = ((self._element.size() // 4) +
                      (self._element.size() % 4 and 1 or 0))
         formats = [('Hex', 16, '0x{:0%iX}' % hexdigits),
                    ('Dec', 10, '{:d}'),
@@ -292,7 +292,7 @@ class RadioBrowser(common.Editor):
         for name, item in list(obj.items()):
             if item.size() % 8 == 0:
                 name = '<b>%s</b> <small>(%s %i bytes)</small>' % (
-                    name, bitwise_type(classname(item)), item.size() / 8)
+                    name, bitwise_type(classname(item)), item.size() // 8)
             else:
                 name = '<b>%s</b> <small>(%s %i bits)</small>' % (
                     name, bitwise_type(classname(item)), item.size())
