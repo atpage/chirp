@@ -448,7 +448,7 @@ class KGUV8ERadio(chirp_common.CloneModeRadio,
         # allocate & fill memory
         image = ""
         for i in range(start, end, blocksize):
-            req = chr(i / 256) + chr(i % 256) + chr(blocksize)
+            req = chr(i // 256) + chr(i % 256) + chr(blocksize)
             self._write_record(CMD_RD, req)
             cs_error, resp = self._read_record()
             if cs_error:
@@ -479,7 +479,7 @@ class KGUV8ERadio(chirp_common.CloneModeRadio,
     def _do_upload(self, start, end, blocksize):
         ptr = start
         for i in range(start, end, blocksize):
-            req = chr(i / 256) + chr(i % 256)
+            req = chr(i // 256) + chr(i % 256)
             chunk = self.get_mmap()[ptr:ptr + blocksize]
             self._write_record(CMD_WR, req + chunk)
             # ~ LOG.debug(util.hexprint(req + chunk))
@@ -677,25 +677,25 @@ class KGUV8ERadio(chirp_common.CloneModeRadio,
         _nam = self._memobj.names[number]
 
         if mem.empty:
-            _mem.set_raw("\x00" * (_mem.size() / 8))
+            _mem.set_raw("\x00" * (_mem.size() // 8))
             self._memobj.valid[number] = 0
-            self._memobj.names[number].set_raw("\x00" * (_nam.size() / 8))
+            self._memobj.names[number].set_raw("\x00" * (_nam.size() // 8))
             return
 
-        _mem.rxfreq = int(mem.freq / 10)
+        _mem.rxfreq = int(mem.freq // 10)
         if mem.duplex == "off":
             _mem.txfreq = 0xFFFFFFFF
         elif mem.duplex == "split":
-            _mem.txfreq = int(mem.offset / 10)
+            _mem.txfreq = int(mem.offset // 10)
         elif mem.duplex == "off":
             for i in range(0, 4):
                 _mem.txfreq[i].set_raw("\xFF")
         elif mem.duplex == "+":
-            _mem.txfreq = int(mem.freq / 10) + int(mem.offset / 10)
+            _mem.txfreq = int(mem.freq // 10) + int(mem.offset // 10)
         elif mem.duplex == "-":
-            _mem.txfreq = int(mem.freq / 10) - int(mem.offset / 10)
+            _mem.txfreq = int(mem.freq // 10) - int(mem.offset // 10)
         else:
-            _mem.txfreq = int(mem.freq / 10)
+            _mem.txfreq = int(mem.freq // 10)
         _mem.scan_add = int(mem.skip != "S")
         _mem.iswide = int(mem.mode == "FM")
         # set the tone
@@ -1135,7 +1135,7 @@ class KGUV8ERadio(chirp_common.CloneModeRadio,
                     else:
                         LOG.debug("Setting %s = %s" % (setting, element.value))
                         if self._is_freq(element):
-                            setattr(obj, setting, int(element.value)/10)
+                            setattr(obj, setting, int(element.value)//10)
                         else:
                             setattr(obj, setting, element.value)
                 except Exception as e:

@@ -529,7 +529,7 @@ def do_download(radio):
 
     # reset UI data
     status.cur = 0
-    status.max = MEM_SIZE / 256
+    status.max = MEM_SIZE // 256
     status.msg = "Cloning from radio..."
     radio.status_fn(status)
 
@@ -580,7 +580,7 @@ def do_upload(radio):
 
     # update UI
     status.cur = 0
-    status.max = MEM_SIZE / 256
+    status.max = MEM_SIZE // 256
     status.msg = "Cloning to radio..."
     radio.status_fn(status)
 
@@ -843,7 +843,7 @@ class Kenwood_Serie_60G(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
         bdata += (256 - (len(bdata)) % 256) * "\xFF"
 
         # fill to match the whole area
-        bdata += (16 - len(bdata) / 256) * EMPTY_BLOCK
+        bdata += (16 - len(bdata) // 256) * EMPTY_BLOCK
 
         # updating the data in the memmap [x1000]
         self._fill(0x1000, bdata)
@@ -1086,7 +1086,7 @@ class Kenwood_Serie_60G(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
             return
 
         # frequency
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
 
         # this are a mistery yet, but so falr there is no impact
         # whit this default values for new channels
@@ -1096,14 +1096,14 @@ class Kenwood_Serie_60G(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
 
         # duplex
         if mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) / 10
+            _mem.txfreq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) / 10
+            _mem.txfreq = (mem.freq - mem.offset) // 10
         elif mem.duplex == "off":
             for byte in _mem.txfreq:
                 byte.set_raw("\xFF")
         else:
-            _mem.txfreq = mem.freq / 10
+            _mem.txfreq = mem.freq // 10
 
         # tone data
         ((txmode, txtone, txpol), (rxmode, rxtone, rxpol)) = \

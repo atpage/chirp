@@ -1129,9 +1129,9 @@ class YaesuSC35GenericRadio(chirp_common.CloneModeRadio,
         band = BAND_ASSIGNMENTS[mem_num - first_vfo_num]
         frange = self.valid_bands[band]
         if freq >= frange[0] and freq <= frange[1]:
-            memloc.freq = freq / 10
+            memloc.freq = freq // 10
             return freq
-        memloc.freq = frange[0] / 10
+        memloc.freq = frange[0] // 10
         raise Exception("freq out of range for %s" % sname)
 
     # modify a radio channel in memobj based on info in CHIRP canonical form
@@ -1143,7 +1143,7 @@ class YaesuSC35GenericRadio(chirp_common.CloneModeRadio,
                 store_bit(self._memobj.enable, ndx, False)
                 return
 
-        txfreq = mem.freq / 10     # really. RX freq is used for TX base
+        txfreq = mem.freq // 10     # really. RX freq is used for TX base
         _mem.freq = txfreq
         self.encode_sql(mem, _mem)
         if mem.power:
@@ -1153,7 +1153,7 @@ class YaesuSC35GenericRadio(chirp_common.CloneModeRadio,
         _mem.tx_width = mem.mode == "NFM"
         _mem.step = STEP_CODE.index(mem.tuning_step)
 
-        _mem.offset = mem.offset / self.freq_offset_scale
+        _mem.offset = mem.offset // self.freq_offset_scale
         duplex = mem.duplex
         if regtype in ["memory", "pms"]:
             ndx = num - 1
@@ -1162,7 +1162,7 @@ class YaesuSC35GenericRadio(chirp_common.CloneModeRadio,
             nametrim = (mem.name + "        ")[:8]
             self._memobj.names[ndx].chrs = bytearray(nametrim, "ascii")
             if mem.duplex == "split":
-                txfreq = mem.offset / 10
+                txfreq = mem.offset // 10
             self._memobj.txfreqs[num-1].freq = txfreq
         _mem.duplex = DUPLEX.index(duplex)
         if regtype in ["vfo", "home"]:

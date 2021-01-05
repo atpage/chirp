@@ -798,8 +798,8 @@ class FT1Radio(yaesu_clone.YaesuCloneModeRadio):
         else:
             flag.nosubvfo = False    # Available in both VFOs
 
-        _mem.freq = int(mem.freq / 1000)
-        _mem.offset = int(mem.offset / 1000)
+        _mem.freq = int(mem.freq // 1000)
+        _mem.offset = int(mem.offset // 1000)
         _mem.tone = chirp_common.TONES.index(mem.rtone)
         self._set_tmode(_mem, mem)
         _mem.duplex = DUPLEX.index(mem.duplex)
@@ -820,7 +820,7 @@ class FT1Radio(yaesu_clone.YaesuCloneModeRadio):
 
     @classmethod
     def _wipe_memory(cls, mem):
-        mem.set_raw("\x00" * (mem.size() / 8))
+        mem.set_raw("\x00" * (mem.size() // 8))
         mem.unknown1 = 0x05
 
     def get_bank_model(self):
@@ -1837,7 +1837,7 @@ class FT1Radio(yaesu_clone.YaesuCloneModeRadio):
     def apply_ff_padded_string(cls, setting, obj):
         # FF pad.
         val = setting.value.get_value()
-        max_len = getattr(obj, "padded_string").size() / 8
+        max_len = getattr(obj, "padded_string").size() // 8
         val = str(val).rstrip()
         setattr(obj, "padded_string", cls._add_ff_pad(val, max_len))
 
@@ -1897,7 +1897,7 @@ class FT1Radio(yaesu_clone.YaesuCloneModeRadio):
     def apply_ff_padded_yaesu(cls, setting, obj):
         # FF pad yaesus custom string format.
         rawval = setting.value.get_value()
-        max_len = getattr(obj, "padded_yaesu").size() / 8
+        max_len = getattr(obj, "padded_yaesu").size() // 8
         rawval = str(rawval).rstrip()
         val = [CHARSET.index(x) for x in rawval]
         for x in range(len(val), max_len):

@@ -196,7 +196,7 @@ def _download(radio):
     # UI progress
     status = chirp_common.Status()
     status.cur = 0
-    status.max = radio._mem_size / radio._recv_block_size
+    status.max = radio._mem_size // radio._recv_block_size
     status.msg = "Cloning from radio..."
     radio.status_fn(status)
 
@@ -266,7 +266,7 @@ def _upload(radio):
     # UI progress
     status = chirp_common.Status()
     status.cur = 0
-    status.max = radio._mem_size / radio._send_block_size
+    status.max = radio._mem_size // radio._send_block_size
     status.msg = "Cloning to radio..."
     radio.status_fn(status)
 
@@ -514,19 +514,19 @@ class BaofengCommonHT(chirp_common.CloneModeRadio,
 
         _mem.set_raw("\x00" * 16)
 
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
 
         if mem.duplex == "off":
             for i in range(0, 4):
                 _mem.txfreq[i].set_raw("\xFF")
         elif mem.duplex == "split":
-            _mem.txfreq = mem.offset / 10
+            _mem.txfreq = mem.offset // 10
         elif mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) / 10
+            _mem.txfreq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) / 10
+            _mem.txfreq = (mem.freq - mem.offset) // 10
         else:
-            _mem.txfreq = mem.freq / 10
+            _mem.txfreq = mem.freq // 10
 
         _namelength = self.get_features().valid_name_length
         for i in range(_namelength):

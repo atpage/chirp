@@ -117,7 +117,7 @@ def _resolve_memory_number(number):
 
 
 def _wipe_memory(mem, char):
-    mem.set_raw(char * (mem.size() / 8))
+    mem.set_raw(char * (mem.size() // 8))
 
 
 @directory.register
@@ -195,7 +195,7 @@ class IC2820Radio(icf.IcomCloneModeRadio, chirp_common.IcomDstarSupport):
         number = _resolve_memory_number(number)
 
         bitpos = (1 << (number % 8))
-        bytepos = number / 8
+        bytepos = number // 8
 
         _mem = self._memobj.memory[number]
         _used = self._memobj.used_flags[bytepos]
@@ -246,7 +246,7 @@ class IC2820Radio(icf.IcomCloneModeRadio, chirp_common.IcomDstarSupport):
 
     def set_memory(self, mem):
         bitpos = (1 << (mem.number % 8))
-        bytepos = mem.number / 8
+        bytepos = mem.number // 8
 
         _mem = self._memobj.memory[mem.number]
         _used = self._memobj.used_flags[bytepos]

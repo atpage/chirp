@@ -622,7 +622,7 @@ class ICx90Radio(icf.IcomCloneModeRadio):
             mult = 5000
             multr = 0
 
-        return (freq / mult, multr)
+        return (freq // mult, multr)
 
     def freq_icom2chirp(self, freq, mult):
         return freq * (6250 if mult else 5000)
@@ -782,7 +782,7 @@ class ICx90Radio_tv(ICx90Radio):
         return None
 
     def freq_chirp2icom(self, freq):
-        return freq / 5000
+        return freq // 5000
 
     def freq_icom2chirp(self, freq):
         return freq * 5000

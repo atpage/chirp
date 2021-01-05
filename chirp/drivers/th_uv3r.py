@@ -202,7 +202,7 @@ class TYTUV3RRadio(chirp_common.CloneModeRadio):
         mem.number = number
 
         bit = 1 << ((number - 1) % 8)
-        byte = (number - 1) / 8
+        byte = (number - 1) // 8
 
         if self._memobj.emptyflags[byte] & bit:
             mem.empty = True
@@ -229,7 +229,7 @@ class TYTUV3RRadio(chirp_common.CloneModeRadio):
     def set_memory(self, mem):
         _mem = self._memobj.memory[mem.number - 1]
         bit = 1 << ((mem.number - 1) % 8)
-        byte = (mem.number - 1) / 8
+        byte = (mem.number - 1) // 8
 
         if mem.empty:
             self._memobj.emptyflags[byte] |= bit
@@ -244,8 +244,8 @@ class TYTUV3RRadio(chirp_common.CloneModeRadio):
         else:
             mult = 5000
             _mem.is625 = False
-        _mem.freq = mem.freq / mult
-        _mem.offset = mem.offset / 5000
+        _mem.freq = mem.freq // mult
+        _mem.offset = mem.offset // 5000
         _mem.duplex = THUV3R_DUPLEX.index(mem.duplex)
         _mem.iswide = mem.mode == "FM"
         self._encode_tone(mem, _mem)

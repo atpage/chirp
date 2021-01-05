@@ -344,7 +344,7 @@ def _download(radio):
         data += d
 
         # UI Update
-        status.cur = addr / BLOCK_SIZE
+        status.cur = addr // BLOCK_SIZE
         status.msg = "Cloning from radio..."
         radio.status_fn(status)
 
@@ -385,7 +385,7 @@ def _upload(radio):
             raise errors.RadioError(msg)
 
         # UI Update
-        status.cur = addr / BLOCK_SIZE
+        status.cur = addr // BLOCK_SIZE
         status.msg = "Cloning to radio..."
         radio.status_fn(status)
 
@@ -675,17 +675,17 @@ class LT725UV(chirp_common.CloneModeRadio):
 
         _mem.set_raw("\xFF" * 15 + "\x00\x00" + "\xFF" * 7)
 
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
         if mem.duplex == "off":
             _mem.txfreq = 0xFFFFFFFF
         elif mem.duplex == "split":
-            _mem.txfreq = mem.offset / 10
+            _mem.txfreq = mem.offset // 10
         elif mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) / 10
+            _mem.txfreq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) / 10
+            _mem.txfreq = (mem.freq - mem.offset) // 10
         else:
-            _mem.txfreq = mem.freq / 10
+            _mem.txfreq = mem.freq // 10
 
         _mem.namelen = len(mem.name)
         _namelength = self.get_features().valid_name_length
@@ -811,7 +811,7 @@ class LT725UV(chirp_common.CloneModeRadio):
 
         def my_dbl2raw(setting, obj, atrb, flg=1):
             """Callback: convert from freq 146.7600 to 14760000 U32."""
-            value = chirp_common.parse_freq(str(setting.value)) / 10
+            value = chirp_common.parse_freq(str(setting.value)) // 10
             # flg=1 means 0 becomes ff, else leave as possible 0
             if flg == 1 and value == 0:
                 value = 0xFFFFFFFF
@@ -953,7 +953,7 @@ class LT725UV(chirp_common.CloneModeRadio):
         # UPPER BAND SETTINGS
 
         # Freq Mode, convert bit 1 state to index pointer
-        val = _vfoa.frq_chn_mode / 2
+        val = _vfoa.frq_chn_mode // 2
 
         rx = RadioSettingValueList(LIST_VFOMODE, LIST_VFOMODE[val])
         rs = RadioSetting("upper.vfoa.frq_chn_mode", "Default Mode", rx)
@@ -1033,7 +1033,7 @@ class LT725UV(chirp_common.CloneModeRadio):
 
         # LOWER BAND SETTINGS
 
-        val = _vfob.frq_chn_mode / 2
+        val = _vfob.frq_chn_mode // 2
         rx = RadioSettingValueList(LIST_VFOMODE, LIST_VFOMODE[val])
         rs = RadioSetting("lower.vfob.frq_chn_mode", "Default Mode", rx)
         rs.set_apply_callback(my_spcl, _vfob, "frq_chn_mode")

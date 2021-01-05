@@ -915,12 +915,12 @@ class AnyTone778UVBase(chirp_common.CloneModeRadio,
 
         if mem.empty:
             # Set the whole memory to 0xff
-            _mem.set_raw('\xff' * (_mem.size() / 8))
+            _mem.set_raw('\xff' * (_mem.size() // 8))
         else:
-            _mem.set_raw('\x00' * (_mem.size() / 8))
+            _mem.set_raw('\x00' * (_mem.size() // 8))
 
-            _mem.freq = int(mem.freq / 10)
-            _mem.offset = int(mem.offset / 10)
+            _mem.freq = int(mem.freq // 10)
+            _mem.offset = int(mem.offset // 10)
 
             _mem.name = mem.name.ljust(5)[:5]  # Store the alpha tag
 

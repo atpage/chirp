@@ -187,7 +187,7 @@ def _clone_out(radio):
             radio.pipe.write(frame)
             ack = radio.pipe.read(1)
             if ack != "\x06":
-                raise errors.RadioError("Radio refused block %i" % (i / 128))
+                raise errors.RadioError("Radio refused block %i" % (i // 128))
             time.sleep(0.05)
 
             status = chirp_common.Status()
@@ -215,7 +215,7 @@ def get_freq(rawfreq):
 
 def set_freq(freq, obj, field):
     """Encode a frequency with any necessary fractional step flags"""
-    obj[field] = freq / 10000
+    obj[field] = freq // 10000
     frac = freq % 10000
 
     if frac >= 5000:
@@ -381,7 +381,7 @@ class FTM350Radio(yaesu_clone.YaesuCloneModeRadio):
             set_freq(mem.offset, _mem, 'split')
             _mem.oddsplit = 1
         else:
-            _mem.offset = mem.offset / 50000
+            _mem.offset = mem.offset // 50000
             _mem.duplex = DUPLEXES.index(mem.duplex)
 
         if mem.power:

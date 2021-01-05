@@ -344,7 +344,7 @@ class VX6Radio(yaesu_clone.YaesuCloneModeRadio):
     _NUM_0_63 = ["%i" % int(x) for x in range(64)]
     _NUM_1_50 = ["%i" % int(x) for x in range(1, 51)]
     _ON_TIMER = ["OFF"] + \
-        ["%02d:%02d" % (t / 60, t % 60) for t in range(10, 1450, 10)]
+        ["%02d:%02d" % (t // 60, t % 60) for t in range(10, 1450, 10)]
     _OPEN_MSG = ("Off", "DC Voltage", "Message")
     _PTT_DELAY = ("OFF", "20MS", "50MS", "100MS", "200MS")
     _RF_SQL = ("OFF", "S1", "S2", "S3", "S4", "S5",
@@ -401,11 +401,11 @@ class VX6Radio(yaesu_clone.YaesuCloneModeRadio):
 
     def get_raw_memory(self, number):
         return repr(self._memobj.memory[number-1]) + \
-            repr(self._memobj.flags[(number-1)/2])
+            repr(self._memobj.flags[(number-1)//2])
 
     def get_memory(self, number):
         _mem = self._memobj.memory[number-1]
-        _flg = self._memobj.flags[(number-1)/2]
+        _flg = self._memobj.flags[(number-1)//2]
 
         nibble = ((number-1) % 2) and "even" or "odd"
         used = _flg["%s_masked" % nibble]
@@ -450,7 +450,7 @@ class VX6Radio(yaesu_clone.YaesuCloneModeRadio):
 
     def set_memory(self, mem):
         _mem = self._memobj.memory[mem.number-1]
-        _flag = self._memobj.flags[(mem.number-1)/2]
+        _flag = self._memobj.flags[(mem.number-1)//2]
 
         nibble = ((mem.number-1) % 2) and "even" or "odd"
         used = _flag["%s_masked" % nibble]
@@ -475,8 +475,8 @@ class VX6Radio(yaesu_clone.YaesuCloneModeRadio):
         if mem.empty:
             return
 
-        _mem.freq = mem.freq / 1000
-        _mem.offset = mem.offset / 1000
+        _mem.freq = mem.freq // 1000
+        _mem.offset = mem.offset // 1000
         _mem.tone = chirp_common.TONES.index(mem.rtone)
         _mem.tmode = TMODES.index(mem.tmode)
         _mem.duplex = DUPLEX.index(mem.duplex)

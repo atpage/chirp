@@ -342,13 +342,13 @@ class KenwoodTKx102Radio(chirp_common.CloneModeRadio):
 
         _mem.unknown3[0] = 0x07
         _mem.unknown3[1] = 0x22
-        _mem.rx_freq = mem.freq / 10
+        _mem.rx_freq = mem.freq // 10
         if mem.duplex == "+":
-            _mem.tx_freq = (mem.freq + mem.offset) / 10
+            _mem.tx_freq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.tx_freq = (mem.freq - mem.offset) / 10
+            _mem.tx_freq = (mem.freq - mem.offset) // 10
         else:
-            _mem.tx_freq = mem.freq / 10
+            _mem.tx_freq = mem.freq // 10
 
         self._set_tone(mem, _mem)
 

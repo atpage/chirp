@@ -206,7 +206,7 @@ class MemFrame(Frame):
 
     def initialize(self):
         """Initialize to sane values"""
-        self._data = MemoryMap("".join(["\x00"] * (self.get_obj().size() / 8)))
+        self._data = MemoryMap("".join(["\x00"] * (self.get_obj().size() // 8)))
 
 
 class BankMemFrame(MemFrame):

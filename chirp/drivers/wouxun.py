@@ -37,8 +37,8 @@ def encode_freq(freq):
     div = 1000
     for i in range(0, 4):
         enc <<= 4
-        enc |= FREQ_ENCODE_TABLE[(freq/div) % 10]
-        div /= 10
+        enc |= FREQ_ENCODE_TABLE[(freq//div) % 10]
+        div //= 10
     return enc
 
 
@@ -853,18 +853,18 @@ class KGUVD1PRadio(chirp_common.CloneModeRadio,
         if _mem.get_raw() == ("\xFF" * 16):
             wipe_memory(_mem, "\x00")
 
-        _mem.rx_freq = int(mem.freq / 10)
+        _mem.rx_freq = int(mem.freq // 10)
         if mem.duplex == "split":
-            _mem.tx_freq = int(mem.offset / 10)
+            _mem.tx_freq = int(mem.offset // 10)
         elif mem.duplex == "off":
             for i in range(0, 4):
                 _mem.tx_freq[i].set_raw("\xFF")
         elif mem.duplex == "+":
-            _mem.tx_freq = int(mem.freq / 10) + int(mem.offset / 10)
+            _mem.tx_freq = int(mem.freq // 10) + int(mem.offset // 10)
         elif mem.duplex == "-":
-            _mem.tx_freq = int(mem.freq / 10) - int(mem.offset / 10)
+            _mem.tx_freq = int(mem.freq // 10) - int(mem.offset // 10)
         else:
-            _mem.tx_freq = int(mem.freq / 10)
+            _mem.tx_freq = int(mem.freq // 10)
         _mem.splitdup = mem.duplex == "split"
         _mem.skip = mem.skip != "S"
         _mem.iswide = mem.mode != "NFM"

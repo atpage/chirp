@@ -593,19 +593,19 @@ class LeixenVV898Radio(chirp_common.CloneModeRadio):
         elif _mem.get_raw() == ("\xFF" * 16):
             _mem.set_raw("\xFF" * 8 + "\xFF\x00\xFF\x00\xFF\xFE\xF0\xFC")
 
-        _mem.rx_freq = mem.freq / 10
+        _mem.rx_freq = mem.freq // 10
 
         if mem.duplex == "off":
             for i in range(0, 4):
                 _mem.tx_freq[i].set_raw("\xFF")
         elif mem.duplex == "split":
-            _mem.tx_freq = mem.offset / 10
+            _mem.tx_freq = mem.offset // 10
         elif mem.duplex == "+":
-            _mem.tx_freq = (mem.freq + mem.offset) / 10
+            _mem.tx_freq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.tx_freq = (mem.freq - mem.offset) / 10
+            _mem.tx_freq = (mem.freq - mem.offset) // 10
         else:
-            _mem.tx_freq = mem.freq / 10
+            _mem.tx_freq = mem.freq // 10
 
         self._set_tone(mem, _mem)
 
@@ -796,7 +796,7 @@ class LeixenVV898Radio(chirp_common.CloneModeRadio):
                           RadioSettingValueList(
                               DTMFTIME_LIST, DTMFTIME_LIST[val]))
         adv_grp.append(rs)
-        val = (_settings.dtmfdelay) / 5
+        val = (_settings.dtmfdelay) // 5
         rs = RadioSetting("dtmfdelay", "DTMF 1st Digit Delay",
                           RadioSettingValueList(
                               DTMFDELAY_LIST, DTMFDELAY_LIST[val]))
@@ -806,7 +806,7 @@ class LeixenVV898Radio(chirp_common.CloneModeRadio):
                           RadioSettingValueList(
                               DTMFPRETIME_LIST, DTMFPRETIME_LIST[val]))
         adv_grp.append(rs)
-        val = (_settings.dtmfdelay2) / 5
+        val = (_settings.dtmfdelay2) // 5
         rs = RadioSetting("dtmfdelay2", "DTMF * and # Digit Delay",
                           RadioSettingValueList(
                               DTMFDELAY2_LIST, DTMFDELAY2_LIST[val]))

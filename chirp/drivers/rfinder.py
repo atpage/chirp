@@ -75,7 +75,7 @@ def deg2dm(decdeg):
 
 def nmea2deg(nmea, direction="N"):
     """Convert NMEA-encoded value to float"""
-    deg = int(nmea) / 100
+    deg = int(nmea) // 100
     try:
         minutes = nmea % (deg * 100)
     except ZeroDivisionError:

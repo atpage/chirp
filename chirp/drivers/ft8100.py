@@ -180,7 +180,7 @@ class FT8100Radio(yaesu_clone.YaesuCloneModeRadio):
         else:
             mem.offset = int(_mem.offset) * 1000
 
-        if int(mem.freq / 100) == 4:
+        if int(mem.freq // 100) == 4:
             mem.power = POWER_LEVELS_UHF[_mem.power]
         else:
             mem.power = POWER_LEVELS_VHF[_mem.power]
@@ -201,7 +201,7 @@ class FT8100Radio(yaesu_clone.YaesuCloneModeRadio):
 
         _mem = self._memobj.memory[mem.number - 1]
 
-        _mem.freq = int(mem.freq / 1000)
+        _mem.freq = int(mem.freq // 1000)
         _mem.tone = TONES.index(mem.rtone)
         _mem.tone_enable = TMODES.index(mem.tmode)
         _mem.am = MODES.index(mem.mode)
@@ -209,10 +209,10 @@ class FT8100Radio(yaesu_clone.YaesuCloneModeRadio):
 
         if mem.duplex == "split":
             tx_freq = mem.freq + mem.offset
-            _mem.split_high = tx_freq / 10000000
-            _mem.offset = (tx_freq % 10000000) / 1000
+            _mem.split_high = tx_freq // 10000000
+            _mem.offset = (tx_freq % 10000000) // 1000
         else:
-            _mem.offset = int(mem.offset / 1000)
+            _mem.offset = int(mem.offset // 1000)
 
         if mem.power:
             _mem.power = POWER_LEVELS_VHF.index(mem.power)
@@ -243,10 +243,10 @@ class FT8100Radio(yaesu_clone.YaesuCloneModeRadio):
     def _bit_byte(self, number):
         if self.VARIANT == 'VHF':
             bit = 1 << ((number - 1) % 8)
-            byte = (number - 1) / 8
+            byte = (number - 1) // 8
         else:
             bit = 1 << ((number - 2) % 8)
-            byte = (number - 2) / 8
+            byte = (number - 2) // 8
 
         return bit, byte
 

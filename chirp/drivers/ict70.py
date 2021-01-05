@@ -143,7 +143,7 @@ class ICT70Radio(icf.IcomCloneModeRadio):
 
     def get_memory(self, number):
         bit = 1 << (number % 8)
-        byte = int(number / 8)
+        byte = int(number // 8)
 
         _mem = self._memobj.memory[number]
         _usd = self._memobj.used[byte]
@@ -178,14 +178,14 @@ class ICT70Radio(icf.IcomCloneModeRadio):
 
     def set_memory(self, mem):
         bit = 1 << (mem.number % 8)
-        byte = int(mem.number / 8)
+        byte = int(mem.number // 8)
 
         _mem = self._memobj.memory[mem.number]
         _usd = self._memobj.used[byte]
         _skp = self._memobj.skips[byte]
         _psk = self._memobj.pskips[byte]
 
-        _mem.set_raw("\x00" * (_mem.size() / 8))
+        _mem.set_raw("\x00" * (_mem.size() // 8))
 
         if mem.empty:
             _usd |= bit
@@ -194,10 +194,10 @@ class ICT70Radio(icf.IcomCloneModeRadio):
         _usd &= ~bit
 
         if chirp_common.is_12_5(mem.freq):
-            _mem.freq = (mem.freq / 6250) | 0x800000
+            _mem.freq = (mem.freq // 6250) | 0x800000
         else:
-            _mem.freq = mem.freq / 5000
-        _mem.offset = mem.offset / 5000
+            _mem.freq = mem.freq // 5000
+        _mem.offset = mem.offset // 5000
         _mem.name = mem.name.ljust(6)[:6]
         _mem.rtone = chirp_common.TONES.index(mem.rtone)
         _mem.ctone = chirp_common.TONES.index(mem.ctone)

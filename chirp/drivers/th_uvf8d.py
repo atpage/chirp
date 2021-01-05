@@ -371,9 +371,9 @@ class TYTUVF8DRadio(chirp_common.CloneModeRadio):
             return mem
 
         if isinstance(number, int):
-            e = self._memobj.enable[(number - 1) / 8]
+            e = self._memobj.enable[(number - 1) // 8]
             enabled = e.flags[7 - ((number - 1) % 8)]
-            s = self._memobj.skip[(number - 1) / 8]
+            s = self._memobj.skip[(number - 1) // 8]
             dont_skip = s.flags[7 - ((number - 1) % 8)]
         else:
             enabled = True
@@ -436,8 +436,8 @@ class TYTUVF8DRadio(chirp_common.CloneModeRadio):
     def set_memory(self, mem):
         _mem, _name = self._get_memobjs(mem.number)
 
-        e = self._memobj.enable[(mem.number - 1) / 8]
-        s = self._memobj.skip[(mem.number - 1) / 8]
+        e = self._memobj.enable[(mem.number - 1) // 8]
+        s = self._memobj.skip[(mem.number - 1) // 8]
         if mem.empty:
             _mem.set_raw("\xFF" * 32)
             e.flags[7 - ((mem.number - 1) % 8)] = False
@@ -450,16 +450,16 @@ class TYTUVF8DRadio(chirp_common.CloneModeRadio):
             LOG.debug("Initializing empty memory")
             _mem.set_raw("\x00" * 32)
 
-        _mem.rx_freq = mem.freq / 10
+        _mem.rx_freq = mem.freq // 10
         if mem.duplex == "-":
-            _mem.tx_freq = (mem.freq - mem.offset) / 10
+            _mem.tx_freq = (mem.freq - mem.offset) // 10
         elif mem.duplex == "+":
-            _mem.tx_freq = (mem.freq + mem.offset) / 10
+            _mem.tx_freq = (mem.freq + mem.offset) // 10
         else:
-            _mem.tx_freq = mem.freq / 10
+            _mem.tx_freq = mem.freq // 10
 
         _mem.duplex = THUVF8D_DUPLEX.index(mem.duplex)
-        _mem.offset = mem.offset / 10
+        _mem.offset = mem.offset // 10
 
         (txmode, txval, txpol), (rxmode, rxval, rxpol) = \
             chirp_common.split_tone_encode(mem)

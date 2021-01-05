@@ -35,7 +35,7 @@ def chunks(s, t):
 
 
 def encode_base100(v):
-    return (v / 100 << 8) + (v % 100)
+    return (v // 100 << 8) + (v % 100)
 
 
 def decode_base100(u16):

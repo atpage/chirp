@@ -505,22 +505,22 @@ class RT26Radio(chirp_common.CloneModeRadio):
         _mem = self._memobj.memory[mem.number - 1]
 
         if mem.empty:
-            _mem.set_raw("\xFF" * (_mem.size() / 8))
+            _mem.set_raw("\xFF" * (_mem.size() // 8))
             return
 
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
 
         if mem.duplex == "off":
             for i in range(0, 4):
                 _mem.txfreq[i].set_raw("\xFF")
         elif mem.duplex == "split":
-            _mem.txfreq = mem.offset / 10
+            _mem.txfreq = mem.offset // 10
         elif mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) / 10
+            _mem.txfreq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) / 10
+            _mem.txfreq = (mem.freq - mem.offset) // 10
         else:
-            _mem.txfreq = mem.freq / 10
+            _mem.txfreq = mem.freq // 10
 
         _mem.wide = mem.mode == "FM"
 

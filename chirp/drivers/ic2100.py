@@ -126,9 +126,9 @@ def _get_freq(mem):
 
 
 def _set_freq(mem, freq):
-    mem.freq = freq / 100000
-    mem.freq_10khz = (freq / 10000) % 10
-    khz = (freq / 1000) % 10
+    mem.freq = freq // 100000
+    mem.freq_10khz = (freq // 10000) % 10
+    khz = (freq // 1000) % 10
     mem.freq_1khz = khz
     mem.is_12_5 = chirp_common.is_12_5(freq)
 
@@ -153,14 +153,14 @@ def _set_offset(mem, offset):
     else:
         extra = 0x00
 
-    mem.offset = offset / 1000
+    mem.offset = offset // 1000
     raw = memmap.MemoryMap(mem.get_raw())
     raw[5] = ord(raw[5]) | extra
     mem.set_raw(raw.get_packed())
 
 
 def _wipe_memory(mem, char):
-    mem.set_raw(char * (mem.size() / 8))
+    mem.set_raw(char * (mem.size() // 8))
 
 
 @directory.register
@@ -209,11 +209,11 @@ class IC2100Radio(icf.IcomCloneModeRadio):
         else:
             number -= 1
             _mem = self._memobj.memory[number]
-            _emt = self._memobj.usedflags[number / 8].flagbits
+            _emt = self._memobj.usedflags[number // 8].flagbits
             empty = (1 << (number % 8)) & int(_emt)
             if not empty:
                 mem.name = str(_mem.name).rstrip()
-            _skp = self._memobj.skipflags[number / 8].flagbits
+            _skp = self._memobj.skipflags[number // 8].flagbits
             isskip = (1 << (number % 8)) & int(_skp)
 
         mem.number = number + 1
@@ -251,13 +251,13 @@ class IC2100Radio(icf.IcomCloneModeRadio):
         else:
             number = mem.number - 1
             _mem = self._memobj.memory[number]
-            _emt = self._memobj.usedflags[number / 8].flagbits
+            _emt = self._memobj.usedflags[number // 8].flagbits
             mask = 1 << (number % 8)
             if mem.empty:
                 _emt |= mask
             else:
                 _emt &= ~mask
-            _skp = self._memobj.skipflags[number / 8].flagbits
+            _skp = self._memobj.skipflags[number // 8].flagbits
             if mem.skip == "S":
                 _skp |= mask
             else:

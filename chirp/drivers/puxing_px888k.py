@@ -828,7 +828,7 @@ def encode_freq(data, fieldlen):
     data_out = bytearray('\xff')*fieldlen
     if data != '':
         data_out = encode_halfbytes((('%%0%di' % (fieldlen << 1)) %
-                                     int(chirp_common.parse_freq(data)/10)),
+                                     int(chirp_common.parse_freq(data)//10)),
                                     '', '0123456789', '', fieldlen)
     return data_out
 
@@ -1507,22 +1507,22 @@ class Puxing_PX888K_Radio(chirp_common.CloneModeRadio):
             integer_setting("vhflo", "VHF lower bound",
                             _model.band_limits[0].lower_freq,
                             134, 176,
-                            int_from_mem=lambda x:int(int(x)/10),
+                            int_from_mem=lambda x:int(int(x)//10),
                             mem_from_int=None),
             integer_setting("vhfhi", "VHF upper bound",
                             _model.band_limits[0].upper_freq,
                             134, 176,
-                            int_from_mem=lambda x:int(int(x)/10),
+                            int_from_mem=lambda x:int(int(x)//10),
                             mem_from_int=None),
             integer_setting("uhflo", "UHF lower bound",
                             _model.band_limits[1].lower_freq,
                             400, 480,
-                            int_from_mem=lambda x:int(int(x)/10),
+                            int_from_mem=lambda x:int(int(x)//10),
                             mem_from_int=None),
             integer_setting("uhfhi", "UHF upper bound",
                             _model.band_limits[1].upper_freq,
                             400, 480,
-                            int_from_mem=lambda x:int(int(x)/10),
+                            int_from_mem=lambda x:int(int(x)//10),
                             mem_from_int=None),
             ff_string_setting("model", "Model string",
                               _model.model_string,

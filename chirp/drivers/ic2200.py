@@ -97,7 +97,7 @@ def _get_special():
 
 
 def _wipe_memory(mem, char):
-    mem.set_raw(char * (mem.size() / 8))
+    mem.set_raw(char * (mem.size() // 8))
 
 
 @directory.register
@@ -242,8 +242,8 @@ class IC2200Radio(icf.IcomCloneModeRadio, chirp_common.IcomDstarSupport):
         _mem.unknown8 = 0
         _mem.is_625 = chirp_common.is_fractional_step(mem.freq)
         mult = _mem.is_625 and 6250 or 5000
-        _mem.freq = mem.freq / mult
-        _mem.offset = mem.offset / mult
+        _mem.freq = mem.freq // mult
+        _mem.offset = mem.offset // mult
         _mem.rtone = chirp_common.TONES.index(mem.rtone)
         _mem.ctone = chirp_common.TONES.index(mem.ctone)
         _mem.tmode = TMODES.index(mem.tmode)

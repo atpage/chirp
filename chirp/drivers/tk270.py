@@ -630,7 +630,7 @@ class Kenwood_P60_Radio(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
             return
 
         # freq rx
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
 
         # rx enabled if valid channel,
         # set tx to on, we decide if off after duplex = off
@@ -639,9 +639,9 @@ class Kenwood_P60_Radio(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
 
         # freq tx
         if mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) / 10
+            _mem.txfreq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) / 10
+            _mem.txfreq = (mem.freq - mem.offset) // 10
         elif mem.duplex == "off":
             # set tx freq on the memap to xff
             for i in range(0, 4):
@@ -649,7 +649,7 @@ class Kenwood_P60_Radio(chirp_common.CloneModeRadio, chirp_common.ExperimentalRa
             # erase the txen flag
             _mem.txen = 255
         else:
-            _mem.txfreq = mem.freq / 10
+            _mem.txfreq = mem.freq // 10
 
         # tone data
         ((txmode, txtone, txpol), (rxmode, rxtone, rxpol)) = \

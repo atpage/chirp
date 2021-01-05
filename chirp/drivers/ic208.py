@@ -240,8 +240,8 @@ class IC208Radio(icf.IcomCloneModeRadio):
         _flg.empty = False
 
         _mem.alt_mult = chirp_common.is_fractional_step(mem.freq)
-        _mem.freq = mem.freq / (_mem.alt_mult and 6250 or 5000)
-        _mem.offset = mem.offset / 5000
+        _mem.freq = mem.freq // (_mem.alt_mult and 6250 or 5000)
+        _mem.offset = mem.offset // 5000
         _mem.rtone = chirp_common.TONES.index(mem.rtone)
         _mem.ctone = chirp_common.TONES.index(mem.ctone)
         _mem.dtcs = chirp_common.DTCS_CODES.index(mem.dtcs)

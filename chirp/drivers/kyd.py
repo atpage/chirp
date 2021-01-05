@@ -305,7 +305,7 @@ class NC630aRadio(chirp_common.CloneModeRadio):
 
     def get_memory(self, number):
         bitpos = (1 << ((number - 1) % 8))
-        bytepos = ((number - 1) / 8)
+        bytepos = ((number - 1) // 8)
         LOG.debug("bitpos %s" % bitpos)
         LOG.debug("bytepos %s" % bytepos)
 
@@ -392,7 +392,7 @@ class NC630aRadio(chirp_common.CloneModeRadio):
 
     def set_memory(self, mem):
         bitpos = (1 << ((mem.number - 1) % 8))
-        bytepos = ((mem.number - 1) / 8)
+        bytepos = ((mem.number - 1) // 8)
         LOG.debug("bitpos %s" % bitpos)
         LOG.debug("bytepos %s" % bytepos)
 
@@ -405,19 +405,19 @@ class NC630aRadio(chirp_common.CloneModeRadio):
 
         _mem.set_raw("\x00" * 14 + "\xFF" * 2)
 
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
 
         if mem.duplex == "off":
             for i in range(0, 4):
                 _mem.txfreq[i].set_raw("\xFF")
         elif mem.duplex == "split":
-            _mem.txfreq = mem.offset / 10
+            _mem.txfreq = mem.offset // 10
         elif mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) / 10
+            _mem.txfreq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) / 10
+            _mem.txfreq = (mem.freq - mem.offset) // 10
         else:
-            _mem.txfreq = mem.freq / 10
+            _mem.txfreq = mem.freq // 10
 
         _mem.wide = mem.mode == "FM"
 

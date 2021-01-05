@@ -308,17 +308,17 @@ class UV3RRadio(chirp_common.CloneModeRadio):
             _mem.set_raw("\xff" * 16)
             return
 
-        _mem.rx_freq = mem.freq / 10
+        _mem.rx_freq = mem.freq // 10
         if mem.duplex == "split":
             diff = mem.freq - mem.offset
-            _mem.offset = abs(diff) / 10
+            _mem.offset = abs(diff) // 10
             _mem.duplex = UV3R_DUPLEX.index(diff < 0 and "+" or "-")
             for i in range(0, 4):
                 _mem.tx_freq[i].set_raw("\xFF")
         else:
-            _mem.offset = mem.offset / 10
+            _mem.offset = mem.offset // 10
             _mem.duplex = UV3R_DUPLEX.index(mem.duplex)
-            _mem.tx_freq = (mem.freq + mem.offset) / 10
+            _mem.tx_freq = (mem.freq + mem.offset) // 10
 
         _mem.ishighpower = mem.power == UV3R_POWER_LEVELS[0]
         _mem.iswide = mem.mode == "FM"
@@ -428,7 +428,7 @@ class UV3RRadio(chirp_common.CloneModeRadio):
                               CH_FLAG_LIST, CH_FLAG_LIST[_settings.ch_flag]))
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.lower_vhf) / 10
+        _limit = int(self._memobj.limits.lower_vhf) // 10
         if _limit < 115 or _limit > 239:
             _limit = 144
         rs = RadioSetting("limits.lower_vhf", "VHF Lower Limit (115-239 MHz)",
@@ -440,7 +440,7 @@ class UV3RRadio(chirp_common.CloneModeRadio):
         rs.set_apply_callback(apply_limit, self._memobj.limits)
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.upper_vhf) / 10
+        _limit = int(self._memobj.limits.upper_vhf) // 10
         if _limit < 115 or _limit > 239:
             _limit = 146
         rs = RadioSetting("limits.upper_vhf", "VHF Upper Limit (115-239 MHz)",
@@ -452,7 +452,7 @@ class UV3RRadio(chirp_common.CloneModeRadio):
         rs.set_apply_callback(apply_limit, self._memobj.limits)
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.lower_uhf) / 10
+        _limit = int(self._memobj.limits.lower_uhf) // 10
         if _limit < 200 or _limit > 529:
             _limit = 420
         rs = RadioSetting("limits.lower_uhf", "UHF Lower Limit (200-529 MHz)",
@@ -464,7 +464,7 @@ class UV3RRadio(chirp_common.CloneModeRadio):
         rs.set_apply_callback(apply_limit, self._memobj.limits)
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.upper_uhf) / 10
+        _limit = int(self._memobj.limits.upper_uhf) // 10
         if _limit < 200 or _limit > 529:
             _limit = 450
         rs = RadioSetting("limits.upper_uhf", "UHF Upper Limit (200-529 MHz)",
@@ -485,7 +485,7 @@ class UV3RRadio(chirp_common.CloneModeRadio):
             return chirp_common.format_freq(real_freq * 10)
 
         def apply_vhf_freq(setting, obj):
-            value = chirp_common.parse_freq(str(setting.value)) / 10
+            value = chirp_common.parse_freq(str(setting.value)) // 10
             obj.vhf.freq = value
 
         val = RadioSettingValueString(
@@ -506,7 +506,7 @@ class UV3RRadio(chirp_common.CloneModeRadio):
             return chirp_common.format_freq(real_offset * 10000)
 
         def apply_vhf_offset(setting, obj):
-            value = chirp_common.parse_freq(str(setting.value)) / 10000
+            value = chirp_common.parse_freq(str(setting.value)) // 10000
             obj.vhf.offset = value
 
         val = RadioSettingValueString(
@@ -532,7 +532,7 @@ class UV3RRadio(chirp_common.CloneModeRadio):
         vfo_preset.append(rs)
 
         def apply_uhf_freq(setting, obj):
-            value = chirp_common.parse_freq(str(setting.value)) / 10
+            value = chirp_common.parse_freq(str(setting.value)) // 10
             obj.uhf.freq = value
 
         val = RadioSettingValueString(
@@ -548,7 +548,7 @@ class UV3RRadio(chirp_common.CloneModeRadio):
         vfo_preset.append(rs)
 
         def apply_uhf_offset(setting, obj):
-            value = chirp_common.parse_freq(str(setting.value)) / 10000
+            value = chirp_common.parse_freq(str(setting.value)) // 10000
             obj.uhf.offset = value
 
         val = RadioSettingValueString(

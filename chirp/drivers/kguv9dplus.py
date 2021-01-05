@@ -445,7 +445,7 @@ def freq2short(val, min, max):
                                 (chirp_common.format_freq(_freq),
                                  chirp_common.format_freq(min),
                                  chirp_common.format_freq(max)))
-    return _freq/100000 & 0xFFFF
+    return _freq//100000 & 0xFFFF
 
 
 def short2freq(freq):
@@ -656,7 +656,7 @@ def _hex_print(data, addrfmt=None):
 
     block_size = 16
 
-    lines = (len(data) / block_size)
+    lines = (len(data) // block_size)
     if (len(data) % block_size > 0):
         lines += 1
 
@@ -1187,22 +1187,22 @@ class KGUV9DPlusRadio(chirp_common.CloneModeRadio,
         _nam = self._memobj.chan_name[number - 1]
 
         if mem.empty:
-            _mem.set_raw("\xFF" * (_mem.size() / 8))
+            _mem.set_raw("\xFF" * (_mem.size() // 8))
             _nam.name = str2name("", 8, '\0', '\0')
             _mem.state = MEM_INVALID
             return
 
-        _mem.rxfreq = int(mem.freq / 10)
+        _mem.rxfreq = int(mem.freq // 10)
         if mem.duplex == "off":
             _mem.txfreq = 0xFFFFFFFF
         elif mem.duplex == "split":
-            _mem.txfreq = int(mem.offset / 10)
+            _mem.txfreq = int(mem.offset // 10)
         elif mem.duplex == "+":
-            _mem.txfreq = int(mem.freq / 10) + int(mem.offset / 10)
+            _mem.txfreq = int(mem.freq // 10) + int(mem.offset // 10)
         elif mem.duplex == "-":
-            _mem.txfreq = int(mem.freq / 10) - int(mem.offset / 10)
+            _mem.txfreq = int(mem.freq // 10) - int(mem.offset // 10)
         else:
-            _mem.txfreq = int(mem.freq / 10)
+            _mem.txfreq = int(mem.freq // 10)
         _mem.scan = int(mem.skip != "S")
         if mem.mode == "FM":
             _mem.mod = 0    # make sure forced AM is off
@@ -1417,10 +1417,10 @@ class KGUV9DPlusRadio(chirp_common.CloneModeRadio,
             setting.value = pw2str(obj.reset)
 
         def apply_wake(setting, obj):
-            obj.wake = int(setting.value)/10
+            obj.wake = int(setting.value)//10
 
         def apply_sleep(setting, obj):
-            obj.sleep = int(setting.value)/10
+            obj.sleep = int(setting.value)//10
 
         pw = self._memobj.passwords  # admin passwords
         s = self._memobj.settings
@@ -1586,11 +1586,11 @@ class KGUV9DPlusRadio(chirp_common.CloneModeRadio,
         """
         def apply_freq(setting, lo, hi, obj):
             f = freq2int(setting.value, lo, hi)
-            obj.freq = f/10
+            obj.freq = f//10
 
         def apply_offset(setting, obj):
             f = freq2int(setting.value, 0, 5000000)
-            obj.offset = f/10
+            obj.offset = f//10
 
         def apply_enc(setting, obj):
             t = tone2short(setting.value)
@@ -1884,7 +1884,7 @@ class KGUV9DPlusRadio(chirp_common.CloneModeRadio,
                         LOG.debug("Setting %s = %s" %
                                   (setting, element.value))
                         if self._is_freq(element):
-                            setattr(obj, setting, int(element.value)/10)
+                            setattr(obj, setting, int(element.value)//10)
                         else:
                             setattr(obj, setting, element.value)
                 except Exception as e:

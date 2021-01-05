@@ -285,7 +285,7 @@ class VX5Radio(yaesu_clone.YaesuCloneModeRadio):
             self._wipe_memory_banks(mem)
             return
 
-        _mem.freq = int(mem.freq / 1000)
+        _mem.freq = int(mem.freq // 1000)
         _mem.duplex = DUPLEX.index(mem.duplex)
         _mem.name = mem.name.ljust(8)
         if mem.mode == "NFM":
@@ -295,7 +295,7 @@ class VX5Radio(yaesu_clone.YaesuCloneModeRadio):
             _mem.mode = MODES.index(mem.mode)
             _mem.half_deviation = 0
         _mem.tuning_step = STEPS.index(mem.tuning_step)
-        _mem.offset = int(mem.offset / 1000)
+        _mem.offset = int(mem.offset // 1000)
         if mem.power:
             _mem.power = 3 - POWER_LEVELS.index(mem.power)
         else:

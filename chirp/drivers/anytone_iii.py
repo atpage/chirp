@@ -511,9 +511,9 @@ def _should_send_addr(memobj, addr):
         return False
     # Skip unused memories
     if addr >= 0x2000 and addr < 0x7dc0:
-        return _is_chan_used(memobj, int((addr - 0x2000) / 0x20))
+        return _is_chan_used(memobj, int((addr - 0x2000) // 0x20))
     if addr >= 0x7dc0 and addr < 0x7f00:
-        return _is_limit_chan_used(memobj, int((addr - 0x7dc0) / 0x20))
+        return _is_limit_chan_used(memobj, int((addr - 0x7dc0) // 0x20))
     return True
 
 
@@ -776,7 +776,7 @@ def _dtmf_decode(dtmf_bytes, num_tones):
     dtmf_str = ""
     x = 1
     while (x <= num_tones):
-        _byte = dtmf_bytes[(x-1)/2]
+        _byte = dtmf_bytes[(x-1)//2]
         dtmf_str += DTMF_CHARS[_byte >> 4]
         x += 1
         if (x <= num_tones):
@@ -1123,7 +1123,7 @@ class AnyTone5888UVIIIRadio(chirp_common.CloneModeRadio,
                         _flg.left_only = 0
                         break
 
-        _mem.offset = mem.offset / 100
+        _mem.offset = mem.offset // 100
 
         if is_hyper_chan:
             mem.name = SEVEN_SPACES
@@ -1773,7 +1773,7 @@ class AnyTone5888UVIIIRadio(chirp_common.CloneModeRadio,
                 RadioSettingValueFloat(
                     0,
                     25,
-                    _settings.dtmf_auto_rst_time / 10,
+                    _settings.dtmf_auto_rst_time // 10,
                     0.1,
                     1)))
         dtmfGroup.append(
@@ -1970,7 +1970,7 @@ class AnyTone5888UVIIIRadio(chirp_common.CloneModeRadio,
                         if int(element.value) != 6
                         else 0xff)
             elif name == "dtmf_first_dig_time" or name == "dtmf_enc_delay":
-                setattr(self._memobj.settings, name, int(element.value) / 10)
+                setattr(self._memobj.settings, name, int(element.value) // 10)
             elif name == "dtmf_auto_rst_time":
                 setattr(self._memobj.settings, name, int(element.value) * 10)
             elif name == "dtmf_self_id":

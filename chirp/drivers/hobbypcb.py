@@ -127,13 +127,13 @@ class HobbyPCBRSUV3Radio(chirp_common.LiveRadio):
         else:
             tone = mem.ctone * 100
         if mem.duplex == '+':
-            self._cmd('FT%06i' % ((mem.freq + mem.offset) / 1000))
-            self._cmd('FR%06i' % (mem.freq / 1000))
+            self._cmd('FT%06i' % ((mem.freq + mem.offset) // 1000))
+            self._cmd('FR%06i' % (mem.freq // 1000))
         elif mem.duplex == '-':
-            self._cmd('FT%06i' % ((mem.freq - mem.offset) / 1000))
-            self._cmd('FR%06i' % (mem.freq / 1000))
+            self._cmd('FT%06i' % ((mem.freq - mem.offset) // 1000))
+            self._cmd('FR%06i' % (mem.freq // 1000))
         else:
-            self._cmd('FS%06i' % (mem.freq / 1000))
+            self._cmd('FS%06i' % (mem.freq // 1000))
         self._cmd('TM%i' % TONE_MODES.index(mem.tmode))
         self._cmd('TF%05i' % tone)
         self._cmd('PW%i' % POWER_LEVELS.index(mem.power))

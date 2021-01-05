@@ -560,14 +560,14 @@ class GMRSV1(baofeng_common.BaofengCommonHT):
 
         _mem.set_raw("\x00" * 16)
 
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
 
         if str(self._memobj.firmware_msg.line1) in self._is_orig:
             if mem.number > 22:
-                _mem.txfreq = mem.freq / 10
+                _mem.txfreq = mem.freq // 10
         else:
             if mem.number < 1 or mem.number > 22:
-                _mem.txfreq = mem.freq / 10
+                _mem.txfreq = mem.freq // 10
 
         _namelength = self.get_features().valid_name_length
         for i in range(_namelength):
@@ -922,10 +922,10 @@ class GMRSV1(baofeng_common.BaofengCommonHT):
             return chirp_common.format_freq(value)
 
         def apply_freq(setting, obj):
-            value = chirp_common.parse_freq(str(setting.value)) / 10
+            value = chirp_common.parse_freq(str(setting.value)) // 10
             for i in range(7, -1, -1):
                 obj.freq[i] = value % 10
-                value /= 10
+                value //= 10
 
         val1a = RadioSettingValueString(0, 10,
                                         convert_bytes_to_freq(_mem.vfo.a.freq))

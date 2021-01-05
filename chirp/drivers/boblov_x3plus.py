@@ -313,10 +313,10 @@ class BoblovX3Plus(chirp_common.CloneModeRadio,
         rmem = self._memobj.memory[memory.number - 1]
 
         if memory.empty:
-            rmem.set_raw('\xFF' * (rmem.size() / 8))
+            rmem.set_raw('\xFF' * (rmem.size() // 8))
             return
 
-        rmem.rxfreq = memory.freq / 10
+        rmem.rxfreq = memory.freq // 10
 
         set_txtone = True
         if memory.duplex == 'off':
@@ -326,13 +326,13 @@ class BoblovX3Plus(chirp_common.CloneModeRadio,
                 self._encode_tone(rmem.txtone, mode='', value=None, pol=None)
                 set_txtone = False
         elif memory.duplex == 'split':
-            rmem.txfreq = memory.offset / 10
+            rmem.txfreq = memory.offset // 10
         elif memory.duplex == '+':
-            rmem.txfreq = (memory.freq + memory.offset) / 10
+            rmem.txfreq = (memory.freq + memory.offset) // 10
         elif memory.duplex == '-':
-            rmem.txfreq = (memory.freq - memory.offset) / 10
+            rmem.txfreq = (memory.freq - memory.offset) // 10
         else:
-            rmem.txfreq = memory.freq / 10
+            rmem.txfreq = memory.freq // 10
 
         txtone, rxtone = chirp_common.split_tone_encode(memory)
         if set_txtone:

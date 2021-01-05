@@ -452,11 +452,11 @@ class BaojieBJUV55Radio(uv5r.BaofengUV5R):
             return chirp_common.format_freq(value)
 
         def apply_freq(setting, obj):
-            value = chirp_common.parse_freq(str(setting.value)) / 10
+            value = chirp_common.parse_freq(str(setting.value)) // 10
             obj.band = value >= 40000000
             for i in range(7, -1, -1):
                 obj.freq[i] = value % 10
-                value /= 10
+                value //= 10
 
         val1a = RadioSettingValueString(
                 0, 10, convert_bytes_to_freq(self._memobj.vfoa.freq))
@@ -490,10 +490,10 @@ class BaojieBJUV55Radio(uv5r.BaofengUV5R):
             return chirp_common.format_freq(real_offset * 10000)
 
         def apply_offset(setting, obj):
-            value = chirp_common.parse_freq(str(setting.value)) / 10000
+            value = chirp_common.parse_freq(str(setting.value)) // 10000
             for i in range(3, -1, -1):
                 obj.offset[i] = value % 10
-                value /= 10
+                value //= 10
 
         val1a = RadioSettingValueString(
                 0, 10, convert_bytes_to_offset(self._memobj.vfoa.offset))

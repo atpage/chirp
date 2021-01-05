@@ -101,7 +101,7 @@ def _upload(radio):
         raise Exception("Radio did not ack ID")
 
     block = 0
-    while block < (radio.get_memsize() / 32):
+    while block < (radio.get_memsize() // 32):
         data = "\x0C\x03\x00\x00" + chr(block)
         data += radio.get_mmap()[block*32:(block+1)*32]
         cs = 0
@@ -253,15 +253,15 @@ class FT2800Radio(YaesuCloneModeRadio):
         _nam = self._memobj.names[mem.number]
 
         if mem.empty:
-            _mem.set_raw("\xFF" * (_mem.size() / 8))
+            _mem.set_raw("\xFF" * (_mem.size() // 8))
             return
 
         if _mem.get_raw()[0] == "\xFF":
             # Emtpy -> Non-empty, so initialize
-            _mem.set_raw("\x00" * (_mem.size() / 8))
+            _mem.set_raw("\x00" * (_mem.size() // 8))
 
-        _mem.freq = mem.freq / 10
-        _mem.offset = mem.offset / 100000
+        _mem.freq = mem.freq // 10
+        _mem.offset = mem.offset // 100000
         _mem.duplex = DUPLEX.index(mem.duplex)
         _mem.tmode = TMODES.index(mem.tmode)
         _mem.tone = chirp_common.TONES.index(mem.rtone)

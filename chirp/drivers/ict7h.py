@@ -106,14 +106,14 @@ class ICT7HRadio(icf.IcomCloneModeRadio):
         _mem = self._memobj.memory[mem.number - 1]
         _flag = self._memobj.flags[mem.number - 1]
 
-        _mem.freq = int(mem.freq / 100000)
-        topfreq = int(mem.freq / 100000) * 100000
+        _mem.freq = int(mem.freq // 100000)
+        topfreq = int(mem.freq // 100000) * 100000
         lastfreq = int((mem.freq - topfreq) / 10000)
         _mem.lastfreq = lastfreq
         midfreq = (mem.freq - topfreq - lastfreq * 10000)
-        _mem.fraction = midfreq / 500
+        _mem.fraction = midfreq // 500
 
-        _mem.offset = mem.offset / 10000
+        _mem.offset = mem.offset // 10000
         _mem.rtone = chirp_common.TONES.index(mem.rtone) + 1
         _mem.ctone = chirp_common.TONES.index(mem.ctone) + 1
         _flag.tmode = TMODES.index(mem.tmode)

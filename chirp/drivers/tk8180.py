@@ -863,7 +863,7 @@ class KenwoodTKx180Radio(chirp_common.CloneModeRadio):
                                                      None))
 
         def apply_it(setting):
-            settings.ignition_time = int(setting.value) / 600
+            settings.ignition_time = int(setting.value) // 600
 
         _it = int(settings.ignition_time) * 600
         it = RadioSetting(

@@ -163,8 +163,8 @@ class ICW32ARadio(icf.IcomCloneModeRadio):
         if mem.empty:
             return
 
-        _mem.freq = mem.freq / 1000
-        _mem.offset = mem.offset / 100
+        _mem.freq = mem.freq // 1000
+        _mem.offset = mem.offset // 100
         if mem.name:
             _mem.name = mem.name.ljust(8)[:8]
         else:

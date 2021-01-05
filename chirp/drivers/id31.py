@@ -143,8 +143,8 @@ def _set_freq(_mem, freq, offset):
         mult = 5000
         flag = 0x00000000
 
-    _mem.freq = (freq / mult) | flag
-    _mem.offset = (offset / mult)
+    _mem.freq = (freq // mult) | flag
+    _mem.offset = (offset // mult)
 
 
 class ID31Bank(icf.IcomBank):
@@ -220,9 +220,9 @@ class ID31Radio(icf.IcomCloneModeRadio, chirp_common.IcomDstarSupport):
 
     def get_memory(self, number):
         _mem = self._memobj.memory[number]
-        _usd = self._memobj.used_flags[number / 8]
-        _skp = self._memobj.skip_flags[number / 8]
-        _psk = self._memobj.pskp_flags[number / 8]
+        _usd = self._memobj.used_flags[number // 8]
+        _skp = self._memobj.skip_flags[number // 8]
+        _psk = self._memobj.pskp_flags[number // 8]
 
         bit = (1 << (number % 8))
 
@@ -261,9 +261,9 @@ class ID31Radio(icf.IcomCloneModeRadio, chirp_common.IcomDstarSupport):
 
     def set_memory(self, memory):
         _mem = self._memobj.memory[memory.number]
-        _usd = self._memobj.used_flags[memory.number / 8]
-        _skp = self._memobj.skip_flags[memory.number / 8]
-        _psk = self._memobj.pskp_flags[memory.number / 8]
+        _usd = self._memobj.used_flags[memory.number // 8]
+        _skp = self._memobj.skip_flags[memory.number // 8]
+        _psk = self._memobj.pskp_flags[memory.number // 8]
 
         bit = (1 << (memory.number % 8))
 

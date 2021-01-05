@@ -470,19 +470,19 @@ class IP620Radio(chirp_common.CloneModeRadio,
     def set_memory(self, mem):
         _mem = self._memobj.memory[mem.number - 1]
         if mem.empty:
-            _mem.set_raw("\xFF" * (_mem.size() / 8))
+            _mem.set_raw("\xFF" * (_mem.size() // 8))
             return
 
-        _mem.rx_freq = mem.freq / 10
+        _mem.rx_freq = mem.freq // 10
         if mem.duplex == "OFF":
             for i in range(0, 4):
                 _mem.tx_freq[i].set_raw("\xFF")
         elif mem.duplex == "+":
-            _mem.tx_freq = (mem.freq + mem.offset) / 10
+            _mem.tx_freq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.tx_freq = (mem.freq - mem.offset) / 10
+            _mem.tx_freq = (mem.freq - mem.offset) // 10
         else:
-            _mem.tx_freq = mem.freq / 10
+            _mem.tx_freq = mem.freq // 10
 
         _mem.w_n = mem.mode == "FM"
         self._set_tone(mem, _mem)

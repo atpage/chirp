@@ -146,12 +146,12 @@ def _decode_freq(freq, mult):
 def _encode_freq(freq):
     for i, step in list(enumerate(FREQ_MULTIPLIER)):
         if freq % step == 0:
-            return freq / step, i
+            return freq // step, i
     raise ValueError("%d cannot be factored by multiplier table." % freq)
 
 
 def _wipe_memory(mem, char):
-    mem.set_raw(char * (mem.size() / 8))
+    mem.set_raw(char * (mem.size() // 8))
 
 
 class ID880Bank(icf.IcomNamedBank):
@@ -237,7 +237,7 @@ class ID880Radio(icf.IcomCloneModeRadio, chirp_common.IcomDstarSupport):
         return repr(self._memobj.memory[number])
 
     def get_memory(self, number):
-        bytepos = number / 8
+        bytepos = number // 8
         bitpos = 1 << (number % 8)
 
         _mem = self._memobj.memory[number]
@@ -288,7 +288,7 @@ class ID880Radio(icf.IcomCloneModeRadio, chirp_common.IcomDstarSupport):
 
     def set_memory(self, mem):
         bitpos = (1 << (mem.number % 8))
-        bytepos = mem.number / 8
+        bytepos = mem.number // 8
 
         _mem = self._memobj.memory[mem.number]
         _used = self._memobj.used_flags[bytepos]

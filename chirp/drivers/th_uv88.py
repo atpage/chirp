@@ -361,7 +361,7 @@ def _download(radio):
         data += d[11:-2]
 
         # UI Update
-        status.cur = addr / BLOCK_SIZE
+        status.cur = addr // BLOCK_SIZE
         status.msg = "Cloning from radio..."
         radio.status_fn(status)
 
@@ -414,7 +414,7 @@ def _upload(radio):
             raise errors.RadioError(msg)
 
         # UI Update
-        status.cur = addr / BLOCK_SIZE
+        status.cur = addr // BLOCK_SIZE
         status.msg = "Cloning to radio..."
         radio.status_fn(status)
 
@@ -425,7 +425,7 @@ def _do_map(chn, sclr, mary):
     """Set or Clear the chn (1-128) bit in mary[] word array map"""
     # chn is 1-based channel, sclr:1 = set, 0= = clear, 2= return state
     # mary[] is u8 array, but the map is by nibbles
-    ndx = int(math.floor((chn - 1) / 8))
+    ndx = int(math.floor((chn - 1) // 8))
     bv = (chn - 1) % 8
     msk = 1 << bv
     mapbit = sclr
@@ -683,13 +683,13 @@ class THUV88Radio(chirp_common.CloneModeRadio):
     def _set_memory(self, mem, _mem, _name):
         # """Convert UI column data (mem) into MEM_FORMAT memory (_mem)."""
 
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
         if mem.duplex == "off":
             _mem.txfreq = 0xFFFFFFFF
         elif mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) / 10
+            _mem.txfreq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) / 10
+            _mem.txfreq = (mem.freq - mem.offset) // 10
         else:
             _mem.txfreq = _mem.rxfreq
 

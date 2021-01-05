@@ -290,8 +290,8 @@ class ID800v2Radio(icf.IcomCloneModeRadio, chirp_common.IcomDstarSupport):
 
         mult = chirp_common.is_fractional_step(mem.freq) and 6250 or 5000
         _mem.mult_flag = mult == 6250
-        _mem.freq = mem.freq / mult
-        _mem.offset = mem.offset / 5000
+        _mem.freq = mem.freq // mult
+        _mem.offset = mem.offset // 5000
         _mem.duplex = DUPLEX.index(mem.duplex)
         _mem.mode = MODES.index(mem.mode)
         _mem.tmode = TMODES.index(mem.tmode)

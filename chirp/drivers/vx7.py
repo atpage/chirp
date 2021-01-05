@@ -170,7 +170,7 @@ class VX7BankModel(chirp_common.BankModel):
 
 
 def _wipe_memory(mem):
-    mem.set_raw("\x00" * (mem.size() / 8))
+    mem.set_raw("\x00" * (mem.size() // 8))
     mem.unknown1 = 0x05
     mem.ones = 0x03
 
@@ -238,7 +238,7 @@ class VX7Radio(yaesu_clone.YaesuCloneModeRadio):
 
     def get_memory(self, number):
         _mem = self._memobj.memory[number-1]
-        _flag = self._memobj.flags[(number-1)/2]
+        _flag = self._memobj.flags[(number-1)//2]
 
         nibble = ((number-1) % 2) and "even" or "odd"
         used = _flag["%s_masked" % nibble]
@@ -293,7 +293,7 @@ class VX7Radio(yaesu_clone.YaesuCloneModeRadio):
 
     def set_memory(self, mem):
         _mem = self._memobj.memory[mem.number-1]
-        _flag = self._memobj.flags[(mem.number-1)/2]
+        _flag = self._memobj.flags[(mem.number-1)//2]
 
         nibble = ((mem.number-1) % 2) and "even" or "odd"
 
@@ -314,8 +314,8 @@ class VX7Radio(yaesu_clone.YaesuCloneModeRadio):
 
         _flag["%s_valid" % nibble] = True
 
-        _mem.freq = mem.freq / 1000
-        _mem.offset = mem.offset / 1000
+        _mem.freq = mem.freq // 1000
+        _mem.offset = mem.offset // 1000
         _mem.tone = chirp_common.TONES.index(mem.rtone)
         if mem.tmode != "Cross":
             _mem.is_split_tone = 0

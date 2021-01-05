@@ -332,24 +332,24 @@ class Th350Radio(BaofengUVB5):
             # D754I -> 0xc7 0x54
             # Yes. Decimal digits as hex. You're seeing that right.
             # No idea why TYT engineers would do something like that.
-            pold = tonea / 16
+            pold = tonea // 16
             if pold not in [0x8, 0xc]:
                 LOG.warn("Bug: tone is %04x %04x" % (tonea, toneb))
                 mode = val = pol = None
             else:
                 mode = 'DTCS'
                 val = (tonea % 16) * 100 + \
-                    toneb / 16 * 10 + \
+                    toneb // 16 * 10 + \
                     (toneb % 16)
                 pol = 'N' if pold == 8 else 'R'
         else:
             # Tone
             # 107.2 -> 0x10 0x72. Seriously.
             mode = 'Tone'
-            val = tonea / 16 * 100 + \
+            val = tonea // 16 * 100 + \
                 (tonea % 16) * 10 + \
-                toneb / 16 + \
-                float(toneb % 16) / 10
+                toneb // 16 + \
+                float(toneb % 16) // 10
             pol = None
 
         return mode, val, pol
@@ -360,8 +360,8 @@ class Th350Radio(BaofengUVB5):
 
         if mode == "Tone":
             tonea = int(
-                        floor(val / 100) * 16 +
-                        floor(val / 10) % 10
+                        floor(val // 100) * 16 +
+                        floor(val // 10) % 10
                     )
             toneb = int(
                         floor(val % 10) * 16 +
@@ -369,8 +369,8 @@ class Th350Radio(BaofengUVB5):
                     )
         elif mode == "DTCS":
             tonea = (0x80 if pol == 'N' else 0xc0) + \
-                val / 100
-            toneb = (val / 10) % 10 * 16 + \
+                val // 100
+            toneb = (val // 10) % 10 * 16 + \
                 val % 10
         else:
             tonea = toneb = 0xff

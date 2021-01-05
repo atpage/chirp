@@ -211,7 +211,7 @@ class ICV86Radio(icf.IcomCloneModeRadio):
 
     def _get_memory(self, number):
         bit = 1 << (number % 8)
-        byte = int(number / 8)
+        byte = int(number // 8)
 
         mem = chirp_common.Memory()
         mem.number = number
@@ -273,7 +273,7 @@ class ICV86Radio(icf.IcomCloneModeRadio):
 
     def _set_memory(self, mem):
         bit = 1 << (mem.number % 8)
-        byte = int(mem.number / 8)
+        byte = int(mem.number // 8)
 
         _mem = self._memobj.memory[mem.number]
         _usd = self._memobj.used[byte] if mem.number <= 206 else None

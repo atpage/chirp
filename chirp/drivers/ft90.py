@@ -400,7 +400,7 @@ struct  {
         mem.dtcs = chirp_common.DTCS_CODES[_mem.dcstone]
         mem.mode = FT90_MODES[_mem.mode]
         mem.duplex = FT90_DUPLEX[_mem.shift]
-        if mem.freq / 1000000 > 300:
+        if mem.freq // 1000000 > 300:
             mem.power = FT90_POWER_LEVELS_UHF[_mem.power]
         else:
             mem.power = FT90_POWER_LEVELS_VHF[_mem.power]
@@ -437,7 +437,7 @@ struct  {
             _mem.step = 2
         else:
             _mem.step = FT90_STEPS.index(mem.tuning_step)
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
         # vfo will unlock if not in right band?
         if mem.freq > 300000000:
             # uhf
@@ -453,7 +453,7 @@ struct  {
             _mem.isUhf1 = 0
             _mem.isUhf2 = 0
             _mem.isUhfHi = 0
-        _mem.txfreqoffset = mem.offset / 10
+        _mem.txfreqoffset = mem.offset // 10
         _mem.tone = FT90_TONES.index(mem.rtone)
         _mem.tmode = FT90_TMODES.index(mem.tmode)
         _mem.mode = FT90_MODES.index(mem.mode)

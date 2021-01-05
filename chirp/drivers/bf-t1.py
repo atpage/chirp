@@ -303,7 +303,7 @@ def _download(radio):
         data += d
 
         # UI Update
-        status.cur = addr / BLOCK_SIZE
+        status.cur = addr // BLOCK_SIZE
         status.msg = "Cloning from radio..."
         radio.status_fn(status)
 
@@ -328,7 +328,7 @@ def _upload(radio):
     data = radio.get_mmap()
 
     # Reset the UI progress
-    status.max = WRITE_SIZE / BLOCK_SIZE
+    status.max = WRITE_SIZE // BLOCK_SIZE
     status.cur = 0
     status.msg = "Cloning to radio..."
     radio.status_fn(status)
@@ -358,7 +358,7 @@ def _upload(radio):
             raise errors.RadioError("Bad ACK writing block 0x%04x:" % addr)
 
         # UI Update
-        status.cur = addr / BLOCK_SIZE
+        status.cur = addr // BLOCK_SIZE
         status.msg = "Cloning to radio..."
         radio.status_fn(status)
 
@@ -698,10 +698,10 @@ class BFT1(chirp_common.CloneModeRadio, chirp_common.ExperimentalRadio):
             return mem
 
         # frequency
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
 
         # duplex/ offset Offset is an absolute value
-        _mem.txoffset = mem.offset / 10
+        _mem.txoffset = mem.offset // 10
 
         # must work out the polarity
         if mem.duplex == "":
@@ -717,11 +717,11 @@ class BFT1(chirp_common.CloneModeRadio, chirp_common.ExperimentalRadio):
             if mem.freq > mem.offset:
                 _mem.offplus = 0
                 _mem.offminus = 1
-                _mem.txoffset = (mem.freq - mem.offset) / 10
+                _mem.txoffset = (mem.freq - mem.offset) // 10
             else:
                 _mem.offplus = 1
                 _mem.offminus = 0
-                _mem.txoffset = (mem.offset - mem.freq) / 10
+                _mem.txoffset = (mem.offset - mem.freq) // 10
 
         # wide/narrow
         _mem.wide = MODES.index(mem.mode)
@@ -843,25 +843,25 @@ class BFT1(chirp_common.CloneModeRadio, chirp_common.ExperimentalRadio):
 
         rs = RadioSetting("vhfl", "VHF Low Limit",
                           RadioSettingValueInteger(130, 174, int(
-                              _settings.vhfl) / 10))
+                              _settings.vhfl) // 10))
         rs.set_apply_callback(apply_limit, _settings)
         adv.append(rs)
 
         rs = RadioSetting("vhfh", "VHF High Limit",
                           RadioSettingValueInteger(130, 174, int(
-                              _settings.vhfh) / 10))
+                              _settings.vhfh) // 10))
         rs.set_apply_callback(apply_limit, _settings)
         adv.append(rs)
 
         rs = RadioSetting("uhfl", "UHF Low Limit",
                           RadioSettingValueInteger(400, 520, int(
-                              _settings.uhfl) / 10))
+                              _settings.uhfl) // 10))
         rs.set_apply_callback(apply_limit, _settings)
         adv.append(rs)
 
         rs = RadioSetting("uhfh", "UHF High Limit",
                           RadioSettingValueInteger(400, 520, int(
-                              _settings.uhfh) / 10))
+                              _settings.uhfh) // 10))
         rs.set_apply_callback(apply_limit, _settings)
         adv.append(rs)
 

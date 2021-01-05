@@ -424,7 +424,7 @@ class RadioddityR2(chirp_common.CloneModeRadio):
 
     def get_memory(self, number):
         bitpos = (1 << ((number - 1) % 8))
-        bytepos = ((number - 1) / 8)
+        bytepos = ((number - 1) // 8)
         LOG.debug("bitpos %s" % bitpos)
         LOG.debug("bytepos %s" % bytepos)
 
@@ -494,7 +494,7 @@ class RadioddityR2(chirp_common.CloneModeRadio):
 
     def set_memory(self, mem):
         bitpos = (1 << ((mem.number - 1) % 8))
-        bytepos = ((mem.number - 1) / 8)
+        bytepos = ((mem.number - 1) // 8)
         LOG.debug("bitpos %s" % bitpos)
         LOG.debug("bytepos %s" % bytepos)
 
@@ -505,17 +505,17 @@ class RadioddityR2(chirp_common.CloneModeRadio):
         if mem.empty:
             return
 
-        _mem.rx_freq = mem.freq / 10
+        _mem.rx_freq = mem.freq // 10
 
         if mem.duplex == "off":
             for i in range(0, 4):
                 _mem.tx_freq[i].set_raw("\xFF")
         elif mem.duplex == "+":
-            _mem.tx_freq = (mem.freq + mem.offset) / 10
+            _mem.tx_freq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.tx_freq = (mem.freq - mem.offset) / 10
+            _mem.tx_freq = (mem.freq - mem.offset) // 10
         else:
-            _mem.tx_freq = mem.freq / 10
+            _mem.tx_freq = mem.freq // 10
 
         # power, default power is low
         if mem.power:

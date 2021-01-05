@@ -145,7 +145,7 @@ def _upload(radio):
     for byte in radio.IDBLOCK:
         cs += ord(byte)
 
-    while block < (radio.get_memsize() / 32):
+    while block < (radio.get_memsize() // 32):
         data = radio.get_mmap()[block * 32:(block + 1) * 32]
 
         LOG.debug("Writing block %i:\n%s" % (block, util.hexprint(data)))
@@ -395,7 +395,7 @@ def _encode_name(mem):
 
 
 def _wipe_memory(mem):
-    mem.set_raw("\xff" * (mem.size() / 8))
+    mem.set_raw("\xff" * (mem.size() // 8))
 
 
 class FT2900Bank(chirp_common.NamedBank):
@@ -561,7 +561,7 @@ class FT2900Radio(YaesuCloneModeRadio):
 
     def get_memory(self, number):
         _mem = self._memobj.memory[number]
-        _flag = self._memobj.flags[(number) / 2]
+        _flag = self._memobj.flags[(number) // 2]
 
         nibble = ((number) % 2) and "even" or "odd"
         used = _flag["%s_masked" % nibble]
@@ -625,7 +625,7 @@ class FT2900Radio(YaesuCloneModeRadio):
 
     def set_memory(self, mem):
         _mem = self._memobj.memory[mem.number]
-        _flag = self._memobj.flags[(mem.number) / 2]
+        _flag = self._memobj.flags[(mem.number) // 2]
 
         nibble = ((mem.number) % 2) and "even" or "odd"
 
@@ -646,8 +646,8 @@ class FT2900Radio(YaesuCloneModeRadio):
 
         _flag["%s_valid" % nibble] = True
 
-        _mem.freq = mem.freq / 1000
-        _mem.offset = mem.offset / 1000
+        _mem.freq = mem.freq // 1000
+        _mem.offset = mem.offset // 1000
         _mem.duplex = DUPLEX.index(mem.duplex)
 
         # clear all the split tone flags -- we'll set them as needed below

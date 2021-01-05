@@ -472,7 +472,7 @@ class AnyToneTERMN8RRadio(chirp_common.CloneModeRadio,
 
     def get_memory(self, number):
         bitpos = (1 << (number % 8))
-        bytepos = (number / 8)
+        bytepos = (number // 8)
 
         _mem = self._memobj.memory[number]
         _skp = self._memobj.skip_flags[bytepos]
@@ -543,7 +543,7 @@ class AnyToneTERMN8RRadio(chirp_common.CloneModeRadio,
 
     def set_memory(self, mem):
         bitpos = (1 << (mem.number % 8))
-        bytepos = (mem.number / 8)
+        bytepos = (mem.number // 8)
 
         _mem = self._memobj.memory[mem.number]
         _skp = self._memobj.skip_flags[bytepos]
@@ -561,7 +561,7 @@ class AnyToneTERMN8RRadio(chirp_common.CloneModeRadio,
             _mem.set_raw("\x00" * 32)
             _mem.squelch = 3
 
-        _mem.freq = mem.freq / 100
+        _mem.freq = mem.freq // 100
 
         if mem.duplex == "off":
             _mem.duplex = DUPLEXES.index("")
@@ -571,9 +571,9 @@ class AnyToneTERMN8RRadio(chirp_common.CloneModeRadio,
             diff = mem.offset - mem.freq
             _mem.duplex = DUPLEXES.index("-") if diff < 0 \
                 else DUPLEXES.index("+")
-            _mem.offset = abs(diff) / 100
+            _mem.offset = abs(diff) // 100
         else:
-            _mem.offset = mem.offset / 100
+            _mem.offset = mem.offset // 100
             _mem.duplex = DUPLEXES.index(mem.duplex)
 
         _mem.name = mem.name.ljust(6)

@@ -211,8 +211,8 @@ class FT1500Radio(yaesu_clone.YaesuCloneModeRadio):
 
         _flag["valid"] = True
 
-        _mem.freq = mem.freq / 1000
-        _mem.offset = mem.offset / 100000
+        _mem.freq = mem.freq // 1000
+        _mem.offset = mem.offset // 100000
         _mem.duplex = DUPLEX.index(mem.duplex)
         _mem.tune_step = STEPS.index(mem.tuning_step)
         _mem.tmode = TMODES.index(mem.tmode)

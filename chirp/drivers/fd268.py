@@ -486,18 +486,18 @@ class FeidaxinFD2x8yRadio(chirp_common.CloneModeRadio):
             return
 
         # freq rx
-        _mem.rx_freq = mem.freq / 10
+        _mem.rx_freq = mem.freq // 10
 
         # freq tx
         if mem.duplex == "+":
-            _mem.tx_freq = (mem.freq + mem.offset) / 10
+            _mem.tx_freq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.tx_freq = (mem.freq - mem.offset) / 10
+            _mem.tx_freq = (mem.freq - mem.offset) // 10
         elif mem.duplex == "off":
             for i in range(0, 4):
                 _mem.tx_freq[i].set_raw("\xFF")
         else:
-            _mem.tx_freq = mem.freq / 10
+            _mem.tx_freq = mem.freq // 10
 
         # tone data
         ((txmode, txtone, txpol), (rxmode, rxtone, rxpol)) = \
@@ -593,7 +593,7 @@ class FeidaxinFD2x8yRadio(chirp_common.CloneModeRadio):
         def apply_freq(setting, obj):
             """Setting is the UI returned value, obj is the memmap object"""
             value = chirp_common.parse_freq(str(setting.value))
-            obj.set_value(value / 10)
+            obj.set_value(value // 10)
 
         # preparing for callback on vrxfreq (handled also in a special )
         vf_freq = RadioSetting("none.vrx_freq", "VFO frequency",
@@ -676,13 +676,13 @@ class FeidaxinFD2x8yRadio(chirp_common.CloneModeRadio):
 
             if shift == "None" or shift == "":
                 # no shift
-                _vfo.vtx_freq = rx / 10
+                _vfo.vtx_freq = rx // 10
             if shift == "-":
                 # minus shift
-                _vfo.vtx_freq = (rx - offset) / 10
+                _vfo.vtx_freq = (rx - offset) // 10
             if shift == "+":
                 # plus shift
-                _vfo.vtx_freq = (rx + offset) / 10
+                _vfo.vtx_freq = (rx + offset) // 10
 
         # special case: narrow/wide at radio level and display icon
         def handle_width(_settings, settings):

@@ -972,7 +972,7 @@ class KenwoodTMx710Radio(chirp_common.CloneModeRadio):
         # ===== Prog VFO Group =============
         for mx in range(0, 10):
             # Raw freq is 0.1 Mhz resolution
-            vfx = int(_pmg[0].progvfo[mx].blow) / mhz1
+            vfx = int(_pmg[0].progvfo[mx].blow) // mhz1
             if vfx == 0:
                 vfx = 118
             rx = RadioSettingValueFloat(118.0, 1299.9, vfx, 0.005, 3)
@@ -981,7 +981,7 @@ class KenwoodTMx710Radio(chirp_common.CloneModeRadio):
             rset.set_apply_callback(_mhz_val, _pmg, "progvfo.blow", 0, mx)
             pvfo.append(rset)
 
-            vfx = int(_pmg[0].progvfo[mx].bhigh) / mhz1
+            vfx = int(_pmg[0].progvfo[mx].bhigh) // mhz1
             if vfx == 0:
                 vfx = 118
             rx = RadioSettingValueFloat(118.0, 1300.0, vfx, 0.005, 3)

@@ -696,7 +696,7 @@ class FT857Radio(ft817.FT817Radio):
                                                 options[_settings.cw_training])
                           )
         cw.append(rs)
-        options = ["1:%1.1f" % (i / 10) for i in range(25, 46, 1)]
+        options = ["1:%1.1f" % (i // 10) for i in range(25, 46, 1)]
         rs = RadioSetting("cw_weight", "CW weight",
                           RadioSettingValueList(options,
                                                 options[_settings.cw_weight]))
@@ -1084,7 +1084,7 @@ class FT857Radio(ft817.FT817Radio):
                              for x in str(element.value)])
                 elif setting == "cw_delay":
                     val = int(element.value) + 2
-                    setattr(obj, "cw_delay_hi", val / 256)
+                    setattr(obj, "cw_delay_hi", val // 256)
                     setattr(obj, setting, val & 0xff)
                 elif setting == "dig_vox":
                     val = int(element.value)

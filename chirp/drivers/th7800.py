@@ -218,7 +218,7 @@ class TYTTH7800Base(chirp_common.Radio):
         """get active flag for channel active,
         scan enable, or priority banks"""
         bank = getattr(self._memobj, banktype)
-        index = (num - 1) / 8
+        index = (num - 1) // 8
         bitpos = (num - 1) % 8
         mask = 2**bitpos
         enabled = bank[index] & mask
@@ -231,7 +231,7 @@ class TYTTH7800Base(chirp_common.Radio):
         """set active flag for channel active,
         scan enable, or priority banks"""
         bank = getattr(self._memobj, banktype)
-        index = (num - 1) / 8
+        index = (num - 1) // 8
         bitpos = (num - 1) % 8
         mask = 2**bitpos
         if enable:
@@ -321,18 +321,18 @@ class TYTTH7800Base(chirp_common.Radio):
         if mem.empty:
             return
 
-        _mem.rx_freq = mem.freq / 10
+        _mem.rx_freq = mem.freq // 10
         if mem.duplex == "split":
-            _mem.tx_freq = mem.offset / 10
+            _mem.tx_freq = mem.offset // 10
         elif mem.duplex == "-":
-            _mem.tx_freq = (mem.freq - mem.offset) / 10
+            _mem.tx_freq = (mem.freq - mem.offset) // 10
         elif mem.duplex == "+":
-            _mem.tx_freq = (mem.freq + mem.offset) / 10
+            _mem.tx_freq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "off":
             _mem.tx_freq = 0
             _mem.offset = 0
         else:
-            _mem.tx_freq = mem.freq / 10
+            _mem.tx_freq = mem.freq // 10
 
         _mem.tmode = TMODES.index(mem.tmode)
         if mem.tmode == "TSQL" or mem.tmode == "DTCS":

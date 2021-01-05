@@ -82,7 +82,7 @@ def set_freq(mmap, freq, base):
     else:
         mult = 5000
 
-    value = (freq - to_MHz(base)) / mult
+    value = (freq - to_MHz(base)) // mult
 
     mmap[POS_MULT_FLAG] = tflag
     mmap[POS_FREQ_START] = struct.pack("<H", value)
@@ -155,7 +155,7 @@ def get_dup_offset(mmap):
 
 
 def set_dup_offset(mmap, offset):
-    val = struct.pack("<H", offset / 5000)
+    val = struct.pack("<H", offset // 5000)
     mmap[POS_OFFSET] = val
 
 

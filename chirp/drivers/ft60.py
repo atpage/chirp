@@ -111,9 +111,9 @@ def _decode_freq(freqraw):
 
 
 def _encode_freq(freq):
-    freqraw = freq / 10000
+    freqraw = freq // 10000
     flags = 0x00
-    if ((freq / 1000) % 10) >= 5:
+    if ((freq // 1000) % 10) >= 5:
         flags += 0x80
     if chirp_common.is_fractional_step(freq):
         flags += 0x40
@@ -304,12 +304,12 @@ class FT60BankModel(chirp_common.BankModel):
         return banks
 
     def add_memory_to_mapping(self, memory, bank):
-        number = (memory.number - 1) / 8
+        number = (memory.number - 1) // 8
         mask = 1 << ((memory.number - 1) & 7)
         self._radio._memobj.banks[bank.index].memory[number].set_bits(mask)
 
     def remove_memory_from_mapping(self, memory, bank):
-        number = (memory.number - 1) / 8
+        number = (memory.number - 1) // 8
         mask = 1 << ((memory.number - 1) & 7)
         m = self._radio._memobj.banks[bank.index].memory[number]
         if m.get_bits(mask) != mask:
@@ -320,7 +320,7 @@ class FT60BankModel(chirp_common.BankModel):
     def get_mapping_memories(self, bank):
         memories = []
         for i in range(*self._radio.get_features().memory_bounds):
-            number = (i - 1) / 8
+            number = (i - 1) // 8
             mask = 1 << ((i - 1) & 7)
             m = self._radio._memobj.banks[bank.index].memory[number]
             if m.get_bits(mask) == mask:
@@ -330,7 +330,7 @@ class FT60BankModel(chirp_common.BankModel):
     def get_memory_mappings(self, memory):
         banks = []
         for bank in self.get_mappings():
-            number = (memory.number - 1) / 8
+            number = (memory.number - 1) // 8
             mask = 1 << ((memory.number - 1) & 7)
             m = self._radio._memobj.banks[bank.index].memory[number]
             if m.get_bits(mask) == mask:
@@ -722,7 +722,7 @@ class FT60Radio(yaesu_clone.YaesuCloneModeRadio):
 
     def get_raw_memory(self, number):
         return repr(self._memobj.memory[number - 1]) + \
-            repr(self._memobj.flags[(number - 1) / 4]) + \
+            repr(self._memobj.flags[(number - 1) // 4]) + \
             repr(self._memobj.names[number - 1])
 
     def get_memory(self, number):
@@ -747,7 +747,7 @@ class FT60Radio(yaesu_clone.YaesuCloneModeRadio):
             mem.number = number
             _mem = self._memobj.memory[mem.number - 1]
             _nam = self._memobj.names[mem.number - 1]
-            _skp = self._memobj.flags[(mem.number - 1) / 4]
+            _skp = self._memobj.flags[(mem.number - 1) // 4]
 
         if not _mem.used:
             mem.empty = True
@@ -787,7 +787,7 @@ class FT60Radio(yaesu_clone.YaesuCloneModeRadio):
         else:
             _mem = self._memobj.memory[mem.number - 1]
             _nam = self._memobj.names[mem.number - 1]
-            _skp = self._memobj.flags[(mem.number - 1) / 4]
+            _skp = self._memobj.flags[(mem.number - 1) // 4]
 
         assert(_mem)
         if mem.empty:
@@ -809,7 +809,7 @@ class FT60Radio(yaesu_clone.YaesuCloneModeRadio):
             _mem.offset = 0
         else:
             _mem.tx_freq = 0
-            _mem.offset = mem.offset / 50000
+            _mem.offset = mem.offset // 50000
         _mem.duplex = DUPLEX.index(mem.duplex)
         _mem.tmode = TMODES.index(mem.tmode)
         _mem.tone = chirp_common.TONES.index(mem.rtone)

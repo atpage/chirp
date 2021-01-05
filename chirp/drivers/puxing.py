@@ -303,13 +303,13 @@ class Puxing777Radio(chirp_common.CloneModeRadio):
             wipe_memory(_mem, "\xFF")
             return
 
-        _mem.rx_freq = mem.freq / 10
+        _mem.rx_freq = mem.freq // 10
         if mem.duplex == "+":
-            _mem.tx_freq = (mem.freq / 10) + (mem.offset / 10)
+            _mem.tx_freq = (mem.freq // 10) + (mem.offset // 10)
         elif mem.duplex == "-":
-            _mem.tx_freq = (mem.freq / 10) - (mem.offset / 10)
+            _mem.tx_freq = (mem.freq // 10) - (mem.offset // 10)
         else:
-            _mem.tx_freq = (mem.freq / 10)
+            _mem.tx_freq = (mem.freq // 10)
         _mem.skip = mem.skip != "S"
         _mem.iswide = mem.mode != "NFM"
 
@@ -496,8 +496,8 @@ class Puxing2RRadio(chirp_common.CloneModeRadio):
             _mem.set_raw("\xff" * 16)
             return
 
-        _mem.freq = mem.freq / 10
-        _mem.offset = mem.offset / 10
+        _mem.freq = mem.freq // 10
+        _mem.offset = mem.offset // 10
         _mem.iswide = mem.mode == "FM"
         _mem.duplex = PX2R_DUPLEX.index(mem.duplex)
         _mem.ishigh = mem.power == PX2R_POWER_LEVELS[1]

@@ -177,11 +177,11 @@ class FlagObj(object):
 
 
 def _is_loc_used(memobj, loc):
-    return memobj.flags[loc / 2].get_raw() != "\xFF"
+    return memobj.flags[loc // 2].get_raw() != "\xFF"
 
 
 def _addr_to_loc(addr):
-    return (addr - 0x2000) / 32
+    return (addr - 0x2000) // 32
 
 
 def _should_send_addr(memobj, addr):
@@ -412,7 +412,7 @@ class AnyTone5888UVRadio(chirp_common.CloneModeRadio,
     def _get_memobjs(self, number):
         number -= 1
         _mem = self._memobj.memory[number]
-        _flg = FlagObj(self._memobj.flags[number / 2],
+        _flg = FlagObj(self._memobj.flags[number // 2],
                        number % 2 and "even" or "odd")
         return _mem, _flg
 
@@ -575,8 +575,8 @@ class AnyTone5888UVRadio(chirp_common.CloneModeRadio,
         _flg.clear()
         _mem.set_raw("\x00" * 32)
 
-        _mem.freq = mem.freq / 100
-        _mem.offset = mem.offset / 100
+        _mem.freq = mem.freq // 100
+        _mem.offset = mem.offset // 100
         _mem.name = mem.name.ljust(7)
         _mem.is_am = mem.mode == "AM"
         _mem.tune_step = TUNING_STEPS.index(mem.tuning_step)

@@ -360,18 +360,18 @@ class TYTTHUVF1Radio(chirp_common.CloneModeRadio):
             LOG.debug("Initializing empty memory")
             _mem.set_raw("\x00" * 16)
 
-        _mem.rx_freq = mem.freq / 10
+        _mem.rx_freq = mem.freq // 10
         if mem.duplex == "off":
             for i in range(0, 4):
                 _mem.tx_freq[i].set_raw("\xFF")
         elif mem.duplex == "split":
-            _mem.tx_freq = mem.offset / 10
+            _mem.tx_freq = mem.offset // 10
         elif mem.duplex == "-":
-            _mem.tx_freq = (mem.freq - mem.offset) / 10
+            _mem.tx_freq = (mem.freq - mem.offset) // 10
         elif mem.duplex == "+":
-            _mem.tx_freq = (mem.freq + mem.offset) / 10
+            _mem.tx_freq = (mem.freq + mem.offset) // 10
         else:
-            _mem.tx_freq = mem.freq / 10
+            _mem.tx_freq = mem.freq // 10
 
         (txmode, txval, txpol), (rxmode, rxval, rxpol) = \
             chirp_common.split_tone_encode(mem)

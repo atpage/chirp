@@ -61,7 +61,7 @@ class BJ9900Radio(chirp_common.CloneModeRadio,
     # 2 char per byte hex string
     # on CR LF terminated lines of 96 char
     # plus an empty line at the end
-    _datsize = (_memsize * 2) / 96 * 98 + 2
+    _datsize = (_memsize * 2) // 96 * 98 + 2
 
     # block are read in same order as original sw eventhough they are not
     # in physical order
@@ -240,19 +240,19 @@ class BJ9900Radio(chirp_common.CloneModeRadio,
         _mem = self._memobj.memory[mem.number - 1]
 
         if mem.empty:
-            _mem.set_raw("\xff" * (_mem.size() / 8))    # clean up
+            _mem.set_raw("\xff" * (_mem.size() // 8))    # clean up
             _mem.namelen = 0
             return
 
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
         if mem.duplex == "split":
-            _mem.txfreq = mem.offset / 10
+            _mem.txfreq = mem.offset // 10
         elif mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) / 10
+            _mem.txfreq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) / 10
+            _mem.txfreq = (mem.freq - mem.offset) // 10
         else:
-            _mem.txfreq = mem.freq / 10
+            _mem.txfreq = mem.freq // 10
 
         _mem.namelen = len(mem.name)
         for i in range(_mem.namelen):

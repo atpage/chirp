@@ -576,7 +576,7 @@ def _download(radio):
         data += d
 
         # UI Update
-        status.cur = addr / BLOCK_SIZE
+        status.cur = addr // BLOCK_SIZE
         status.msg = "Cloning from radio..."
         radio.status_fn(status)
 
@@ -600,7 +600,7 @@ def _upload(radio):
     data = radio.get_mmap()
 
     # Reset the UI progress
-    status.max = MEM_SIZE / TX_BLOCK_SIZE
+    status.max = MEM_SIZE // TX_BLOCK_SIZE
     status.cur = 0
     status.msg = "Cloning to radio..."
     radio.status_fn(status)
@@ -978,20 +978,20 @@ class BTechMobileCommon(chirp_common.CloneModeRadio,
             _mem.set_raw('\x00' * 16)
 
         # frequency
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
 
         # duplex
         if mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) / 10
+            _mem.txfreq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) / 10
+            _mem.txfreq = (mem.freq - mem.offset) // 10
         elif mem.duplex == "off":
             for i in _mem.txfreq:
                 i.set_raw("\xFF")
         elif mem.duplex == "split":
-            _mem.txfreq = mem.offset / 10
+            _mem.txfreq = mem.offset // 10
         else:
-            _mem.txfreq = mem.freq / 10
+            _mem.txfreq = mem.freq // 10
 
         # tone data
         ((txmode, txtone, txpol), (rxmode, rxtone, rxpol)) = \
@@ -1831,10 +1831,10 @@ class BTechMobileCommon(chirp_common.CloneModeRadio,
             return chirp_common.format_freq(value)
 
         def apply_freq(setting, obj):
-            value = chirp_common.parse_freq(str(setting.value)) / 10
+            value = chirp_common.parse_freq(str(setting.value)) // 10
             for i in range(7, -1, -1):
                 obj.freq[i] = value % 10
-                value /= 10
+                value //= 10
 
         val1a = RadioSettingValueString(0, 10, convert_bytes_to_freq(
                                         _mem.vfo.a.freq))
@@ -1898,10 +1898,10 @@ class BTechMobileCommon(chirp_common.CloneModeRadio,
             return chirp_common.format_freq(real_offset * 1000)
 
         def apply_offset(setting, obj):
-            value = chirp_common.parse_freq(str(setting.value)) / 1000
+            value = chirp_common.parse_freq(str(setting.value)) // 1000
             for i in range(5, -1, -1):
                 obj.offset[i] = value % 10
-                value /= 10
+                value //= 10
 
         if not self.MODEL == "GMRS-50X1":
             if self.COLOR_LCD:
@@ -2157,10 +2157,10 @@ class BTechMobileCommon(chirp_common.CloneModeRadio,
                         obj[i] = '0xff'
 
             def apply_fm_freq(setting, obj):
-                value = chirp_common.parse_freq(str(setting.value)) / 10
+                value = chirp_common.parse_freq(str(setting.value)) // 10
                 for i in range(7, -1, -1):
                     obj.freq[i] = value % 10
-                    value /= 10
+                    value //= 10
 
             _presets = self._memobj.fm_radio_preset
             i = 1

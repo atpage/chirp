@@ -194,7 +194,7 @@ class FTM7250Radio(ft1d.FT1Radio):
 
     @classmethod
     def _wipe_memory(cls, mem):
-        mem.set_raw("\x00" * (mem.size() / 8))
+        mem.set_raw("\x00" * (mem.size() // 8))
 
     def sync_out(self):
         # Need to give enough time for the radio to ACK after writes

@@ -81,7 +81,7 @@ class IC2720Radio(icf.IcomCloneModeRadio):
     _ranges = [(0x0000, 0x1400, 32)]
 
     def _get_bank(self, loc):
-        _bank = self._memobj.banks[loc / 2]
+        _bank = self._memobj.banks[loc // 2]
         if loc % 2:
             bank = _bank.bank_odd
         else:
@@ -93,7 +93,7 @@ class IC2720Radio(icf.IcomCloneModeRadio):
             return bank
 
     def _set_bank(self, loc, index):
-        _bank = self._memobj.banks[loc / 2]
+        _bank = self._memobj.banks[loc // 2]
         if index is None:
             index = 0x0A
         if loc % 2:
@@ -122,7 +122,7 @@ class IC2720Radio(icf.IcomCloneModeRadio):
 
     def get_memory(self, number):
         bitpos = (1 << (number % 8))
-        bytepos = (number / 8)
+        bytepos = (number // 8)
 
         _mem = self._memobj.memory[number]
         _skp = self._memobj.skips[bytepos]
@@ -148,7 +148,7 @@ class IC2720Radio(icf.IcomCloneModeRadio):
 
         mem.skip = (_skp & bitpos) and "S" or ""
 
-        if int(mem.freq / 100000000) == 1:
+        if int(mem.freq // 100000000) == 1:
             mem.power = POWER_LEVELS_VHF[_mem.power]
         else:
             mem.power = POWER_LEVELS_UHF[_mem.power]
@@ -157,7 +157,7 @@ class IC2720Radio(icf.IcomCloneModeRadio):
 
     def set_memory(self, mem):
         bitpos = (1 << (mem.number % 8))
-        bytepos = (mem.number / 8)
+        bytepos = (mem.number // 8)
 
         _mem = self._memobj.memory[mem.number]
         _skp = self._memobj.skips[bytepos]

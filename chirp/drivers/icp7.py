@@ -147,7 +147,7 @@ class ICP7Radio(icf.IcomCloneModeRadio):
 
     def get_memory(self, number):
         bit = 1 << (number % 8)
-        byte = int(number / 8)
+        byte = int(number // 8)
 
         _mem = self._memobj.memory[number]
         _usd = self._memobj.used[byte]
@@ -161,8 +161,8 @@ class ICP7Radio(icf.IcomCloneModeRadio):
             mem.empty = True
             return mem
 
-        mem.freq = _mem.freq / 3
-        mem.offset = _mem.offset / 3
+        mem.freq = _mem.freq // 3
+        mem.offset = _mem.offset // 3
         mem.tmode = TMODES[_mem.tmode]
         mem.duplex = DUPLEX[_mem.duplex]
         mem.tuning_step = TUNING_STEPS[_mem.tuning_step]
@@ -182,7 +182,7 @@ class ICP7Radio(icf.IcomCloneModeRadio):
 
     def set_memory(self, mem):
         bit = 1 << (mem.number % 8)
-        byte = int(mem.number / 8)
+        byte = int(mem.number // 8)
 
         _mem = self._memobj.memory[mem.number]
         _usd = self._memobj.used[byte]

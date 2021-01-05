@@ -560,7 +560,7 @@ class Th9000Radio(chirp_common.CloneModeRadio,
         _mem = self._memobj.memory[number]
 
         # get flag info
-        cbyte = number / 8 ;
+        cbyte = number // 8 ;
         cbit =  7 - (number % 8) ;
         setflag = self._memobj.csetflag[cbyte].c[cbit]; 
         skipflag = self._memobj.cskipflag[cbyte].c[cbit]; 
@@ -622,7 +622,7 @@ class Th9000Radio(chirp_common.CloneModeRadio,
 
         _mem = self._memobj.memory[mem.number]
 
-        cbyte = mem.number / 8 
+        cbyte = mem.number // 8 
         cbit =  7 - (mem.number % 8) 
 
         if mem.empty:
@@ -635,8 +635,8 @@ class Th9000Radio(chirp_common.CloneModeRadio,
 
         _mem.set_raw("\x00" * 32)
 
-        _mem.freq = mem.freq / 100         # Convert to low-level frequency
-        _mem.offset = mem.offset / 100         # Convert to low-level frequency
+        _mem.freq = mem.freq // 100         # Convert to low-level frequency
+        _mem.offset = mem.offset // 100         # Convert to low-level frequency
 
         _mem.name = mem.name.ljust(7)[:7]  # Store the alpha tag
         _mem.duplex = DUPLEXES.index(mem.duplex)
@@ -729,28 +729,28 @@ class Th9000Radio(chirp_common.CloneModeRadio,
         basic.append(rs)
 
         (flow,fhigh)  = self.valid_freq[0]
-        flow  /= 1000
-        fhigh /= 1000
+        flow  //= 1000
+        fhigh //= 1000
         fmidrange = (fhigh- flow)/2
 
         rs = RadioSetting("txrangelow","TX Freq, Lower Limit (khz)", RadioSettingValueInteger(flow,
             flow + fmidrange,
-            int(_freqrange.txrangelow)/10))
+            int(_freqrange.txrangelow)//10))
         freqrange.append(rs)
 
         rs = RadioSetting("txrangehi","TX Freq, Upper Limit (khz)", RadioSettingValueInteger(fhigh-fmidrange,
             fhigh,
-            int(_freqrange.txrangehi)/10))
+            int(_freqrange.txrangehi)//10))
         freqrange.append(rs)
 
         rs = RadioSetting("rxrangelow","RX Freq, Lower Limit (khz)", RadioSettingValueInteger(flow,
             flow+fmidrange,
-            int(_freqrange.rxrangelow)/10))
+            int(_freqrange.rxrangelow)//10))
         freqrange.append(rs)
 
         rs = RadioSetting("rxrangehi","RX Freq, Upper Limit (khz)", RadioSettingValueInteger(fhigh-fmidrange,
             fhigh,
-            int(_freqrange.rxrangehi)/10))
+            int(_freqrange.rxrangehi)//10))
         freqrange.append(rs)
 
         return settings
@@ -801,8 +801,8 @@ class Th9000Radio(chirp_common.CloneModeRadio,
     def match_model(cls, filedata, filename):
         if  MMAPSIZE == len(filedata):
            (flow,fhigh)  = cls.valid_freq[0]
-           flow  /= 1000000
-           fhigh /= 1000000
+           flow  //= 1000000
+           fhigh //= 1000000
 
            txmin=ord(filedata[0x200])*100 + (ord(filedata[0x201])>>4)*10 + ord(filedata[0x201])%16
            txmax=ord(filedata[0x204])*100 + (ord(filedata[0x205])>>4)*10 + ord(filedata[0x205])%16

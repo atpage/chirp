@@ -460,14 +460,14 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
         if _mem.get_raw() == ("\xFF" * 16):
             _mem.set_raw("\x00" * 13 + "\xFF" * 3)
 
-        _mem.freq = mem.freq / 10
+        _mem.freq = mem.freq // 10
 
         if mem.duplex == "split":
             diff = mem.offset - mem.freq
             _mem.duplex = DUPLEX.index("-") if diff < 0 else DUPLEX.index("+")
-            _mem.offset = abs(diff) / 10
+            _mem.offset = abs(diff) // 10
         else:
-            _mem.offset = mem.offset / 10
+            _mem.offset = mem.offset // 10
             _mem.duplex = DUPLEX.index(mem.duplex)
 
         tx, rx = chirp_common.split_tone_encode(mem)
@@ -631,7 +631,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
                           RadioSettingValueBoolean(not _settings.ste_disabled))
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.lower_vhf) / 10
+        _limit = int(self._memobj.limits.lower_vhf) // 10
         rs = RadioSetting("limits.lower_vhf", "VHF Lower Limit (MHz)",
                           RadioSettingValueInteger(128, 270, _limit))
 
@@ -641,7 +641,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
         rs.set_apply_callback(apply_limit, self._memobj.limits)
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.upper_vhf) / 10
+        _limit = int(self._memobj.limits.upper_vhf) // 10
         rs = RadioSetting("limits.upper_vhf", "VHF Upper Limit (MHz)",
                           RadioSettingValueInteger(128, 270, _limit))
 
@@ -651,7 +651,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
         rs.set_apply_callback(apply_limit, self._memobj.limits)
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.lower_uhf) / 10
+        _limit = int(self._memobj.limits.lower_uhf) // 10
         rs = RadioSetting("limits.lower_uhf", "UHF Lower Limit (MHz)",
                           RadioSettingValueInteger(400, 520, _limit))
 
@@ -661,7 +661,7 @@ class BaofengUVB5(chirp_common.CloneModeRadio,
         rs.set_apply_callback(apply_limit, self._memobj.limits)
         basic.append(rs)
 
-        _limit = int(self._memobj.limits.upper_uhf) / 10
+        _limit = int(self._memobj.limits.upper_uhf) // 10
         rs = RadioSetting("limits.upper_uhf", "UHF Upper Limit (MHz)",
                           RadioSettingValueInteger(400, 520, _limit))
 

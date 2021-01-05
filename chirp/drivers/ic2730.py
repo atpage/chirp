@@ -273,7 +273,7 @@ def _resolve_memory_number(number):
 
 
 def _wipe_memory(mem, char):
-    mem.set_raw(char * (mem.size() / 8))
+    mem.set_raw(char * (mem.size() // 8))
 
 
 @directory.register
@@ -383,7 +383,7 @@ class IC2730Radio(icf.IcomRawCloneModeRadio):
         if mem.number >= 0:
             _mem = self._memobj.memory[mem.number]
             bitpos = (1 << (number % 8))
-            bytepos = number / 8
+            bytepos = number // 8
             _used = self._memobj.used_flags[bytepos]
             is_used = ((_used & bitpos) == 0)
 
@@ -472,7 +472,7 @@ class IC2730Radio(icf.IcomRawCloneModeRadio):
     def set_memory(self, mem):
         if mem.number >= 0:       # Normal
             bitpos = (1 << (mem.number % 8))
-            bytepos = mem.number / 8
+            bytepos = mem.number // 8
 
             _mem = self._memobj.memory[mem.number]
             _used = self._memobj.used_flags[bytepos]
@@ -519,8 +519,8 @@ class IC2730Radio(icf.IcomRawCloneModeRadio):
         elif mem.offset % 8333 == 0:
             frequency_flags |= 0x02
             offset_multiplier = 8333
-        _mem.freq = mem.freq / frequency_multiplier
-        _mem.offset = mem.offset / offset_multiplier
+        _mem.freq = mem.freq // frequency_multiplier
+        _mem.offset = mem.offset // offset_multiplier
         _mem.freq_flags = frequency_flags
         _mem.rtone = chirp_common.TONES.index(mem.rtone)
         _mem.ctone = chirp_common.TONES.index(mem.ctone)
@@ -660,7 +660,7 @@ class IC2730Radio(icf.IcomRawCloneModeRadio):
                 vfrq = int(vfrq / 6250)
             elif vfrq % 5000 == 0:
                 vflg = 0
-                vfrq = int(vfrq / 5000)
+                vfrq = int(vfrq // 5000)
             else:
                 vfrq = int(vfrq / 8333)
             setattr(obj[ndx], flg, vflg)

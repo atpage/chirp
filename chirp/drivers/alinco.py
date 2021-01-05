@@ -288,12 +288,12 @@ class DRx35Radio(AlincoStyleRadio):
         return rf
 
     def _get_used(self, number):
-        _usd = self._memobj.used_flags[number / 8]
+        _usd = self._memobj.used_flags[number // 8]
         bit = (0x80 >> (number % 8))
         return _usd & bit
 
     def _set_used(self, number, is_used):
-        _usd = self._memobj.used_flags[number / 8]
+        _usd = self._memobj.used_flags[number // 8]
         bit = (0x80 >> (number % 8))
         if is_used:
             _usd |= bit
@@ -323,8 +323,8 @@ class DRx35Radio(AlincoStyleRadio):
 
     def get_memory(self, number):
         _mem = self._memobj.memory[number]
-        _skp = self._memobj.skips[number / 8]
-        _usd = self._memobj.used_flags[number / 8]
+        _skp = self._memobj.skips[number // 8]
+        _usd = self._memobj.used_flags[number // 8]
         bit = (0x80 >> (number % 8))
 
         mem = chirp_common.Memory()
@@ -358,8 +358,8 @@ class DRx35Radio(AlincoStyleRadio):
 
     def set_memory(self, mem):
         _mem = self._memobj.memory[mem.number]
-        _skp = self._memobj.skips[mem.number / 8]
-        _usd = self._memobj.used_flags[mem.number / 8]
+        _skp = self._memobj.skips[mem.number // 8]
+        _usd = self._memobj.used_flags[mem.number // 8]
         bit = (0x80 >> (mem.number % 8))
 
         if self._get_used(mem.number) and not mem.empty:
@@ -370,7 +370,7 @@ class DRx35Radio(AlincoStyleRadio):
         if mem.empty:
             return
 
-        _mem.freq = mem.freq / 100
+        _mem.freq = mem.freq // 100
 
         try:
             _tone = mem.rtone
@@ -382,7 +382,7 @@ class DRx35Radio(AlincoStyleRadio):
                                               "tone %.1fHz" % _tone)
 
         _mem.duplex = DUPLEX.index(mem.duplex)
-        _mem.offset = mem.offset / 100
+        _mem.offset = mem.offset // 100
         _mem.tmode = TMODES.index(mem.tmode)
         _mem.dtcs_tx = DCS_CODES[self.VENDOR].index(mem.dtcs)
         _mem.dtcs_rx = DCS_CODES[self.VENDOR].index(mem.dtcs)
@@ -816,7 +816,7 @@ class AlincoDJG7EG(AlincoStyleRadio):
         # Get a low-level memory object mapped to the image
         _mem = self._memobj.memory[mem.number]
         if mem.empty:
-            _mem.set_raw("\xff" * (_mem.size()/8))
+            _mem.set_raw("\xff" * (_mem.size()//8))
             _mem.empty = 0x00
         else:
             _mem.empty = self._get_empty_flag(mem.freq, mem.mode)

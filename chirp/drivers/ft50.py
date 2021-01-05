@@ -291,9 +291,9 @@ class FT50Radio(yaesu_clone.YaesuCloneModeRadio):
             for i in range(0, 4):
                 _mem.name[i] = CHARSET.index(mem.name.ljust(4)[i])
 
-        _mem.freq = int(mem.freq / 1000)
+        _mem.freq = int(mem.freq // 1000)
         _mem.duplex = DUPLEX.index(mem.duplex)
-        _mem.offset = int(mem.offset / 1000)
+        _mem.offset = int(mem.offset // 1000)
         _mem.mode = MODES.index(mem.mode)
         _mem.tuning_step = TUNING_STEPS.index(mem.tuning_step)
         if mem.power:

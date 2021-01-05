@@ -190,14 +190,14 @@ class ICQ7Radio(icf.IcomCloneModeRadio):
         _mem.set_raw("\x00" * 8)
 
         if mem.freq > to_GHz(1):
-            _mem.freq = (mem.freq / 1000) - to_GHz(1)
+            _mem.freq = (mem.freq // 1000) - to_GHz(1)
             upper = from_GHz(mem.freq) << 4
             _mem.freq[0].clr_bits(0xF0)
             _mem.freq[0].set_bits(upper)
         else:
-            _mem.freq = mem.freq / 1000
+            _mem.freq = mem.freq // 1000
         _mem.fractional = chirp_common.is_fractional_step(mem.freq)
-        _mem.offset = mem.offset / 1000
+        _mem.offset = mem.offset // 1000
         _mem.rtone = chirp_common.TONES.index(mem.rtone)
         _mem.ctone = chirp_common.TONES.index(mem.ctone)
         _mem.tune_step = STEPS.index(mem.tuning_step)

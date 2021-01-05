@@ -591,9 +591,9 @@ class FT817Radio(yaesu_clone.YaesuCloneModeRadio):
 
     def _get_normal(self, number):
         _mem = self._memobj.memory[number - 1]
-        used = (self._memobj.visible[(number - 1) / 8] >> (number - 1) % 8) \
+        used = (self._memobj.visible[(number - 1) // 8] >> (number - 1) % 8) \
             & 0x01
-        valid = (self._memobj.filled[(number - 1) / 8] >> (number - 1) % 8) \
+        valid = (self._memobj.filled[(number - 1) // 8] >> (number - 1) % 8) \
             & 0x01
 
         mem = chirp_common.Memory()
@@ -607,9 +607,9 @@ class FT817Radio(yaesu_clone.YaesuCloneModeRadio):
 
     def _set_normal(self, mem):
         _mem = self._memobj.memory[mem.number - 1]
-        wasused = (self._memobj.visible[(mem.number - 1) / 8] >>
+        wasused = (self._memobj.visible[(mem.number - 1) // 8] >>
                    (mem.number - 1) % 8) & 0x01
-        wasvalid = (self._memobj.filled[(mem.number - 1) / 8] >>
+        wasvalid = (self._memobj.filled[(mem.number - 1) // 8] >>
                     (mem.number - 1) % 8) & 0x01
 
         if mem.empty:
@@ -618,17 +618,17 @@ class FT817Radio(yaesu_clone.YaesuCloneModeRadio):
                 # if you ulpoad an empty image you can brick your radio
                 raise Exception("Sorry, can't delete first memory")
             if wasvalid and not wasused:
-                self._memobj.filled[(mem.number - 1) / 8] &= \
+                self._memobj.filled[(mem.number - 1) // 8] &= \
                     ~(1 << (mem.number - 1) % 8)
-                _mem.set_raw("\xFF" * (_mem.size() / 8))    # clean up
-            self._memobj.visible[(mem.number - 1) / 8] &= \
+                _mem.set_raw("\xFF" * (_mem.size() // 8))    # clean up
+            self._memobj.visible[(mem.number - 1) // 8] &= \
                 ~(1 << (mem.number - 1) % 8)
             return
         if not wasvalid:
-            _mem.set_raw("\x00" * (_mem.size() / 8))    # clean up
+            _mem.set_raw("\x00" * (_mem.size() // 8))    # clean up
 
-        self._memobj.visible[(mem.number - 1) / 8] |= 1 << (mem.number - 1) % 8
-        self._memobj.filled[(mem.number - 1) / 8] |= 1 << (mem.number - 1) % 8
+        self._memobj.visible[(mem.number - 1) // 8] |= 1 << (mem.number - 1) % 8
+        self._memobj.filled[(mem.number - 1) // 8] |= 1 << (mem.number - 1) % 8
         self._set_memory(mem, _mem)
 
     def _get_memory(self, mem, _mem):
@@ -728,8 +728,8 @@ class FT817Radio(yaesu_clone.YaesuCloneModeRadio):
         except ValueError:
             pass
         _mem.rit = 0    # not supported in chirp
-        _mem.freq = mem.freq / 10
-        _mem.offset = mem.offset / 10
+        _mem.freq = mem.freq // 10
+        _mem.offset = mem.offset // 10
         # there are ft857D that have problems with short labels, see bug #937
         # some of the radio fill with 0xff and some with blanks
         # the latter is safe for all ft8x7 radio
@@ -853,7 +853,7 @@ class FT817Radio(yaesu_clone.YaesuCloneModeRadio):
                           RadioSettingValueList(options,
                                                 options[_settings.cw_speed]))
         cw.append(rs)
-        options = ["1:%1.1f" % (i / 10) for i in range(25, 46, 1)]
+        options = ["1:%1.1f" % (i // 10) for i in range(25, 46, 1)]
         rs = RadioSetting("cw_weight", "CW weight",
                           RadioSettingValueList(options,
                                                 options[_settings.cw_weight]))

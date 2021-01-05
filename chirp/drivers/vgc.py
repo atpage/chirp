@@ -497,7 +497,7 @@ def _download(radio):
         data += d
 
         # UI Update
-        status.cur = addr / BLOCK_SIZE
+        status.cur = addr // BLOCK_SIZE
         status.msg = "Cloning from radio..."
         radio.status_fn(status)
 
@@ -540,7 +540,7 @@ def _upload(radio):
         _check_for_double_ack(radio)
 
         # UI Update
-        status.cur = addr / BLOCK_SIZE
+        status.cur = addr // BLOCK_SIZE
         status.msg = "Cloning to radio..."
         radio.status_fn(status)
 
@@ -725,7 +725,7 @@ class VGCStyleRadio(chirp_common.CloneModeRadio,
     def get_memory(self, number):
         """Get the mem representation from the radio image"""
         bitpos = (1 << (number % 8))
-        bytepos = (number / 8)
+        bytepos = (number // 8)
 
         _mem = self._memory_obj()[number]
         _names = self._name_obj()[number]
@@ -803,7 +803,7 @@ class VGCStyleRadio(chirp_common.CloneModeRadio,
     def set_memory(self, mem):
         """Set the memory data in the eeprom img from the UI"""
         bitpos = (1 << (mem.number % 8))
-        bytepos = (mem.number / 8)
+        bytepos = (mem.number // 8)
 
         _mem = self._memory_obj()[mem.number]
         _names = self._name_obj()[mem.number]
@@ -820,20 +820,20 @@ class VGCStyleRadio(chirp_common.CloneModeRadio,
             _usd |= bitpos
 
         # frequency
-        _mem.rxfreq = mem.freq / 10
+        _mem.rxfreq = mem.freq // 10
 
         # duplex
         if mem.duplex == "+":
-            _mem.txfreq = (mem.freq + mem.offset) / 10
+            _mem.txfreq = (mem.freq + mem.offset) // 10
         elif mem.duplex == "-":
-            _mem.txfreq = (mem.freq - mem.offset) / 10
+            _mem.txfreq = (mem.freq - mem.offset) // 10
         elif mem.duplex == "off":
             for i in _mem.txfreq:
                 i.set_raw("\xFF")
         elif mem.duplex == "split":
-            _mem.txfreq = mem.offset / 10
+            _mem.txfreq = mem.offset // 10
         else:
-            _mem.txfreq = mem.freq / 10
+            _mem.txfreq = mem.freq // 10
 
         # tone data
         ((txmode, txtone, txpol), (rxmode, rxtone, rxpol)) = \

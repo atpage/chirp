@@ -678,9 +678,9 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
 
     def _get_normal(self, number):
         _mem = self._memobj.memory[number - 1]
-        used = (self._memobj.visible[(number - 1) / 8] >> (number - 1) % 8) \
+        used = (self._memobj.visible[(number - 1) // 8] >> (number - 1) % 8) \
                 & 0x01
-        valid = (self._memobj.filled[(number - 1) / 8] >> (number - 1) % 8) \
+        valid = (self._memobj.filled[(number - 1) // 8] >> (number - 1) % 8) \
                 & 0x01
 
         mem = chirp_common.Memory()
@@ -696,27 +696,27 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
 
     def _set_normal(self, mem):
         _mem = self._memobj.memory[mem.number - 1]
-        wasused = (self._memobj.visible[(mem.number - 1) / 8] >>
+        wasused = (self._memobj.visible[(mem.number - 1) // 8] >>
                     (mem.number - 1) % 8) & 0x01
-        wasvalid = (self._memobj.filled[(mem.number - 1) / 8] >>
+        wasvalid = (self._memobj.filled[(mem.number - 1) // 8] >>
                     (mem.number - 1) % 8) & 0x01
 
         if mem.empty:
             if mem.number == 1:
                 raise Exception("Sorry, can't delete first memory")
             if wasvalid and not wasused:
-                self._memobj.filled[(mem.number - 1) / 8] &= \
+                self._memobj.filled[(mem.number - 1) // 8] &= \
                     ~(1 << (mem.number - 1) % 8)
-                _mem.set_raw("\xFF" * (_mem.size() / 8))    # clean up
-            self._memobj.visible[(mem.number - 1) / 8] &= \
+                _mem.set_raw("\xFF" * (_mem.size() // 8))    # clean up
+            self._memobj.visible[(mem.number - 1) // 8] &= \
                 ~(1 << (mem.number - 1) % 8)
             return
         if not wasvalid:
-            _mem.set_raw("\x00" * (_mem.size() / 8))    # clean up
+            _mem.set_raw("\x00" * (_mem.size() // 8))    # clean up
 
-        self._memobj.visible[(mem.number - 1) / 8] |= 1 << (mem.number - 1) \
+        self._memobj.visible[(mem.number - 1) // 8] |= 1 << (mem.number - 1) \
                         % 8
-        self._memobj.filled[(mem.number - 1) / 8] |= 1 << (mem.number - 1) \
+        self._memobj.filled[(mem.number - 1) // 8] |= 1 << (mem.number - 1) \
                         % 8
         self._set_memory(mem, _mem)
 
@@ -1096,7 +1096,7 @@ class FT450DRadio(yaesu_clone.YaesuCloneModeRadio):
         rs.set_doc("Cpm is Wpm * 5")
         cw.append(rs)
 
-        options = ["1:%1.1f" % (i / 10) for i in range(25, 46, 1)]
+        options = ["1:%1.1f" % (i // 10) for i in range(25, 46, 1)]
         rs = RadioSetting("cwweigt", "CW weight",
                           RadioSettingValueList(options,
                           options[_settings.cwweigt]))

@@ -682,8 +682,8 @@ class FT70Radio(yaesu_clone.YaesuCloneModeRadio):
         else:
             flag.nosubvfo = False  # Available in both VFOs
 
-        _mem.freq = int(mem.freq / 1000)
-        _mem.offset = int(mem.offset / 1000)
+        _mem.freq = int(mem.freq // 1000)
+        _mem.offset = int(mem.offset // 1000)
         _mem.tone = chirp_common.TONES.index(mem.rtone)
         self._set_tmode(_mem, mem)
         _mem.duplex = DUPLEX.index(mem.duplex)
@@ -707,7 +707,7 @@ class FT70Radio(yaesu_clone.YaesuCloneModeRadio):
 
     @classmethod
     def _wipe_memory(cls, mem):
-        mem.set_raw("\x00" * (mem.size() / 8))
+        mem.set_raw("\x00" * (mem.size() // 8))
         mem.unknown1 = 0x05
 
     def get_bank_model(self):

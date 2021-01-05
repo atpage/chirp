@@ -138,11 +138,11 @@ class FT1802Radio(yaesu_clone.YaesuCloneModeRadio):
 
     def get_raw_memory(self, number):
         return repr(self._memobj.memory[number]) + \
-               repr(self._memobj.flags[number/2])
+               repr(self._memobj.flags[number//2])
 
     def get_memory(self, number):
         _mem = self._memobj.memory[number]
-        _flag = self._memobj.flags[number/2]
+        _flag = self._memobj.flags[number//2]
 
         nibble = (number % 2) and "odd" or "even"
         visible = _flag["%s_visible" % nibble]
@@ -194,7 +194,7 @@ class FT1802Radio(yaesu_clone.YaesuCloneModeRadio):
 
     def set_memory(self, mem):
         _mem = self._memobj.memory[mem.number]
-        _flag = self._memobj.flags[mem.number/2]
+        _flag = self._memobj.flags[mem.number//2]
 
         nibble = (mem.number % 2) and "odd" or "even"
 
@@ -221,8 +221,8 @@ class FT1802Radio(yaesu_clone.YaesuCloneModeRadio):
 
         _flag["%s_valid" % nibble] = True
 
-        _mem.freq = mem.freq / 1000
-        _mem.offset = mem.offset / 1000
+        _mem.freq = mem.freq // 1000
+        _mem.offset = mem.offset // 1000
         _mem.duplex = DUPLEX.index(mem.duplex)
         _mem.tune_step = STEPS.index(mem.tuning_step)
         _mem.step_changed = mem.tuning_step != STEPS[0]

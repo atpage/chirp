@@ -101,7 +101,7 @@ class TYTUV3R25Radio(TYTUV3RRadio):
         mem.number = number
 
         bit = 1 << ((number - 1) % 8)
-        byte = (number - 1) / 8
+        byte = (number - 1) // 8
 
         if self._memobj.emptyflags[byte] & bit:
             mem.empty = True
@@ -155,7 +155,7 @@ class TYTUV3R25Radio(TYTUV3RRadio):
     def set_memory(self, mem):
         _mem = self._memobj.memory[mem.number - 1]
         bit = 1 << ((mem.number - 1) % 8)
-        byte = (mem.number - 1) / 8
+        byte = (mem.number - 1) // 8
 
         if mem.empty:
             self._memobj.emptyflags[byte] |= bit
@@ -164,7 +164,7 @@ class TYTUV3R25Radio(TYTUV3RRadio):
 
         self._memobj.emptyflags[byte] &= ~bit
 
-        _mem.rx_freq = mem.freq / 10
+        _mem.rx_freq = mem.freq // 10
 
         if mem.duplex == "":
             _mem.tx_freq = _mem.rx_freq

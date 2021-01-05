@@ -118,7 +118,7 @@ def _download(radio):
     _send_ack(radio.pipe)
 
     # for debugging purposes, dump the channels, in hex.
-    for _i in range(0, (NB_OF_BLOCKS * BLOCK_LEN) / 26):
+    for _i in range(0, (NB_OF_BLOCKS * BLOCK_LEN) // 26):
         _start_data = 4 + 26 * _i
         chunk = data[_start_data:_start_data + 26]
         LOG.debug("channel %i:\n%s", _i-21, util.hexprint(chunk))

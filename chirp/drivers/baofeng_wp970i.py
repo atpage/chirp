@@ -665,10 +665,10 @@ class WP970I(baofeng_common.BaofengCommonHT):
             return chirp_common.format_freq(value)
 
         def apply_freq(setting, obj):
-            value = chirp_common.parse_freq(str(setting.value)) / 10
+            value = chirp_common.parse_freq(str(setting.value)) // 10
             for i in range(7, -1, -1):
                 obj.freq[i] = value % 10
-                value /= 10
+                value //= 10
 
         val1a = RadioSettingValueString(0, 10,
                                         convert_bytes_to_freq(_mem.vfo.a.freq))
@@ -701,10 +701,10 @@ class WP970I(baofeng_common.BaofengCommonHT):
             return chirp_common.format_freq(real_offset * 1000)
 
         def apply_offset(setting, obj):
-            value = chirp_common.parse_freq(str(setting.value)) / 1000
+            value = chirp_common.parse_freq(str(setting.value)) // 1000
             for i in range(5, -1, -1):
                 obj.offset[i] = value % 10
-                value /= 10
+                value //= 10
 
         val1a = RadioSettingValueString(
                     0, 10, convert_bytes_to_offset(_mem.vfo.a.offset))

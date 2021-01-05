@@ -277,7 +277,7 @@ class THD72Radio(chirp_common.CloneModeRadio):
         return sorted(THD72_SPECIAL.keys())
 
     def add_dirty_block(self, memobj):
-        block = memobj._offset / 256
+        block = memobj._offset // 256
         if block not in self._dirty_blocks:
             self._dirty_blocks.append(block)
         self._dirty_blocks.sort()
@@ -445,14 +445,14 @@ class THD72Radio(chirp_common.CloneModeRadio):
 
     def download(self, raw=False, blocks=None):
         if blocks is None:
-            blocks = list(range(self._memsize / 256))
+            blocks = list(range(self._memsize // 256))
         else:
-            blocks = [b for b in blocks if b < self._memsize / 256]
+            blocks = [b for b in blocks if b < self._memsize // 256]
 
         if self.command("0M PROGRAM") != "0M":
             raise errors.RadioError("No response from self")
 
-        allblocks = list(range(self._memsize / 256))
+        allblocks = list(range(self._memsize // 256))
         self.pipe.baudrate = 57600
         try:
             self.pipe.setRTS()
@@ -484,9 +484,9 @@ class THD72Radio(chirp_common.CloneModeRadio):
 
     def upload(self, blocks=None):
         if blocks is None:
-            blocks = list(range((self._memsize / 256) - 2))
+            blocks = list(range((self._memsize // 256) - 2))
         else:
-            blocks = [b for b in blocks if b < self._memsize / 256]
+            blocks = [b for b in blocks if b < self._memsize // 256]
 
         if self.command("0M PROGRAM") != "0M":
             raise errors.RadioError("No response from self")
@@ -781,10 +781,10 @@ if __name__ == "__main__":
             raise errors.RadioError("last address out of range")
         elif last == 0:
             last = memmax
-        first /= 256
+        first //= 256
         if last % 256 != 0:
             last += 256
-        last /= 256
+        last //= 256
         blocks = list(range(first, last))
 
     if download:

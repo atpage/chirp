@@ -242,7 +242,7 @@ def get_freq(rawfreq):
 
 def set_freq(freq, obj, field):
     """Encode a frequency with any necessary fractional step flags"""
-    obj[field] = freq / 10000
+    obj[field] = freq // 10000
     if (freq % 1000) == 500:
         obj[field][0].set_bits(0x40)
 
@@ -354,7 +354,7 @@ class FTx800Radio(yaesu_clone.YaesuCloneModeRadio):
         if mem.duplex == "split":
             set_freq(mem.offset, _mem, "split")
         else:
-            _mem.offset = (int(mem.offset / 10000) / 5)
+            _mem.offset = (int(mem.offset // 10000) / 5)
 
     def _get_mem_name(self, mem, _mem):
         _nam = self._memobj.names[mem.number - 1]
@@ -379,12 +379,12 @@ class FTx800Radio(yaesu_clone.YaesuCloneModeRadio):
             _nam.enabled = 0
 
     def _get_mem_skip(self, mem, _mem):
-        _flg = self._memobj.flags[(mem.number - 1) / 4]
+        _flg = self._memobj.flags[(mem.number - 1) // 4]
         flgidx = (mem.number - 1) % 4
         return SKIPS[_flg["skip%i" % flgidx]]
 
     def _set_mem_skip(self, mem, _mem):
-        _flg = self._memobj.flags[(mem.number - 1) / 4]
+        _flg = self._memobj.flags[(mem.number - 1) // 4]
         flgidx = (mem.number - 1) % 4
         _flg["skip%i" % flgidx] = SKIPS.index(mem.skip)
 
@@ -408,7 +408,7 @@ class FTx800Radio(yaesu_clone.YaesuCloneModeRadio):
         mem.offset = self._get_mem_offset(mem, _mem)
         mem.name = self._get_mem_name(mem, _mem)
 
-        if int(mem.freq / 100) == 4:
+        if int(mem.freq // 100) == 4:
             mem.power = self.POWER_LEVELS_UHF[_mem.power]
         else:
             mem.power = self.POWER_LEVELS_VHF[_mem.power]
@@ -432,7 +432,7 @@ class FTx800Radio(yaesu_clone.YaesuCloneModeRadio):
         if self.get_features().has_tuning_step:
             _mem.tune_step = STEPS.index(mem.tuning_step)
         _mem.duplex = DUPLEX.index(mem.duplex)
-        _mem.split = mem.duplex == "split" and int(mem.offset / 10000) or 0
+        _mem.split = mem.duplex == "split" and int(mem.offset // 10000) or 0
         if mem.power:
             _mem.power = self.POWER_LEVELS_VHF.index(mem.power)
         else:
@@ -480,7 +480,7 @@ class FT7800BankModel(chirp_common.BankModel):
         index = memory.number - 1
         _bitmap = self._radio._memobj.bank_channels[bank.index]
         ishft = 31 - (index % 32)
-        _bitmap.bitmap[index / 32] |= (1 << ishft)
+        _bitmap.bitmap[index // 32] |= (1 << ishft)
         self.__m2b_cache[memory.number].append(bank.index)
         self.__b2m_cache[bank.index].append(memory.number)
 
@@ -490,11 +490,11 @@ class FT7800BankModel(chirp_common.BankModel):
         index = memory.number - 1
         _bitmap = self._radio._memobj.bank_channels[bank.index]
         ishft = 31 - (index % 32)
-        if not (_bitmap.bitmap[index / 32] & (1 << ishft)):
+        if not (_bitmap.bitmap[index // 32] & (1 << ishft)):
             raise Exception("Memory {num} is " +
                             "not in bank {bank}".format(num=memory.number,
                                                         bank=bank))
-        _bitmap.bitmap[index / 32] &= ~(1 << ishft)
+        _bitmap.bitmap[index // 32] &= ~(1 << ishft)
         self.__b2m_cache[bank.index].remove(memory.number)
         self.__m2b_cache[memory.number].remove(bank.index)
 
@@ -503,7 +503,7 @@ class FT7800BankModel(chirp_common.BankModel):
         upper = self._radio.get_features().memory_bounds[1]
         c = self._radio._memobj.bank_channels[bank.index]
         for i in range(0, upper):
-            _bitmap = c.bitmap[i / 32]
+            _bitmap = c.bitmap[i // 32]
             ishft = 31 - (i % 32)
             if _bitmap & (1 << ishft):
                 memories.append(i + 1)
@@ -897,7 +897,7 @@ class FT8800Radio(FTx800Radio):
             set_freq(mem.offset, _mem, "split")
             return
 
-        val = int(mem.offset / 10000) / 5
+        val = int(mem.offset // 10000) // 5
         for i in reversed(list(range(2, 6))):
             _mem.name[i] = (_mem.name[i] & 0x3F) | ((val & 0x03) << 6)
             val >>= 2

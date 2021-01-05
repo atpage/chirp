@@ -862,14 +862,14 @@ class TS480Radio(chirp_common.CloneModeRadio):
         rset = RadioSetting("settings.pc", sx, rx)
         basic.append(rset)
 
-        val = _sets.fa / mhz1       # valid range is for receiver
+        val = _sets.fa // mhz1       # valid range is for receiver
         rx = RadioSettingValueFloat(0.05, 60.0, val, 0.001, 3)
         sx = "VFO-A Frequency (MHz)"
         rset = RadioSetting("settings.fa", sx, rx)
         rset.set_apply_callback(my_mhz_val, _sets, "fa")
         basic.append(rset)
 
-        val = _sets.fb / mhz1
+        val = _sets.fb // mhz1
         rx = RadioSettingValueFloat(0.05, 60.0, val, 0.001, 3)
         sx = "VFO-B Frequency (MHz)"
         rset = RadioSetting("settings.fb", sx, rx)
@@ -886,7 +886,7 @@ class TS480Radio(chirp_common.CloneModeRadio):
         # ==== VFO Edges Group ================
 
         for mx in range(100, 110):
-            val = _chm[mx].rxfreq / mhz1
+            val = _chm[mx].rxfreq // mhz1
             if val < 1.8:       # Many operators never use this
                 val = 1.8       # So default is 0.0
             rx = RadioSettingValueFloat(1.8, 54.0, val, 0.001, 3)
@@ -895,7 +895,7 @@ class TS480Radio(chirp_common.CloneModeRadio):
             rset.set_apply_callback(my_mhz_val, _chm, "rxfreq", mx)
             pvfo.append(rset)
 
-            val = _chm[mx].txfreq / mhz1
+            val = _chm[mx].txfreq // mhz1
             if val < 1.8:
                 val = 54.0
             rx = RadioSettingValueFloat(1.8, 54.0, val, 0.001, 3)
@@ -1077,7 +1077,7 @@ class TS480Radio(chirp_common.CloneModeRadio):
 
         # ==== Auto Scan Params (amode) ==============
         for ix in range(32):
-            val = _asf[ix].asfreq / mhz1
+            val = _asf[ix].asfreq // mhz1
             rx = RadioSettingValueFloat(0.03, 60.0, val, 0.001, 3)
             rset = RadioSetting("asf.asfreq/%d" % ix,
                                 "Scan %02i Freq (MHz)" % ix, rx)
@@ -1096,7 +1096,7 @@ class TS480Radio(chirp_common.CloneModeRadio):
         for ix in range(10):        # Chans
             for nx in range(5):     # spots
                 px = ((ix * 5) + nx)
-                val = _ssf[px].ssfreq / mhz1
+                val = _ssf[px].ssfreq // mhz1
                 stx = "      -   -   -    Slot %02i Freq (MHz)" % nx
                 if nx == 0:
                     stx = "Slow Scan %02i, Slot 0 Freq (MHz" % ix

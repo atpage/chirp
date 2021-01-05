@@ -113,7 +113,7 @@ POWER_LEVELS = [chirp_common.PowerLevel("High", watts=65),
 
 
 def _wipe_memory(mem, char):
-    mem.set_raw(char * (mem.size() / 8))
+    mem.set_raw(char * (mem.size() // 8))
 
 
 @directory.register
@@ -212,8 +212,8 @@ class IC2300Radio(icf.IcomCloneModeRadio):
         if was_empty:
             _wipe_memory(_mem, "\x00")
         mult = mem.tuning_step * 1000
-        _mem.frequency = (mem.freq / mult)
-        _mem.offset = mem.offset / mult
+        _mem.frequency = (mem.freq // mult)
+        _mem.offset = mem.offset // mult
         _mem.name = mem.name.ljust(6)
         _mem.repeater_tone = chirp_common.TONES.index(mem.rtone)
         _mem.ctcss_tone = chirp_common.TONES.index(mem.ctone)
